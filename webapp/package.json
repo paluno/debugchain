@@ -1,0 +1,14 @@
+{
+  "name": "webapp",
+  "version": "0.0.0",
+  "scripts": {
+    "build-contracts": "node contracts.conf.js"
+  },
+  "private": true,
+  "license": "UNLICENSED",
+  "dependencies": {},
+  "devDependencies": {
+    "solc": "^0.4.24",
+    "find": "^0.2.9"
+  }
+}
