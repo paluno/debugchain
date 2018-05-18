@@ -138,10 +138,10 @@
                 <version>0.3.0</version>
                 <configuration>
                     <packageName>due.debugchain.contracts</packageName>
-                    <sourceDestination>target/generated-sources/contracts</sourceDestination>
+                    <sourceDestination>${basedir}/target/generated-sources/contracts</sourceDestination>
                     <nativeJavaType>true</nativeJavaType>
                     <soliditySourceFiles>
-                        <directory>../contracts</directory>
+                        <directory>${project.parent.basedir}/contracts</directory>
                         <includes>
                             <include>**/*.sol</include>
                         </includes>
