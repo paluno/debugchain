@@ -1,7 +1,1 @@
-# DebugChain
-
-## Building & Running
-
-1. Checkout project
-2. Run ``./mvnw clean install``
-3. Run server via ``java -jar server/target/debugchain-server.jar``
+Infos zur Einrichtung und Architektur gibt's im [DebugChain Wiki](https://git.uni-due.de/debug-chain/debug-chain/wikis/home)
