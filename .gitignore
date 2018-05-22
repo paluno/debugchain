@@ -1,4 +1,4 @@
-/target/
+target/
 !.mvn/wrapper/maven-wrapper.jar
 
 ### STS ###
@@ -25,6 +25,8 @@
 /.nb-gradle/
 
 ### Project ###
-node
-node_modules
-abi
+
+# Frontend # 
+/webapp/node/
+/webapp/node_modules/
+/webapp/abi
