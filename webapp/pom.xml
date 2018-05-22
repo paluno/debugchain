@@ -47,7 +47,16 @@
                         </configuration>
                         <phase>process-resources</phase>
                     </execution>
-                    <!-- TODO: frontend build commands -->
+                    <execution>
+                        <id>build</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>run build</arguments>
+                        </configuration>
+                        <phase>process-resources</phase>
+                    </execution>
                 </executions>
             </plugin>
 
