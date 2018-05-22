@@ -26,7 +26,8 @@ target/
 
 ### Project ###
 
-# Frontend # 
+# Frontend build artifacts #
 /webapp/node/
 /webapp/node_modules/
 /webapp/abi
+server/src/main/resources/public/
