@@ -8,7 +8,7 @@ basePath: /api
 schemes:
   - http
 paths:
-  /user:
+  /users:
     post:
       tags:
         - user
@@ -26,10 +26,12 @@ paths:
           schema:
             $ref: '#/definitions/User'
       responses:
-        default:
-          description: successful operation
+        '201':
+          description: User was created successfully
+          schema:
+            $ref: '#/definitions/User'
   
-  '/user/{username}':
+  '/users/{username}':
     get:
       tags:
         - user
@@ -47,7 +49,7 @@ paths:
           type: string
       responses:
         '200':
-          description: successful operation
+          description: User was returned successfully
           schema:
             $ref: '#/definitions/User'
         '400':
@@ -76,6 +78,8 @@ paths:
           schema:
             $ref: '#/definitions/User'
       responses:
+        '200':
+          description: User was updated successfully
         '400':
           description: Invalid user supplied
         '404':
@@ -96,18 +100,155 @@ paths:
           required: true
           type: string
       responses:
+        '200':
+          description: User was deleted successfully
         '400':
           description: Invalid username supplied
         '404':
           description: User not found
-  /issue:
+  /issues:
     get:
       tags:
-        - issue
-  /project:
+        - issues
+      summary: Get all issues
+      description: Get all issues which are tracked in the debugchain
+      operationId: getIssues
+      produces:
+        - application/json
+      parameters:
+        - name: searchterm
+          in: query
+          description: A searchterm for searching and filtering the issues
+          required: false
+          type: string
+      responses:
+        '200':
+          description: Issues were returned successfully
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Issue'
+        '404':
+          description: No issues found
+
+  '/issues/{issueId}':
     get:
       tags:
-        - project
+        - issues
+      summary: Get an issues
+      description: Get an issues by id
+      operationId: getIssueById
+      produces:
+        - application/json
+      parameters:
+        - name: issueId
+          in: path
+          description: The id of the issue
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Issue was returned successfully
+          schema:
+            $ref: '#/definitions/Issue'
+        '404':
+          description: No issue with this id found
+  '/issues/{issueId}/reviewers':
+    get:
+      tags:
+        - issues
+      summary: Get the reviewers of an issue
+      description: Get the reviewers of an issue, which are assigned for this issue
+      operationId: getIssueReviewers
+      produces:
+        - application/json
+      parameters:
+        - name: issueId
+          in: path
+          description: The id of the issue
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Reviewers were returned successfully
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProjectReviewer'
+        '404':
+          description: No reviewers assigned or no issue with this id found
+  /projects:
+    get:
+      tags:
+        - projects
+      summary: Get all projects
+      description: Get all projects which are tracked by a debugchain-contract
+      operationId: getProjects
+      produces:
+        - application/json
+      parameters:
+        - name: searchterm
+          in: query
+          description: A searchterm for searching and filtering the projects
+          required: false
+          type: string
+      responses:
+        '200':
+          description: Projects were returned successfully
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Project'
+        '404':
+          description: No issues found
+    
+  '/projects/{projectId}':
+    get:
+      tags:
+        - projects
+      summary: Get a project
+      description: Get a project by id
+      operationId: getProjectById
+      produces:
+        - application/json
+      parameters:
+        - name: projectId
+          in: path
+          description: The id of the project
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Project was returned successfully
+          schema:
+            $ref: '#/definitions/Project'
+        '404':
+          description: No project with this id found
+    
+  '/projects/{projectId}/reviewers':
+    get:
+      tags:
+        - projects
+      summary: Get the reviewers of a project
+      description: Get the reviewers of a project, which are assigned for this project
+      operationId: getProjectReviewers
+      produces:
+        - application/json
+      parameters:
+        - name: projectId
+          in: path
+          description: The id of the project
+          required: true
+          type: integer
+      responses:
+        '200':
+          description: Reviewers were returned successfully
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ProjectReviewer'
+        '404':
+          description: No reviewers assigned or no project with this id found
 definitions:
   Issue:
     type: object
