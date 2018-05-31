@@ -40,7 +40,7 @@ public class IntegrationTest {
 
     @Test
     public void testDeploy() throws Exception {
-        Credentials credentials = Credentials.create("2631b689696e69aae84657d1d1f1bebae62bd50af72dfff2ef3050c9828bf8f3");
+        Credentials credentials = Credentials.create("c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3");
         HelloWorld contract = HelloWorld
             .deploy(web3j, credentials, ManagedTransaction.GAS_PRICE, Contract.GAS_LIMIT)
             .send();
