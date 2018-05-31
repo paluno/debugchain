@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import UserSession from "../auth.js";
+import { UserSession } from "../auth.js";
 const GitlabApis = require("gitlab-api-wrapper");
 
 export default {

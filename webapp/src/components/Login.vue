@@ -8,18 +8,7 @@
 
 <script>
 import router from "../router.js";
-import UserSession from "../auth.js";
-const ClientOAuth2 = require("client-oauth2");
-
-const GitlabOAuth = new ClientOAuth2({
-  clientId: "e17e062d1dbaf7b95df11ac2ea2a2efe7715b1b11efea02793209e9014177d1f",
-  clientSecret:
-    "79557d718c85353a04e8e78fefc7ba8fedb6040a1cf0627833e768f6eaaa6321",
-  accessTokenUri: "http://localhost:80/oauth/token",
-  authorizationUri: "http://localhost:80/oauth/authorize",
-  redirectUri: "http://localhost:8080/login",
-  scopes: ["api"]
-});
+import { UserSession, GitlabOAuth } from "../auth.js";
 
 export default {
   // We use computed properties based on 'props' to avoid any complex logic in our template
