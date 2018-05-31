@@ -8,7 +8,31 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>webapp</artifactId>
+    <artifactId>contracts</artifactId>
+
+    <properties>
+        <cmd.dev>dev</cmd.dev>
+        <cmd.compile>compile</cmd.compile>
+        <cmd.migrate>migrate</cmd.migrate>
+        <cmd.test>test</cmd.test>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>platform-windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <cmd.dev>dev-win</cmd.dev>
+                <cmd.compile>compile-win</cmd.compile>
+                <cmd.migrate>migrate-win</cmd.migrate>
+                <cmd.test>test-win</cmd.test>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
@@ -20,6 +44,16 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <id>test-rpc</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>run --silent rpc</arguments>
+                        </configuration>
+                        <phase>none</phase>
+                    </execution>
+                    <execution>
                         <id>npm install</id>
                         <goals>
                             <goal>npm</goal>
@@ -30,26 +64,51 @@
                         <phase>generate-resources</phase>
                     </execution>
                     <execution>
-                        <id>build contracts</id>
-                        <goals>
-                            <goal>npm</goal>
-                        </goals>
-                        <configuration>
-                            <arguments>run build-contracts</arguments>
-                        </configuration>
-                        <phase>process-resources</phase>
-                    </execution>
-                    <execution>
                         <id>build</id>
                         <goals>
                             <goal>npm</goal>
                         </goals>
                         <configuration>
-                            <arguments>run build</arguments>
+                            <arguments>run ${cmd.compile}</arguments>
                         </configuration>
-                        <phase>process-resources</phase>
+                        <phase>compile</phase>
+                    </execution>
+                    <execution>
+                        <id>migrate</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>run ${cmd.migrate} -- --reset</arguments>
+                        </configuration>
+                        <phase>process-classes</phase>
+                    </execution>
+                    <execution>
+                        <id>npm test</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>test</phase>
+                        <configuration>
+                            <arguments>run ${cmd.test}</arguments>
+                        </configuration>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>build</directory>
+                            <includes>
+                                <include>**</include>
+                            </includes>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                    </filesets>
+                </configuration>
             </plugin>
 
             <!-- skip default jar creation -->
@@ -87,21 +146,6 @@
                         <phase>none</phase>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>3.0.0</version>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>abi</directory>
-                            <includes>
-                                <include>**</include>
-                            </includes>
-                            <followSymlinks>false</followSymlinks>
-                        </fileset>
-                    </filesets>
-                </configuration>
             </plugin>
             <!-- skip default compile -->
             <plugin>

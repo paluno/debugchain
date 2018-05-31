@@ -1,0 +1,26 @@
+image: openjdk:8-jdk
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository -Dorg.slf4j.simpleLogger.defaultLogLevel=info -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
+
+cache:
+  paths:
+    - contracts/node_modules
+    - webapp/node_modules
+    - .m2/repository
+
+stages:
+  - build
+
+before_script:
+  - chmod +x ./mvnw
+  - apt-get update > /dev/null
+  - apt-get install --no-install-suggests --no-install-recommends -y apt-utils build-essential python > /dev/null
+
+build:
+  stage: build
+  script:
+    - ./mvnw -B compile
+    - ./mvnw -B -q -pl :contracts frontend:npm@test-rpc &
+    - sleep 5
+    - ./mvnw -B test

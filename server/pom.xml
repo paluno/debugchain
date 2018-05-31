@@ -141,7 +141,7 @@
                     <sourceDestination>${basedir}/target/generated-sources/contracts</sourceDestination>
                     <nativeJavaType>true</nativeJavaType>
                     <soliditySourceFiles>
-                        <directory>${project.parent.basedir}/contracts</directory>
+                        <directory>${project.parent.basedir}/contracts/contracts</directory>
                         <includes>
                             <include>**/*.sol</include>
                         </includes>

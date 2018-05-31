@@ -1,1 +1,1 @@
-web3j.client-address: "https://kovan.infura.io"
+web3j.client-address: "http://localhost:9545"
