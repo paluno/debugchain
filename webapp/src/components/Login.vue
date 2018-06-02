@@ -7,10 +7,9 @@
 
 
 <script>
-import router from "../router.js";
-import { UserSession, GitlabOAuth } from "../auth.js";
+    import {GitlabOAuth, UserSession} from "../auth.js";
 
-export default {
+    export default {
   // We use computed properties based on 'props' to avoid any complex logic in our template
   computed: {
     computedToken() {
@@ -21,30 +20,25 @@ export default {
       }
     }
   },
-  data: function() {
+        data: () => {
     return {
       token: null
     };
   },
-  created: function() {
+        created: () => {
     // lifecycle-hook. prüfen, ob uri den token beinhaltet, wir also aus Gitlab zurückkommen
-    console.log(window.location.href);
-    const that = this;
     if (window.location.href.includes("access_token")) {
-      GitlabOAuth.token.getToken(window.location.href).then(function(result) {
-        console.log(result);
-        that.setToken(result);
+        GitlabOAuth.token.getToken(window.location.href).then((result) => {
+            this.setToken(result);
       });
     }
   },
   methods: {
-    loginViaGitlab: function(event) {
-      console.log("Login-Button geklickt. Leite um auf GitLab");
+      loginViaGitlab: (event) => {
       window.location.href = GitlabOAuth.token.getUri();
     },
-    setToken: function(newToken) {
+      setToken: (newToken) => {
       this.token = newToken;
-      console.log(this.token);
       UserSession.token = this.token;
       UserSession.loggedIn = true;
     }
