@@ -1,23 +1,28 @@
 package due.debugchain;
 
-import due.debugchain.contracts.HelloWorld;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
-import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
-import org.web3j.tx.Contract;
-import org.web3j.tx.ManagedTransaction;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.core.IsEqual.equalTo;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
@@ -25,12 +30,20 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 public class IntegrationTest {
 
     @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
     protected Web3j web3j;
 
     @Autowired
-    protected WebApplicationContext context;
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private WebApplicationContext context;
 
     protected MockMvc mockMvc;
+
+    private MockRestServiceServer server;
 
     @Before
     public void mvcSetup() {
@@ -38,14 +51,33 @@ public class IntegrationTest {
             .webAppContextSetup(context)
             .apply(springSecurity())
             .build();
+        server = MockRestServiceServer.createServer(restTemplate);
     }
 
-    @Test
-    public void testDeploy() throws Exception {
-        Credentials credentials = Credentials.create("c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3");
-        HelloWorld contract = HelloWorld
-            .deploy(web3j, credentials, ManagedTransaction.GAS_PRICE, Contract.GAS_LIMIT)
-            .send();
-        assertThat(contract.renderHelloWorld().send()).isEqualTo("Hello World!");
+    protected RequestPostProcessor userToken() {
+        String tokenHeader = "Bearer 9a3a65322e7283741f2710d5d4e796af2b0bc46131a9e21da4a8761b96761043";
+        server.expect(requestTo("http://localhost/api/v4/user"))
+            .andExpect(method(HttpMethod.GET))
+            .andExpect(header(HttpHeaders.AUTHORIZATION, equalTo(tokenHeader)))
+            .andRespond(withSuccess(userResponse(), MediaType.APPLICATION_JSON));
+        return mockRequest -> {
+            mockRequest.addHeader("Authorization", tokenHeader);
+            return mockRequest;
+        };
+    }
+
+    private String userResponse() {
+        GitLabUser user = new GitLabUser();
+        user.setAdmin(false);
+        user.setEmail("user@example.com");
+        user.setId(2L);
+        user.setName("Benutzer");
+        user.setUsername("user");
+        user.setState("active");
+        try {
+            return objectMapper.writeValueAsString(user);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -24,6 +24,7 @@ public class ReviewerControllerTest extends IntegrationTest {
             .put("address", address)
             .toString();
         mockMvc.perform(post("/projects/123/reviewers")
+            .with(userToken())
             .content(addressJson)
             .contentType(APPLICATION_JSON_UTF8))
             .andExpect(status().isOk());
