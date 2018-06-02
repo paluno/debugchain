@@ -1,12 +1,16 @@
 package due.debugchain;
 
 import due.debugchain.contracts.HelloWorld;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.tx.Contract;
@@ -20,7 +24,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class IntegrationTest {
 
     @Autowired
-    private Web3j web3j;
+    protected Web3j web3j;
+
+    @Autowired
+    protected WebApplicationContext context;
+
+    protected MockMvc mockMvc;
+
+    @Before
+    public void mvcSetup() {
+        mockMvc = MockMvcBuilders
+            .webAppContextSetup(context)
+            .build();
+    }
 
     @Test
     public void testDeploy() throws Exception {
