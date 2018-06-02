@@ -20,25 +20,30 @@
       }
     }
   },
-        data: () => {
+        data: function () {
     return {
       token: null
     };
   },
-        created: () => {
+        created: function () {
     // lifecycle-hook. prüfen, ob uri den token beinhaltet, wir also aus Gitlab zurückkommen
+            console.log(window.location.href);
+            const that = this;
     if (window.location.href.includes("access_token")) {
-        GitlabOAuth.token.getToken(window.location.href).then((result) => {
-            this.setToken(result);
+        GitlabOAuth.token.getToken(window.location.href).then(function (result) {
+            console.log(result);
+            that.setToken(result);
       });
     }
   },
   methods: {
-      loginViaGitlab: (event) => {
+      loginViaGitlab: function (event) {
+          console.log("Login-Button geklickt. Leite um auf GitLab");
       window.location.href = GitlabOAuth.token.getUri();
     },
-      setToken: (newToken) => {
+      setToken: function (newToken) {
       this.token = newToken;
+          console.log(this.token);
       UserSession.token = this.token;
       UserSession.loggedIn = true;
     }
