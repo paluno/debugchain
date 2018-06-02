@@ -27,7 +27,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
 @SpringBootTest
-public class IntegrationTest {
+public abstract class IntegrationTest {
 
     @Autowired
     private RestTemplate restTemplate;
