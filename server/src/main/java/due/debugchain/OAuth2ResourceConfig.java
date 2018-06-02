@@ -1,6 +1,6 @@
 package due.debugchain;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -16,8 +16,8 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 @EnableResourceServer
 public class OAuth2ResourceConfig extends ResourceServerConfigurerAdapter {
 
-    @Value("${oauth2.gitlab.userEndpoint:http://localhost/api/v4/user}")
-    private String gitLabUserEndpoint;
+    @Autowired
+    private GitLabTokenServices tokenServices;
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
@@ -31,6 +31,6 @@ public class OAuth2ResourceConfig extends ResourceServerConfigurerAdapter {
 
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) {
-        resources.tokenServices(new GitLabTokenServices(gitLabUserEndpoint));
+        resources.tokenServices(tokenServices);
     }
 }

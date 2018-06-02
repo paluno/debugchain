@@ -1,8 +1,9 @@
 package due.debugchain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.codehaus.jackson.annotate.JsonProperty;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 
 /**
@@ -18,13 +19,23 @@ public class GitLabUser {
     @JsonProperty("is_admin")
     private boolean isAdmin;
 
+    /**
+     * Arbitrary authority wrapper.
+     */
     @AllArgsConstructor
-    static class Authority implements GrantedAuthority {
-        private String authority;
+    @Getter
+    public enum Authority implements GrantedAuthority {
 
-        @Override
-        public String getAuthority() {
-            return authority;
-        }
+        /**
+         * Default authority for any authenticated GitLab user.
+         */
+        USER("user"),
+
+        /**
+         * Authority for GitLab admins.
+         */
+        ADMIN("admin");
+
+        private String authority;
     }
 }

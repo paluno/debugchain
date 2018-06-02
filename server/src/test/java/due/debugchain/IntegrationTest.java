@@ -17,6 +17,7 @@ import org.web3j.tx.Contract;
 import org.web3j.tx.ManagedTransaction;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
@@ -35,6 +36,7 @@ public class IntegrationTest {
     public void mvcSetup() {
         mockMvc = MockMvcBuilders
             .webAppContextSetup(context)
+            .apply(springSecurity())
             .build();
     }
 

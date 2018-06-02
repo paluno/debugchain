@@ -1,10 +1,10 @@
 package due.debugchain;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -14,46 +14,29 @@ import org.springframework.security.oauth2.common.exceptions.InvalidTokenExcepti
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestOperations;
-import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
  * Token services for validating OAuth2 tokens from GitLab.
  */
+@Component
+@RequiredArgsConstructor
 public class GitLabTokenServices implements ResourceServerTokenServices {
 
-    private RestOperations restTemplate = new RestTemplate();
+    private final RestOperations rest;
 
-    private final String userEndpoint;
-
-    /**
-     * Default constructor for specifying GitLab's endpoint for retrieving current user.
-     *
-     * @param userEndpoint GitLab's endpoint for retrieving current user
-     */
-    public GitLabTokenServices(String userEndpoint) {
-        this.userEndpoint = userEndpoint;
-        ((RestTemplate) restTemplate).setErrorHandler(new DefaultResponseErrorHandler() {
-            @Override
-            // Ignore 400
-            public void handleError(ClientHttpResponse response) throws IOException {
-                if (response.getRawStatusCode() != HttpStatus.BAD_REQUEST.value()) {
-                    super.handleError(response);
-                }
-            }
-        });
-    }
+    @Value("${oauth2.gitlab.userEndpoint:http://localhost/api/v4/user}")
+    private String userEndpoint;
 
     @Override
     public OAuth2Authentication loadAuthentication(String accessToken) throws AuthenticationException, InvalidTokenException {
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.AUTHORIZATION, String.format("Bearer %s", accessToken));
-        GitLabUser gitLabUser = restTemplate
+        GitLabUser gitLabUser = rest
             .exchange(userEndpoint, HttpMethod.GET, new HttpEntity<>(headers), GitLabUser.class)
             .getBody();
         Assert.notNull(gitLabUser.getId(), "GitLab user requires a valid ID");
@@ -62,9 +45,9 @@ public class GitLabTokenServices implements ResourceServerTokenServices {
         token.setScope(scope);
         token.setTokenType("access_token");
         List<GitLabUser.Authority> authorities = new ArrayList<>();
-        authorities.add(new GitLabUser.Authority("user"));
+        authorities.add(GitLabUser.Authority.USER);
         if (gitLabUser.isAdmin()) {
-            authorities.add(new GitLabUser.Authority("admin"));
+            authorities.add(GitLabUser.Authority.ADMIN);
         }
         Authentication authentication = new UsernamePasswordAuthenticationToken(gitLabUser, "N/A", authorities);
         OAuth2Request request = new OAuth2Request(new HashMap<>(), null, null,
