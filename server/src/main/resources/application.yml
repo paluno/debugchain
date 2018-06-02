@@ -1,1 +1,14 @@
 web3j.client-address: "https://kovan.infura.io"
+server:
+ port: 8081
+oauth2:
+ resource:
+ userInfoUri: http://localhost/api/user
+logging:
+ level:
+  org.springframework.security: DEBUG
+auth:
+ server:
+  url: http://localhost/oauth/check_token/
+  clientId: acb6f1458c7cc4b8fda433f836186c9af1115581389021e9e3aa7536bf8d4f0a
+  clientsecret: 7a398d95a40e8478e9c24889c553bbe8f3db389a2f83b552d58b7736f8d3ba3b

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.reactivestreams.Publisher;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthBlock;
@@ -35,5 +36,11 @@ public class ChainService {
                     list.add(s);
                     return list;
                 });
+    }
+
+    @GetMapping("/test")
+    @PreAuthorize("#oauth2.hasScope('api') or (!#oauth2.isOAuth())")
+    public boolean test(){
+        return true;
     }
 }
