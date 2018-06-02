@@ -1,4 +1,4 @@
-web3j.client-address: "https://kovan.infura.io"
+web3j.client-address: "http://localhost:9545"
 server:
  port: 8081
 oauth2:

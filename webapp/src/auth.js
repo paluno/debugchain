@@ -1,10 +1,9 @@
-import SETTINGS from "./settings.js"
-const ClientOAuth2 = require("client-oauth2");
+import SETTINGS from "./settings"
+import ClientOAuth2 from "client-oauth2";
 
-console.log(SETTINGS);
 const GitlabOAuth = new ClientOAuth2(SETTINGS.oauthConfig);
 
-var UserSession = {
+const UserSession = {
     token: null,
     loggedIn: false
 };

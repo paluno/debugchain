@@ -3,11 +3,11 @@ import Router from 'vue-router'
 import Home from './views/Home.vue'
 import About from './views/About.vue'
 import Login from './components/Login.vue'
-import { UserSession } from './auth'
+import {UserSession} from './auth'
 
-Vue.use(Router)
+Vue.use(Router);
 
-var router = new Router({
+const router = new Router({
   mode: 'history',
   routes: [
     {

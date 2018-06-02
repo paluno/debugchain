@@ -26,8 +26,13 @@ target/
 
 ### Project ###
 
-# Frontend build artifacts #
-/webapp/node/
-/webapp/node_modules/
+### Node ###
+node/
+node_modules/
+
+### Web ###
 /webapp/abi
 server/src/main/resources/public/
+
+### Contracts ###
+contracts/build/
