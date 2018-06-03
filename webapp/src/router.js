@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Home from './views/Home.vue'
 import About from './views/About.vue'
 import Login from './components/Login.vue'
+import Profile from './components/Profile.vue'
 import {UserSession} from './auth'
 
 Vue.use(Router);
@@ -14,6 +15,11 @@ const router = new Router({
       path: '/',
       name: 'home',
       component: Home, meta: { requiresAuth: true }
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: Profile
     },
     {
       path: '/about',
