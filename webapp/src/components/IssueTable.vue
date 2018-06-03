@@ -1,6 +1,5 @@
 <template>
   <div class="table">
-    <h1>{{ msg }}</h1>
     <input type="submit" value="GET CURRENT USER" v-on:click="getUser"/>
     <p>
       {{json}}
@@ -11,13 +10,15 @@
       :rows="rows"
       :pagination-options="{ enabled: true, perPage: 5}"
       :search-options="{ enabled: true}"
-      styleClass="vgt-table striped bordered"> 
+      styleClass="vgt-table striped bordered"
+      @on-row-click="navigate"> 
     </vue-good-table>
   </div>
 </template>
 
 <script>
 import { UserSession } from "../auth.js";
+import router from "../router";
 const GitlabApis = require("gitlab-api-wrapper");
 
 export default {
@@ -85,6 +86,9 @@ export default {
     },
     setJson: function(newJson) {
       this.json = newJson;
+    },
+    navigate: function(params) {
+      router.push({ path: "issue", query: { id: params.row.id} });
     }
   }
 };
