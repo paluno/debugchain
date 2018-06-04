@@ -23,52 +23,50 @@ const GitlabApis = require("gitlab-api-wrapper");
 
 export default {
   name: "IssueTable",
-  props: {
-    
-  },
+  props: {},
   data: function() {
     return {
       json: "",
-    
+
       //issue table dummy data
       columns: [
         {
-          label: 'ID',
-          field: 'id',
+          label: "ID",
+          field: "id",
           filterOptions: {
-            enabled: true,
-          },
+            enabled: true
+          }
         },
         {
-          label: 'Issue',
-          field: 'issue',
+          label: "Issue",
+          field: "issue",
           filterOptions: {
-            enabled: true,
-          },
+            enabled: true
+          }
         },
         {
-          label: 'ETH',
-          field: 'eth',
-          type: 'number',
+          label: "ETH",
+          field: "eth",
+          type: "number"
         },
         {
-          label: 'Status',
-          field: 'status',
+          label: "Status",
+          field: "status",
           filterOptions: {
-            enabled: true,
-          },
+            enabled: true
+          }
         }
       ],
       rows: [
-        { id:1, issue:"Fix Bug #1", eth: 2.3, status: "Open" },
-        { id:2, issue:"Fix Bug #2", eth: 1.7, status: "In Review" },
-        { id:3, issue:"Fix Bug #3", eth: 3, status: "Locked" },
-        { id:4, issue:"Fix Bug #4", eth: 12.2, status: "In Review" },
-        { id:5, issue:"Fix Bug #5", eth: 5.3, status: "Open" },
-        { id:6, issue:"Fix Bug #6", eth: 0.7, status: "Locked" },
-        { id:7, issue:"Fix Bug #7", eth: 8.5, status: "Open" },
-        { id:8, issue:"Fix Bug #8", eth: 7, status: "Locked" },
-      ],
+        { id: 1, issue: "Fix Bug #1", eth: 2.3, status: "Open" },
+        { id: 2, issue: "Fix Bug #2", eth: 1.7, status: "In Review" },
+        { id: 3, issue: "Fix Bug #3", eth: 3, status: "Locked" },
+        { id: 4, issue: "Fix Bug #4", eth: 12.2, status: "In Review" },
+        { id: 5, issue: "Fix Bug #5", eth: 5.3, status: "Open" },
+        { id: 6, issue: "Fix Bug #6", eth: 0.7, status: "Locked" },
+        { id: 7, issue: "Fix Bug #7", eth: 8.5, status: "Open" },
+        { id: 8, issue: "Fix Bug #8", eth: 7, status: "Locked" }
+      ]
     };
   },
   methods: {
@@ -88,14 +86,14 @@ export default {
       this.json = newJson;
     },
     navigate: function(params) {
-      router.push({ path: "issue", query: { id: params.row.id} });
+      router.push({ path: "issue", query: { id: params.row.id } });
     }
   }
 };
 </script>
 
 <style scoped lang="scss">
-  #table{
+#table {
   padding: 20px;
-  }
+}
 </style>
