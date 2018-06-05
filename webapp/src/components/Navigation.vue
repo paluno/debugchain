@@ -1,10 +1,22 @@
 <template>
-    <div id="nav">
+    <div id="nav" v-if="session.loggedIn">
       <router-link to="/">Issue Overview</router-link> |
       <router-link to="/profile">Profile</router-link> |
       <router-link to="/about">About</router-link>
     </div>
 </template>
+
+<script>
+import { UserSession } from "../auth.js";
+
+export default {
+  data: function() {
+    return {
+      session: UserSession
+    };
+  }
+};
+</script>
 
 <style lang="scss" scoped>
 #nav {
