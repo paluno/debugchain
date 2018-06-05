@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS project_entity;
-DROP TABLE IF EXISTS reviewer_entity;
-DROP TABLE IF EXISTS project_entity_reviewers;
+DROP TABLE IF EXISTS user_entity;
+DROP TABLE IF EXISTS membership_entity;
 
 CREATE TABLE project_entity (
   gitlab_id BIGINT NOT NULL,
