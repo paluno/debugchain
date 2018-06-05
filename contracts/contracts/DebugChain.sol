@@ -2,79 +2,123 @@ pragma solidity ^0.4.0;
 
 contract DebugChain {
 
-    struct Donation{
-        address donator;
-        uint amount;
-    }
-
     struct Issue {
-        byte32 id;
+        uint id;
+        mapping(address => uint) donations;
         address developer;
-        address [] reviewers;
-        Donation [] donations;
+        address[] reviewers;
         bool isApproved;
         bool isLocked;
         bool isDeveloped;
-        bool isClosed;
         mapping(address => bool) isReviewed;
+        bool isClosed;
     }
 
     address maintainer;
-    mapping(address => uint)pendingWithdrawals;
-    Issue [] issues;
+    Issue[] issues;
+    mapping(address => uint) pendingWithdrawals;
 
-    //constructor
-    function DebugChain() onlyMaintainer{
+    /**
+     * Contract constructor.
+     */
+    constructor() public {
+        maintainer = msg.sender;
+    }
+
+    function donate(uint _id) public {
 
     }
 
-    function isReviewer(address user) returns (bool success){
-        for (uint i = 0; i < issues.length; i++){
-            for (uint j = 0; j < reviewers.length; j++){
-                if(user == issues[i].reviewers[j]){
-                    return true;
-                }
-            }
-        }
-        return false;
+    function withdraw() public {
+
     }
 
-    function isDeveloper(address user) returns (bool success){
-        for (uint i = 0; i < issues.length; i++){
-            if(user == issues[i].developer){
-                return true;
-            }
-        }
-        return false;
-    }
-    // modifier
-    modifier onlyReviewer{
-        require(isReviewer(msg.sender));
-        _;
+    function createIssue(uint _id) public {
+
     }
 
-    modifier onlyDeveloper{
-        require(isDeveloper(msg.sender));
-        _;
+    function getIssue(uint _id) public {
+
     }
 
-    modifier onlyMaintainer{
+    function closeIssue(uint _id) public {
+
+    }
+
+    function deleteIssue(uint _id) public {
+
+    }
+
+    /**
+     *
+     *      EVENTS
+     *
+     **/
+
+    event dontationRecieved (
+        address indexed _from,
+        uint indexed _iid,
+        uint _amount
+    );
+
+    event issueApproved (
+        address indexed _by,
+        uint indexed _iid
+    );
+
+    event issueLocked (
+        address indexed _by,
+        uint indexed _iid
+    );
+
+    event issueUnlocked (
+        address indexed _by,
+        uint indexed _iid
+    );
+
+    event issueDeveloped (
+        address indexed _by,
+        uint indexed _iid
+    );
+
+    event issueClosed (
+        address indexed _by,
+        uint indexed _iid
+    );
+
+    event issueReset (
+        address indexed _by,
+        address[] _reviewers,
+        uint indexed _iid
+    );
+
+    event issueDeleted (
+        address indexed _by,
+        uint indexed _iid
+    );
+
+    /**
+     *
+     *      MODIFIER
+     *
+     **/
+
+    /**
+     * Set a condition to be met, otherwise an error will be thrown and
+     * any funds connected to this transaction will be automatically
+     * returned.
+     */
+    modifier onlyMaintainer() {
         require(msg.sender == maintainer);
         _;
     }
 
-    function donate(byte32 id, uint amount) public{
+    modifier onlyDeveloper() {
+        _;
+    }
 
-        Donation donation;
-        donation.donator = msg.sender;
-        donation.amount  = amount;
-
-        for (uint i = 0; i < issues.length; i++){
-            if(id == issues[i].id){
-                issues[i].donations.push(donation);
-            }
-        }
-
+    modifier onlyReviewer() {
+        _;
     }
 
 }
