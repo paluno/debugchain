@@ -13,13 +13,13 @@
       styleClass="vgt-table striped bordered"
       @on-row-click="navigate"> 
     </vue-good-table>
+    <button v-on:click="updateData">load from gitlab</button>
   </div>
 </template>
 
 <script>
-import { UserSession } from "../auth.js";
 import router from "../router";
-const GitlabApis = require("gitlab-api-wrapper");
+import gitlab from "../api/gitlab";
 
 export default {
   name: "IssueTable",
@@ -71,12 +71,7 @@ export default {
   },
   methods: {
     getUser: function(event) {
-      const client = GitlabApis({
-        // the GitLab url
-        base_url: "http://localhost",
-        private_token: UserSession.token.accessToken,
-        timeout: 3000
-      });
+      const client = gitlab.getClient();
       const that = this;
       client.users.current().then(function(result) {
         that.setJson(JSON.stringify(result));
@@ -84,6 +79,23 @@ export default {
     },
     setJson: function(newJson) {
       this.json = newJson;
+    },
+    setIssues: function(newIssues) {
+      this.rows = newIssues.map(issue => {
+        return {
+          id: issue.id,
+          issue: issue.title,
+          eth: 0,
+          status: "Unknown"
+        };
+      });
+    },
+    updateData: function(event) {
+      const client = gitlab.getClient();
+      const that = this;
+      client.projects.issues.list(1).then(issues => {
+        that.setIssues(issues);
+      });
     },
     navigate: function(params) {
       router.push({ path: "issue", query: { id: params.row.id } });
