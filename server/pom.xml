@@ -17,6 +17,8 @@
         <docker.image.prefix>debugchain</docker.image.prefix>
         <org.mapstruct.version>1.2.0.Final</org.mapstruct.version>
         <org.projectlombok.version>1.16.20</org.projectlombok.version>
+        <springfox-version>2.7.0</springfox-version>
+        <jackson-threetenbp-version>2.6.4</jackson-threetenbp-version>
     </properties>
 
     <dependencies>
@@ -99,6 +101,30 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
             <version>1.4.196</version>
+        </dependency>
+
+        <!--SpringFox dependencies-->
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>${springfox-version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-annotations</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>${springfox-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.joschi.jackson</groupId>
+            <artifactId>jackson-datatype-threetenbp</artifactId>
+            <version>${jackson-threetenbp-version}</version>
         </dependency>
 
         <!-- Testing -->
