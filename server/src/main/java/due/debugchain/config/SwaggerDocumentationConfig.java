@@ -30,7 +30,7 @@ public class SwaggerDocumentationConfig {
     public Docket customImplementation(){
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
-                    .apis(RequestHandlerSelectors.basePackage("io.swagger.api"))
+                    .apis(RequestHandlerSelectors.basePackage("due.debugchain"))
                     .build()
                 .directModelSubstitute(org.threeten.bp.LocalDate.class, java.sql.Date.class)
                 .directModelSubstitute(org.threeten.bp.OffsetDateTime.class, java.util.Date.class)
