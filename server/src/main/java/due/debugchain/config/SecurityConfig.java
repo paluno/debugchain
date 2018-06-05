@@ -13,6 +13,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) throws Exception {
         web
                 .ignoring()
-                .antMatchers("/api-docs/**");
+                .antMatchers("/api-docs/**")
+                .antMatchers("/swagger-ui.html")
+                .antMatchers("/webjars/springfox-swagger-ui/**");
     }
 }
