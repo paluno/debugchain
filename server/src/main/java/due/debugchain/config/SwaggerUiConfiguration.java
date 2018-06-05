@@ -16,7 +16,7 @@ import java.util.List;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2018-06-05T11:48:51.982+02:00")
 
 @Configuration
-@ComponentScan(basePackages = "io.swagger.api")
+@ComponentScan(basePackages = "due.debugchain")
 @EnableWebMvc
 @EnableSwagger2 //Loads the spring beans required by the framework
 @PropertySource("classpath:swagger.properties")
