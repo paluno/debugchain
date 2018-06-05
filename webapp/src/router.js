@@ -2,9 +2,9 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
 import About from './views/About.vue'
-import Login from './components/Login.vue'
+import Login from './views/Login.vue'
 import Profile from './views/Profile.vue'
-import IssueDetail from './components/IssueDetail'
+import IssueDetail from './views/IssueDetail'
 import {UserSession} from './auth'
 
 Vue.use(Router);
