@@ -1,10 +1,5 @@
 <template>
   <div class="table">
-    <input type="submit" value="GET CURRENT USER" v-on:click="getUser"/>
-    <p>
-      {{json}}
-    </p>
-
     <vue-good-table
       :columns="columns"
       :rows="rows"
@@ -25,7 +20,6 @@ export default {
   props: {},
   data: function() {
     return {
-      json: "",
       columns: [
         {
           label: "ID",
@@ -61,16 +55,6 @@ export default {
     this.updateData();
   },
   methods: {
-    getUser: function(event) {
-      const client = gitlab.getClient();
-      const that = this;
-      client.users.current().then(function(result) {
-        that.setJson(JSON.stringify(result));
-      });
-    },
-    setJson: function(newJson) {
-      this.json = newJson;
-    },
     setIssues: function(newIssues) {
       this.rows = newIssues.map(issue => {
         return {

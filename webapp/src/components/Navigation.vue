@@ -2,7 +2,7 @@
     <div id="nav" v-if="session.loggedIn">
       <router-link to="/">Issue Overview</router-link> |
       <router-link to="/profile">Profile</router-link> |
-      <router-link to="/about">About</router-link>
+      <router-link to="/debug">Debug</router-link>
     </div>
 </template>
 

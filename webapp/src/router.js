@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
-import About from './views/About.vue'
+import Debug from './views/Debug'
 import Login from './views/Login.vue'
 import Profile from './views/Profile.vue'
 import IssueDetail from './views/IssueDetail'
@@ -15,17 +15,19 @@ const router = new Router({
     {
       path: '/',
       name: 'home',
-      component: Home, meta: { requiresAuth: true }
+      component: Home,
+      meta: { requiresAuth: true }
     },
     {
       path: '/profile',
       name: 'profile',
-      component: Profile
+      component: Profile,
+      meta: { requiresAuth: true }
     },
     {
-      path: '/about',
-      name: 'about',
-      component: About
+      path: '/debug',
+      name: 'debug',
+      component: Debug
     },
     {
       path: '/login',
@@ -35,7 +37,8 @@ const router = new Router({
     {
       path: '/issue',
       name: 'issue',
-      component: IssueDetail
+      component: IssueDetail,
+      meta: { requiresAuth: true }      
     }
   ]
 });
