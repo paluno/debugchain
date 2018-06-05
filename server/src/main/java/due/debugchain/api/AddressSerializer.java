@@ -1,4 +1,4 @@
-package due.debugchain.api.dto;
+package due.debugchain.api;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;

@@ -1,8 +1,8 @@
 package due.debugchain.api;
 
 import due.debugchain.IntegrationTest;
-import due.debugchain.persistence.entities.ReviewerEntity;
-import due.debugchain.persistence.repositories.ReviewerRepository;
+import due.debugchain.persistence.entities.UserEntity;
+import due.debugchain.persistence.repositories.UserRepository;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +12,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class ReviewerControllerTest extends IntegrationTest {
+public class ProjectMemberControllerTest extends IntegrationTest {
 
     @Autowired
-    private ReviewerRepository reviewerRepository;
+    private UserRepository userRepository;
 
     @Test
     public void saveAddress() throws Exception {
@@ -23,12 +23,12 @@ public class ReviewerControllerTest extends IntegrationTest {
         String addressJson = new JSONObject()
             .put("address", address)
             .toString();
-        mockMvc.perform(post("/projects/123/reviewers")
+        mockMvc.perform(post("/projects/123/members")
             .with(userToken())
             .content(addressJson)
             .contentType(APPLICATION_JSON_UTF8))
             .andExpect(status().isOk());
-        ReviewerEntity reviewer = reviewerRepository.findById(1L)
+        UserEntity reviewer = userRepository.findById(1L)
             .orElseThrow(IllegalStateException::new);
         assertThat(reviewer.getAddress().toString()).isEqualTo(address);
     }
