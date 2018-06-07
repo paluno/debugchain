@@ -13,7 +13,9 @@
                         <slot></slot>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" @click="dismiss">Close</button>
+                        <slot name="footer">
+                            <button type="button" class="btn btn-secondary" @click="dismiss">Close</button>
+                        </slot>
                     </div>
                 </div>
             </div>

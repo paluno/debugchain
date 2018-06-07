@@ -1,7 +1,17 @@
 <template>
   <div id="profile">
-    <Modal v-model="showModal" title="Set Ethereum address">
-      <p>Modal body content.</p>
+    <Modal v-model="setAddressModal.show" title="Set Ethereum address">
+      <p>
+        To execute some actions in this application, we need the public address of your Ethereum wallet. Please enter it below.<br />
+      </p>
+      <div class="alert alert-warning">
+        This address will be used for your interactions with the Ethereum Smart Contract and can not be changed afterwards.
+      </div>
+      <input class="form-control" type="text" placeholder="Enter your Ethereum address..." v-model="setAddressModal.address" />
+      <template slot="footer">
+        <button type="button" class="btn btn-primary" @click="setAddressModalSave(setAddressModal.address)">Save</button>
+        <button type="button" class="btn btn-secondary" @click="setAddressModal.show = false">Close</button>
+      </template>
     </Modal>
 
     <h1>Profile</h1>
@@ -15,7 +25,7 @@
       <label class="col-md-3" for="address">Ethereum Address:</label>
       <div class="col-md-9">
         <span>No address has been set.</span>
-        <button class="btn btn-outline-secondary btn-sm" @click="showModal = true">Set address</button>
+        <button class="btn btn-outline-secondary btn-sm" @click="setAddressModal.show = true">Set address</button>
       </div>
     </div>
     <div class="form-group row">
@@ -59,11 +69,21 @@ import Modal from "@/components/Modal.vue";
 export default {
   data: function() {
     return {
-      showModal: false
+      setAddressModal: {
+        show: false,
+        address: null
+      }
     };
   },
   components: {
     Modal
+  },
+  methods: {
+    setAddressModalSave: function(newAddress) {
+      console.log("TODO: Save new address: " + newAddress);
+      this.setAddressModal.show = false;
+      this.setAddressModal.address = null;
+    }
   }
 };
 </script>
