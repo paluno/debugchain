@@ -1,5 +1,9 @@
 <template>
   <div id="profile">
+    <Modal v-model="showModal" title="Set Ethereum address">
+      <p>Modal body content.</p>
+    </Modal>
+
     <h1>Profile</h1>
     <div class="form-group row">
       <label class="col-md-3" for="username">Username:</label>
@@ -11,7 +15,7 @@
       <label class="col-md-3" for="address">Ethereum Address:</label>
       <div class="col-md-9">
         <span>No address has been set.</span>
-        <button class="btn btn-outline-secondary btn-sm">Set address</button>
+        <button class="btn btn-outline-secondary btn-sm" @click="showModal = true">Set address</button>
       </div>
     </div>
     <div class="form-group row">
@@ -48,3 +52,18 @@
     </table>
   </div>
 </template>
+
+<script>
+import Modal from "@/components/Modal.vue";
+
+export default {
+  data: function() {
+    return {
+      showModal: false
+    };
+  },
+  components: {
+    Modal
+  }
+};
+</script>
