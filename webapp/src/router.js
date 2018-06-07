@@ -1,8 +1,10 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
-import About from './views/About.vue'
-import Login from './components/Login.vue'
+import Debug from './views/Debug'
+import Login from './views/Login.vue'
+import Profile from './views/Profile.vue'
+import IssueDetail from './views/IssueDetail'
 import {UserSession} from './auth'
 
 Vue.use(Router);
@@ -13,17 +15,30 @@ const router = new Router({
     {
       path: '/',
       name: 'home',
-      component: Home, meta: { requiresAuth: true }
+      component: Home,
+      meta: { requiresAuth: true }
     },
     {
-      path: '/about',
-      name: 'about',
-      component: About
+      path: '/profile',
+      name: 'profile',
+      component: Profile,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/debug',
+      name: 'debug',
+      component: Debug
     },
     {
       path: '/login',
       name: 'login',
       component: Login
+    },
+    {
+      path: '/issue',
+      name: 'issue',
+      component: IssueDetail,
+      meta: { requiresAuth: true }      
     }
   ]
 });

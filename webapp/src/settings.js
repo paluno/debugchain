@@ -7,6 +7,9 @@ const SETTINGS = {
         authorizationUri: "http://localhost:80/oauth/authorize",
         redirectUri: "http://localhost:8080/login",
         scopes: ["api"]
+    },
+    gitlabConnection: {
+        url: "http://localhost",
     }
 };
 
