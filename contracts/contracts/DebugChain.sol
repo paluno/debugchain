@@ -13,6 +13,8 @@ contract DebugChain {
         bool isDeveloped;
         mapping(address => bool) isReviewed;
         bool isCompleted;
+        // to be able to check existence - solidity specialty
+        bool exists;
     }
 
     uint projectId;
@@ -40,9 +42,9 @@ contract DebugChain {
      *
      * @param _id issue ID to which the donation gets added
      */
-    function donate(uint _id) payable public {
+    function donate(uint _id) payable public issueExists(_id) {
         // check if issue is completed.
-        require(issues[_id].isCompleted == false);
+        require(!issues[_id].isCompleted);
 
         issues[_id].donations[msg.sender] = msg.value;
         issues[_id].donationSum += msg.value;
@@ -77,6 +79,8 @@ contract DebugChain {
      * @param _id gitlab-issue-id to be used as map key
      */
     function createIssue(uint _id) public {
+        // check that the issue does not already exist
+        require(!issues[_id].exists);
         // create in-memory array and persist it to storage
         Issue memory issue = Issue({
             id: _id,
@@ -86,17 +90,68 @@ contract DebugChain {
             isApproved: false,
             isLocked: false,
             isDeveloped: false,
-            isCompleted: false
+            isCompleted: false,
+            exists: true
             });
         issues[_id] = issue;
     }
 
-    function getIssue(uint _id) public view returns (uint, uint, bool) {
+    /**
+     * Returns an issue split up in its individual fields since returning
+     * structs is not possible in Solidity.
+     *
+     * @param _id issue to get
+     */
+    function getIssue(uint _id) public view issueExists(_id) returns
+    (uint, uint, address[], bool) {
         // IN PROGRESS
-        return (issues[_id].id, issues[_id].donationSum, issues[_id].isCompleted);
+        return (
+        issues[_id].id,
+        issues[_id].donationSum,
+        issues[_id].reviewers,
+        issues[_id].isCompleted
+        );
     }
 
-    function completeIssue(uint _id) public {
+    /**
+     * Setter for an issues developer address.
+     *
+     * @param _id issue id
+     * @param _developer developer address to set
+     */
+    function setDeveloper(uint _id, address _developer) public issueExists(_id) {
+        issues[_id].developer = _developer;
+    }
+
+    /**
+     * Getter for an issues developer address.
+     *
+     * @param _id issue id
+     */
+    function getDeveloper(uint _id) public view issueExists(_id) returns (address) {
+        return issues[_id].developer;
+    }
+
+    /**
+     * Setter for an issues reviewer addresses.
+     *
+     * @param _id issue id
+     * @param _reviewers reviewer addresses to set
+     */
+    function setReviewers(uint _id, address[] _reviewers) public issueExists(_id) {
+        issues[_id].reviewers = _reviewers;
+    }
+
+    /**
+     * Getter for an issues reviewer addresses.
+     *
+     * @param _id issue id
+     */
+    function getReviewers(uint _id) public view issueExists(_id) returns (address[]) {
+        return issues[_id].reviewers;
+    }
+
+    function completeIssue(uint _id) public issueExists(_id) {
         // IN PROGRESS
         pendingWithdrawals[maintainer] = issues[_id].donationSum;
         issues[_id].isCompleted = true;
@@ -104,7 +159,7 @@ contract DebugChain {
         emit issueCompleted(msg.sender, _id);
     }
 
-    function deleteIssue(uint _id) public {
+    function deleteIssue(uint _id) public issueExists(_id) {
 
     }
 
@@ -161,6 +216,16 @@ contract DebugChain {
      *      MODIFIER
      *
      **/
+
+    /**
+     * Modifier to check if an issue exists.
+     *
+     * @param _id issue id to check
+     */
+    modifier issueExists(uint _id) {
+        require(issues[_id].exists == true);
+        _;
+    }
 
     /**
      * Set a condition to be met, otherwise an error will be thrown and
