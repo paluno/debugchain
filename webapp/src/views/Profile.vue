@@ -32,7 +32,7 @@
       <div class="col-md-3">Reviewer:</div>
       <div class="col-md-9">
         <div class="form-check">
-          <input class="form-check-input" id="isReviewer" type="checkbox" value="asdas" />
+          <input class="form-check-input" id="isReviewer" type="checkbox" />
           <label class="form-check-label" for="isReviewer">You are not available as reviewer.</label>
         </div>
       </div>
@@ -65,6 +65,8 @@
 
 <script>
 import Modal from "@/components/Modal.vue";
+import Backend from "../api/backend";
+const backend = Backend.getClient();
 
 export default {
   data: function() {
@@ -80,7 +82,20 @@ export default {
   },
   methods: {
     setAddressModalSave: function(newAddress) {
-      console.log("TODO: Save new address: " + newAddress);
+      console.log("TODO: Saving new address: " + newAddress);
+      backend
+        .post("/projects/1/members", {
+          address: newAddress,
+          reviewer: false
+        })
+        .then(function(response) {
+          // TODO
+          console.log(response);
+        })
+        .catch(function(error) {
+          // TODO
+          console.log(error);
+        });
       this.setAddressModal.show = false;
       this.setAddressModal.address = null;
     }
