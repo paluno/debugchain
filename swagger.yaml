@@ -30,8 +30,7 @@ paths:
           description: User was created successfully
           schema:
             $ref: '#/definitions/User'
-  
-  '/users/{username}':
+  '/users/{userId}':
     get:
       tags:
         - user
@@ -42,11 +41,11 @@ paths:
         - application/xml
         - application/json
       parameters:
-        - name: username
+        - name: userId
           in: path
           description: 'The name that needs to be fetched. Use user1 for testing. '
           required: true
-          type: string
+          type: integer
       responses:
         '200':
           description: User was returned successfully
@@ -66,7 +65,7 @@ paths:
         - application/xml
         - application/json
       parameters:
-        - name: username
+        - name: userId
           in: path
           description: name that need to be updated
           required: true
@@ -84,28 +83,6 @@ paths:
           description: Invalid user supplied
         '404':
           description: User not found
-    delete:
-      tags:
-        - user
-      summary: Delete user
-      description: This can only be done by the logged in user.
-      operationId: deleteUser
-      produces:
-        - application/xml
-        - application/json
-      parameters:
-        - name: username
-          in: path
-          description: The name that needs to be deleted
-          required: true
-          type: string
-      responses:
-        '200':
-          description: User was deleted successfully
-        '400':
-          description: Invalid username supplied
-        '404':
-          description: User not found
   /issues:
     get:
       tags:
@@ -120,7 +97,7 @@ paths:
           in: query
           description: A searchterm for searching and filtering the issues
           required: false
-          type: string
+          type: integer
       responses:
         '200':
           description: Issues were returned successfully
@@ -130,7 +107,6 @@ paths:
               $ref: '#/definitions/Issue'
         '404':
           description: No issues found
-
   '/issues/{issueId}':
     get:
       tags:
@@ -158,7 +134,7 @@ paths:
       tags:
         - issues
       summary: Get the reviewers of an issue
-      description: Get the reviewers of an issue, which are assigned for this issue
+      description: 'Get the reviewers of an issue, which are assigned for this issue'
       operationId: getIssueReviewers
       produces:
         - application/json
@@ -201,7 +177,6 @@ paths:
               $ref: '#/definitions/Project'
         '404':
           description: No issues found
-    
   '/projects/{projectId}':
     get:
       tags:
@@ -224,13 +199,12 @@ paths:
             $ref: '#/definitions/Project'
         '404':
           description: No project with this id found
-    
   '/projects/{projectId}/reviewers':
     get:
       tags:
         - projects
       summary: Get the reviewers of a project
-      description: Get the reviewers of a project, which are assigned for this project
+      description: 'Get the reviewers of a project, which are assigned for this project'
       operationId: getProjectReviewers
       produces:
         - application/json

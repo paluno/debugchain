@@ -1,1 +1,8 @@
 web3j.client-address: "http://localhost:9545"
+server:
+   port: 8081
+spring:
+    jpa:
+        databasePlatform: "org.hibernate.dialect.PostgreSQLDialect"
+        hibernate:
+          ddlAuto: none

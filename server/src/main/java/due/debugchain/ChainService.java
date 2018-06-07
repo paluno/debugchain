@@ -15,6 +15,9 @@ import rx.RxReactiveStreams;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Controll for Web3j demonstration.
+ */
 @RequiredArgsConstructor
 @RestController
 public class ChainService {
@@ -23,17 +26,22 @@ public class ChainService {
 
     private HelloWorld contract; // just to be included in compilation for demonstration
 
+    /**
+     * Fetches first ten blocks from chain.
+     *
+     * @return block hashes
+     */
     @GetMapping("/blocks")
     public Mono<List<String>> blocks() {
-        Publisher<EthBlock> block$ = RxReactiveStreams.toPublisher(web3j.replayBlocksObservable(
-                DefaultBlockParameterName.EARLIEST,
-                DefaultBlockParameterName.LATEST, false));
-        return Flux.from(block$)
-                .take(10)
-                .map(block -> block.getBlock().getHash())
-                .reduce(new ArrayList<>(), (list, s) -> {
-                    list.add(s);
-                    return list;
-                });
+        Publisher<EthBlock> blocks = RxReactiveStreams.toPublisher(web3j.replayBlocksObservable(
+            DefaultBlockParameterName.EARLIEST,
+            DefaultBlockParameterName.LATEST, false));
+        return Flux.from(blocks)
+            .take(10)
+            .map(block -> block.getBlock().getHash())
+            .reduce(new ArrayList<>(), (list, s) -> {
+                list.add(s);
+                return list;
+            });
     }
 }
