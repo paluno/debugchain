@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <IssueTable />
+    <IssueTable v-bind:projectId="projectId" />
   </div>
 </template>
 
