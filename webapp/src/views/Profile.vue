@@ -69,7 +69,6 @@
 <script>
 import Modal from "@/components/Modal.vue";
 import backend from "../api/backend";
-const client = backend.getClient();
 
 export default {
   data: function() {
@@ -89,6 +88,7 @@ export default {
   },
   methods: {
     setAddressModalSave: function(newAddress) {
+      const client = backend.getClient();
       const self = this;
       // TODO get project id from context
       client
@@ -115,18 +115,18 @@ export default {
               "Could not save address.\nUnknown error: " + error.message
             );
           }
-
           console.log(error);
         });
     },
     updateData: function() {
+      const client = backend.getClient();
       const self = this;
       // TODO handle / display errors in component
       // TODO get project id from context
       client.get("/projects/1/members").then(function(response) {
         self.address = response.data.find(element => {
           // TODO get user id from context
-          return element.gitlabId === 1;
+          return element.gitlabId == 1;
         }).address.value;
       });
     },
