@@ -10,6 +10,9 @@ import IssueTable from "@/components/IssueTable.vue";
 
 export default {
   name: "home",
+  props: {
+    projectId: Number
+  },
   components: {
     IssueTable
   }

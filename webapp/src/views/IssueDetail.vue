@@ -7,6 +7,9 @@
 <script>
 export default {
   name: "IssueDetail",
-  props: {}
+  props: {
+    projectId: Number,
+    issueId: Number
+  }
 };
 </script>

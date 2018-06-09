@@ -71,6 +71,9 @@ import Modal from "@/components/Modal.vue";
 import backend from "../api/backend";
 
 export default {
+  props: {
+    projectId: Number
+  },
   data: function() {
     return {
       address: null,
