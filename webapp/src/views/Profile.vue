@@ -23,9 +23,12 @@
     </div>
     <div class="form-group row">
       <label class="col-md-3" for="address">Ethereum Address:</label>
-      <div class="col-md-9">
+      <div v-if="address === null" class="col-md-9">
         <span>No address has been set.</span>
         <button class="btn btn-outline-secondary btn-sm" @click="setAddressModal.show = true">Set address</button>
+      </div>
+      <div v-else class="col-md-9">
+        <span>{{address}}</span>
       </div>
     </div>
     <div class="form-group row">
@@ -65,12 +68,13 @@
 
 <script>
 import Modal from "@/components/Modal.vue";
-import Backend from "../api/backend";
-const backend = Backend.getClient();
+import backend from "../api/backend";
+const client = backend.getClient();
 
 export default {
   data: function() {
     return {
+      address: null,
       setAddressModal: {
         show: false,
         address: null
@@ -80,10 +84,14 @@ export default {
   components: {
     Modal
   },
+  created: function() {
+    this.updateData();
+  },
   methods: {
     setAddressModalSave: function(newAddress) {
-      console.log("TODO: Saving new address: " + newAddress);
-      backend
+      const self = this;
+      // TODO get project id from context
+      client
         .post("/projects/1/members", {
           address: newAddress,
           reviewer: false
@@ -91,13 +99,24 @@ export default {
         .then(function(response) {
           // TODO
           console.log(response);
+          self.updateData();
+          self.setAddressModal.show = false;
+          self.setAddressModal.address = null;
         })
         .catch(function(error) {
           // TODO
+          alert(
+            "Could not save address: Server returned: " +
+              JSON.stringify(error, null, 2)
+          );
           console.log(error);
         });
-      this.setAddressModal.show = false;
-      this.setAddressModal.address = null;
+    },
+    updateData: function() {
+      const self = this;
+      client.get("/projects/1/members").then(function(response) {
+        self.address = response.data[0].address.value;
+      });
     }
   }
 };
