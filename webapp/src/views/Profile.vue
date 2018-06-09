@@ -10,7 +10,7 @@
       <input class="form-control" type="text" placeholder="Enter your Ethereum address..." v-model="setAddressModal.address" />
       <template slot="footer">
         <button type="button" class="btn btn-primary" @click="setAddressModalSave(setAddressModal.address)">Save</button>
-        <button type="button" class="btn btn-secondary" @click="setAddressModal.show = false">Close</button>
+        <button type="button" class="btn btn-secondary" @click="closeSetAddressModal()">Close</button>
       </template>
     </Modal>
 
@@ -25,7 +25,7 @@
       <label class="col-md-3" for="address">Ethereum Address:</label>
       <div v-if="address === null" class="col-md-9">
         <span>No address has been set.</span>
-        <button class="btn btn-outline-secondary btn-sm" @click="setAddressModal.show = true">Set address</button>
+        <button class="btn btn-outline-secondary btn-sm" @click="showSetAddressModal()">Set address</button>
       </div>
       <div v-else class="col-md-9">
         <span>{{address}}</span>
@@ -97,26 +97,46 @@ export default {
           reviewer: false
         })
         .then(function(response) {
-          // TODO
-          console.log(response);
           self.updateData();
-          self.setAddressModal.show = false;
-          self.setAddressModal.address = null;
         })
         .catch(function(error) {
-          // TODO
-          alert(
-            "Could not save address: Server returned: " +
-              JSON.stringify(error, null, 2)
-          );
+          // TODO handle / display errors in component
+          const msg = "Could not save address.\n";
+          if (error.response) {
+            alert(
+              "Could not save address.\nServer returned error: " +
+                error.response.status +
+                error.response.statusText +
+                "\n" +
+                JSON.stringify(error.response.data, null, 2)
+            );
+          } else {
+            console.log(
+              "Could not save address.\nUnknown error: " + error.message
+            );
+          }
+
           console.log(error);
         });
     },
     updateData: function() {
       const self = this;
+      // TODO handle / display errors in component
+      // TODO get project id from context
       client.get("/projects/1/members").then(function(response) {
-        self.address = response.data[0].address.value;
+        self.address = response.data.find(element => {
+          // TODO get user id from context
+          return element.gitlabId === 1;
+        }).address.value;
       });
+    },
+    showSetAddressModal: function() {
+      this.setAddressModal.show = true;
+      this.setAddressModal.address = null;
+    },
+    closeSetAddressModal: function() {
+      this.setAddressModal.show = false;
+      this.setAddressModal.address = null;
     }
   }
 };
