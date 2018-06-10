@@ -1,6 +1,6 @@
-package due.debugchain;
+package due.debugchain.auth;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -8,16 +8,17 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 
+import static org.springframework.http.HttpMethod.GET;
 
 /**
  * Resource server configuration for OAuth2 integration with GitLab.
  */
 @Configuration
 @EnableResourceServer
+@RequiredArgsConstructor
 public class OAuth2ResourceConfig extends ResourceServerConfigurerAdapter {
 
-    @Autowired
-    private GitLabTokenServices tokenServices;
+    private final GitLabTokenServices tokenServices;
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
@@ -26,7 +27,13 @@ public class OAuth2ResourceConfig extends ResourceServerConfigurerAdapter {
             .httpBasic().disable()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
-            .authorizeRequests().anyRequest().authenticated();
+            .authorizeRequests()
+            .antMatchers(// dev paths
+                "/api-docs/**",
+                "/swagger-ui.html",
+                "/webjars/springfox-swagger-ui/**").permitAll()
+            .antMatchers(GET, "/projects/*/members").permitAll()
+            .anyRequest().authenticated();
     }
 
     @Override

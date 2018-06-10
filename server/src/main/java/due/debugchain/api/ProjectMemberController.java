@@ -1,7 +1,9 @@
 package due.debugchain.api;
 
-import due.debugchain.GitLabUser;
 import due.debugchain.api.dto.MembershipRequest;
+import due.debugchain.api.dto.UserResource;
+import due.debugchain.api.mappers.UserMapper;
+import due.debugchain.auth.GitLabUser;
 import due.debugchain.persistence.ProjectService;
 import due.debugchain.persistence.UserService;
 import due.debugchain.persistence.entities.ProjectEntity;
@@ -25,6 +27,8 @@ public class ProjectMemberController {
     private final ProjectService projectService;
 
     private final UserService userService;
+
+    private final UserMapper userMapper;
 
     /**
      * Saves a user to a project by mapping their GitLab ID and Ethereum address accordingly.
@@ -50,13 +54,13 @@ public class ProjectMemberController {
     }
 
     /**
-     * Resolves all reviewers attached to a project.
+     * Resolves all members associated with a project.
      *
-     * @param project project whose reviewers to resolve
-     * @return project's reviewers
+     * @param project project whose members to resolve
+     * @return project's members
      */
     @GetMapping
-    public Collection<UserEntity> getMembers(ProjectEntity project) {
-        return projectService.getMembers(project);
+    public Collection<UserResource> getMembers(ProjectEntity project) {
+        return userMapper.entitiesToResources(projectService.getMembers(project));
     }
 }

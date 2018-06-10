@@ -1,4 +1,4 @@
-package due.debugchain;
+package due.debugchain.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

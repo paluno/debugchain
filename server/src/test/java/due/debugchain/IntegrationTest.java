@@ -2,6 +2,7 @@ package due.debugchain;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import due.debugchain.auth.GitLabUser;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -28,6 +30,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
 @SpringBootTest
+@Sql( {"/schema.sql", "/test_data.sql"})
 public abstract class IntegrationTest {
 
     protected static Long USER_ID = 4723L;
