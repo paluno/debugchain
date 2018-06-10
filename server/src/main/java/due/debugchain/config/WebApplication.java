@@ -13,7 +13,7 @@ public class WebApplication extends AbstractAnnotationConfigDispatcherServletIni
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class<?>[] { WebMvcConfiguration.class };
+        return new Class<?>[] {WebMvcConfig.class};
     }
 
     @Override

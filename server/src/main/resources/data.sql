@@ -1,1 +1,0 @@
-INSERT INTO project_entity (gitlab_id) VALUES (1);
