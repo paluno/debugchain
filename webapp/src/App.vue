@@ -1,11 +1,14 @@
 <template>
-  <div id="app">
-    <Navigation/>
+  <div id="app" class="container">
+      <Navigation/>
     <router-view/>
   </div>
 </template>
 
 <script>
+
+import 'bootstrap/dist/css/bootstrap.css'
+
 import Navigation from "@/components/Navigation.vue";
 
 export default {
@@ -20,7 +23,6 @@ export default {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
 }
 </style>

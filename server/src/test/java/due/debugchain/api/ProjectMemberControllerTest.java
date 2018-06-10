@@ -23,7 +23,7 @@ public class ProjectMemberControllerTest extends IntegrationTest {
         String addressJson = new JSONObject()
             .put("address", address)
             .toString();
-        mockMvc.perform(post("/projects/123/members")
+        mockMvc.perform(post("/projects/1/members")
             .with(userToken())
             .content(addressJson)
             .contentType(APPLICATION_JSON_UTF8))
