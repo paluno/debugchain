@@ -21,6 +21,7 @@ import org.web3j.protocol.Web3j;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
@@ -28,6 +29,8 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @WebAppConfiguration
 @SpringBootTest
 public abstract class IntegrationTest {
+
+    protected static Long USER_ID = 4723L;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -49,28 +52,33 @@ public abstract class IntegrationTest {
     public void mvcSetup() {
         mockMvc = MockMvcBuilders
             .webAppContextSetup(context)
+            .alwaysDo(result -> server.reset()) // reset mocking of user-requests to GitLab
             .apply(springSecurity())
             .build();
         server = MockRestServiceServer.createServer(restTemplate);
     }
 
     protected RequestPostProcessor userToken() {
+        return userToken(USER_ID);
+    }
+
+    protected RequestPostProcessor userToken(Long userId) {
         String tokenHeader = "Bearer 9a3a65322e7283741f2710d5d4e796af2b0bc46131a9e21da4a8761b96761043";
-        server.expect(requestTo("http://localhost/api/v4/user"))
+        server.expect(manyTimes(), requestTo("http://localhost/api/v4/user"))
             .andExpect(method(HttpMethod.GET))
             .andExpect(header(HttpHeaders.AUTHORIZATION, equalTo(tokenHeader)))
-            .andRespond(withSuccess(userResponse(), MediaType.APPLICATION_JSON));
+            .andRespond(withSuccess(userResponse(userId), MediaType.APPLICATION_JSON));
         return mockRequest -> {
             mockRequest.addHeader("Authorization", tokenHeader);
             return mockRequest;
         };
     }
 
-    private String userResponse() {
+    private String userResponse(Long userId) {
         GitLabUser user = new GitLabUser();
         user.setAdmin(false);
         user.setEmail("user@example.com");
-        user.setId(2L);
+        user.setId(userId);
         user.setName("Benutzer");
         user.setUsername("user");
         user.setState("active");

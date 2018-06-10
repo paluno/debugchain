@@ -28,8 +28,36 @@ public class ProjectMemberControllerTest extends IntegrationTest {
             .content(addressJson)
             .contentType(APPLICATION_JSON_UTF8))
             .andExpect(status().isOk());
-        UserEntity reviewer = userRepository.findById(1L)
+        UserEntity reviewer = userRepository.findById(USER_ID)
             .orElseThrow(IllegalStateException::new);
         assertThat(reviewer.getAddress().toString()).isEqualTo(address);
+    }
+
+    @Test
+    public void saveMultipleAddresses() throws Exception {
+        String firstAddress = "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae";
+        String firstAddressJson = new JSONObject()
+            .put("address", firstAddress)
+            .toString();
+        mockMvc.perform(post("/projects/1/members")
+            .with(userToken(1336L))
+            .content(firstAddressJson)
+            .contentType(APPLICATION_JSON_UTF8))
+            .andExpect(status().isOk());
+        UserEntity reviewer = userRepository.findById(1336L)
+            .orElseThrow(IllegalStateException::new);
+        assertThat(reviewer.getAddress().toString()).isEqualTo(firstAddress);
+        String secondAddress = "0x123f681646d4a755815f9cb19e1acc8565a0c2ac";
+        String secondAddressJson = new JSONObject()
+            .put("address", secondAddress)
+            .toString();
+        mockMvc.perform(post("/projects/1/members")
+            .with(userToken(1337L))
+            .content(secondAddressJson)
+            .contentType(APPLICATION_JSON_UTF8))
+            .andExpect(status().isOk());
+        reviewer = userRepository.findById(1337L)
+            .orElseThrow(IllegalStateException::new);
+        assertThat(reviewer.getAddress().toString()).isEqualTo(secondAddress);
     }
 }

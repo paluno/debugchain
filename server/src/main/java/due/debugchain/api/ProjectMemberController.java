@@ -1,11 +1,13 @@
 package due.debugchain.api;
 
+import due.debugchain.GitLabUser;
 import due.debugchain.api.dto.MembershipRequest;
 import due.debugchain.persistence.ProjectService;
 import due.debugchain.persistence.UserService;
 import due.debugchain.persistence.entities.ProjectEntity;
 import due.debugchain.persistence.entities.UserEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,12 +30,14 @@ public class ProjectMemberController {
      * Saves a user to a project by mapping their GitLab ID and Ethereum address accordingly.
      *
      * @param project project to attach user to
+     * @param authentication current user authentication
      * @param request dto
      */
     @PostMapping
     @Transactional
-    public void addMember(ProjectEntity project, @RequestBody MembershipRequest request) {
-        Long gitlabId = 1L; // TODO: retrieve from login
+    public void addMember(ProjectEntity project, Authentication authentication, @RequestBody MembershipRequest request) {
+        GitLabUser principal = (GitLabUser) authentication.getPrincipal();
+        Long gitlabId = principal.getId();
         UserEntity user = userService.getUser(gitlabId)
             .orElseGet(() -> {
                 UserEntity newUser = new UserEntity();
