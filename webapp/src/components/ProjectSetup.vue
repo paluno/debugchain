@@ -6,24 +6,40 @@
       :rows="gitlabProjects"
       :pagination-options="{ enabled: true, perPage: 10}"
       :search-options="{ enabled: true}"
-      styleClass="vgt-table striped bordered"> 
+      styleClass="vgt-table striped bordered"
+      @on-row-click="showCreateProjectModal">
     </vue-good-table>
 
-    <form @submit.prevent="createProject">
-        <input type="text" placeholder="Enter the GitLab-ID..." v-model="id">
-        <button @click="createProject" type="button">Create Project</button>
-      </form>
+    <Modal v-model="createProjectModal.show" title="Create Project">
+      <p>
+        Do you want to create a DebugChain project for this GitLab project?<br />
+      </p>
+        <div class="alert alert-primary">
+        ID: {{ createProjectModal.id }}, URL: {{ createProjectModal.url }}
+        </div>
+      
+      <template slot="footer">
+        <button type="button" class="btn btn-primary" @click="selectGitlabProject(id)">Save</button>
+        <button type="button" class="btn btn-secondary" @click="closeCreateProjectModal()">Close</button>
+      </template>
+    </Modal>
   </div>
+
 </template>
 
 <script>
 import gitlab from "../api/gitlab";
+import Modal from "@/components/Modal.vue";
 
 export default {
   name: "ProjectSetup",
   data() {
     return {
-        id: "",
+        createProjectModal: {
+            show: false,
+            id: 0,
+            url: ""
+        },
         columns: [
             {
           label: "ID",
@@ -42,11 +58,18 @@ export default {
         gitlabProjects: []
     }
   },
+  components: {
+      Modal
+  },
   created: function() {
     this.updateData();
   },
   methods: {
-      createProject() {
+      selectGitlabProject(id) {
+          //TODO see if project already exists in our system, open its issue table if yes, else open Model to create new project
+      },
+
+      createProject(id) {
           //TODO meta mask + backend calls
           console.log(this.id);
       },
@@ -65,7 +88,17 @@ export default {
         client.projects.list().then(projects => {
         that.setProjects(projects);
       });
-      }
+      },
+      showCreateProjectModal: function(params) {
+      this.createProjectModal.show = true;
+      this.createProjectModal.id = params.row.id;
+      this.createProjectModal.url = params.row.url;
+    },
+      closeCreateProjectModal: function() {
+      this.createProjectModal.show = false;
+      this.createProjectModal.address = 0;
+      this.createProjectModal.id = "";
+    }
   }
 };
 </script>
