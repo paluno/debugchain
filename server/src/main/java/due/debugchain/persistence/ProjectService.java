@@ -34,6 +34,8 @@ public class ProjectService {
         return projectRepository.findById(projectId);
     }
 
+    public void addProject(ProjectEntity projectEntity){ projectRepository.save(projectEntity); }
+
     /**
      * Attaches a user to a project by persiting a new membership connection.
      *
