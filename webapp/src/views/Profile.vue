@@ -14,6 +14,7 @@
       </template>
     </Modal>
 
+    <Navigation/>
     <h1>Profile</h1>
     <div class="form-group row">
       <label class="col-md-3" for="username">Username:</label>
@@ -69,6 +70,7 @@
 <script>
 import Modal from "@/components/Modal.vue";
 import backend from "../api/backend";
+import Navigation from "@/components/Navigation";
 
 export default {
   props: {
@@ -84,7 +86,8 @@ export default {
     };
   },
   components: {
-    Modal
+    Modal,
+    Navigation
   },
   created: function() {
     this.updateData();

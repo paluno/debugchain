@@ -1,5 +1,6 @@
 <template>
   <div>
+    <Navigation v-if="session.loggedIn"/>
     <h1>{{ computedToken }}</h1>
     <input type="submit" value="Login" v-on:click="loginViaGitlab" />
   </div>
@@ -9,8 +10,12 @@
 <script>
 import { GitlabOAuth, UserSession } from "../auth";
 import Storage from "../webStorage";
+import Navigation from "@/components/Navigation";
 
 export default {
+  components: {
+    Navigation
+  },
   computed: {
     computedToken: function() {
       if (this.session.accessToken != null) {

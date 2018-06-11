@@ -1,5 +1,6 @@
 <template>
     <div id="debug">
+        <Navigation/>
         <h1>Debug</h1>
         <input type="submit" value="Get current User" v-on:click="getUser"/>
         <pre>{{userJson}}</pre>
@@ -8,8 +9,12 @@
 
 <script>
 import gitlab from "../api/gitlab";
+import Navigation from "@/components/Navigation";
 
 export default {
+  components: {
+    Navigation
+  },
   data: function() {
     return {
       userJson: ""
