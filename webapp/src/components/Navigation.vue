@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import { UserSession } from "../auth.js";
+import UserSession from "../auth.js";
 
 export default {
   data: function() {

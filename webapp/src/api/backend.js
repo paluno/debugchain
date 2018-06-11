@@ -1,4 +1,4 @@
-import { UserSession } from "../auth.js";
+import UserSession from "../auth.js";
 import Axios from "axios";
 
 export default {

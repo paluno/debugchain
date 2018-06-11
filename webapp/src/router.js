@@ -5,7 +5,7 @@ import Debug from './views/Debug'
 import Login from './views/Login.vue'
 import Profile from './views/Profile.vue'
 import IssueDetail from './views/IssueDetail'
-import { UserSession } from './auth'
+import UserSession from './auth'
 
 Vue.use(Router);
 

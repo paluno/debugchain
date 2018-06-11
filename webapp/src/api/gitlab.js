@@ -1,6 +1,6 @@
 import SETTINGS from "../settings"
-import { UserSession } from "../auth.js";
-const GitlabApis = require("gitlab-api-wrapper");
+import UserSession from "../auth.js";
+import GitlabApis from "gitlab-api-wrapper";
 
 export default {
     getClient() {

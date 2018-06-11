@@ -22,4 +22,4 @@ const UserSession = {
     }
 };
 
-export { UserSession, GitlabOAuth };
+export { UserSession as default, UserSession, GitlabOAuth };
