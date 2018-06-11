@@ -1,12 +1,15 @@
 const SETTINGS = {
     oauthConfig: {
-        clientId: "e17e062d1dbaf7b95df11ac2ea2a2efe7715b1b11efea02793209e9014177d1f",
+        clientId: "ec6dec9cb9a857d52de82013b6591dd4bbd87410ea7893b9ef7df1566bf8bbe9",
         clientSecret:
-            "79557d718c85353a04e8e78fefc7ba8fedb6040a1cf0627833e768f6eaaa6321",
+            "b70b78d597a147e53de24443f34c3c4626b608850e3c22fb7f375296f32e17d7",
         accessTokenUri: "http://localhost:80/oauth/token",
         authorizationUri: "http://localhost:80/oauth/authorize",
         redirectUri: "http://localhost:8080/login",
         scopes: ["api"]
+    },
+    gitlabConnection: {
+        url: "http://localhost",
     }
 };
 
