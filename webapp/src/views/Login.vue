@@ -11,14 +11,10 @@ import { GitlabOAuth, UserSession } from "../auth";
 import Storage from "../webStorage";
 
 export default {
-  // We use computed properties based on 'props' to avoid any complex logic in our template
   computed: {
     computedToken: function() {
-      if (
-        this.session.token != null &&
-        this.session.token.accessToken != null
-      ) {
-        return "Token: " + this.session.token.accessToken;
+      if (this.session.accessToken != null) {
+        return "Token: " + this.session.accessToken;
       } else {
         return "No token";
       }
@@ -26,11 +22,11 @@ export default {
   },
   data: function() {
     return {
-      session: UserSession
+      session: UserSession.state
     };
   },
   created: function() {
-    if (UserSession.loggedIn) {
+    if (this.session.loggedIn) {
       // User is already authenticated. Perform redirect, if requested
       this.performRedirect();
     } else {
@@ -38,7 +34,7 @@ export default {
       const that = this;
       if (window.location.href.includes("access_token")) {
         GitlabOAuth.token.getToken(window.location.href).then(function(token) {
-          that.login(token);
+          UserSession.login(token.accessToken);
           that.performRedirect();
         });
       }
@@ -49,10 +45,6 @@ export default {
       Storage.setLoginRedirect(this.$route.query.redirect);
       window.location.href = GitlabOAuth.token.getUri();
     },
-    login: function(newToken) {
-      UserSession.token = newToken;
-      UserSession.loggedIn = true;
-    },
     performRedirect: function() {
       if (this.$route.query.hasOwnProperty("redirect")) {
         this.$router.push(this.$router.query.redirect);
@@ -61,7 +53,9 @@ export default {
       const redirect = Storage.getLoginRedirect();
       if (redirect != null) {
         this.$router.push(redirect);
+        
         Storage.setLoginRedirect(null);
+
       }
     }
   }

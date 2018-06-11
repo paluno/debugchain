@@ -7,7 +7,7 @@ export default {
             baseURL: 'http://localhost:8080/api/',
             timeout: 3000,
             headers: {
-                Authorization: "Bearer " + UserSession.token.accessToken
+                Authorization: "Bearer " + UserSession.state.accessToken
             }
         });
     }

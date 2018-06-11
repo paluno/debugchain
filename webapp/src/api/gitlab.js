@@ -6,7 +6,7 @@ export default {
     getClient() {
         return GitlabApis({
             base_url: SETTINGS.gitlabConnection.url,
-            private_token: UserSession.token.accessToken,
+            private_token: UserSession.state.accessToken,
             timeout: 3000
         });
     }

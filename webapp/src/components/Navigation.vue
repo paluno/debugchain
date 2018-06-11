@@ -12,7 +12,7 @@ import { UserSession } from "../auth.js";
 export default {
   data: function() {
     return {
-      session: UserSession
+      session: UserSession.state
     };
   }
 };
