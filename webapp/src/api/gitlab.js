@@ -1,5 +1,5 @@
-import SETTINGS from "../settings"
-import UserSession from "../auth.js";
+import SETTINGS from "@/settings"
+import UserSession from "@/auth.js";
 import GitlabApis from "gitlab-api-wrapper";
 
 export default {

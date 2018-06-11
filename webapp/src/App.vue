@@ -8,7 +8,7 @@
 
 import 'bootstrap/dist/css/bootstrap.css'
 
-import Navigation from "@/components/Navigation.vue";
+import Navigation from "@/components/Navigation";
 
 export default {
 };

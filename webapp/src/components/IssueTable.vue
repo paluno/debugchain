@@ -12,8 +12,8 @@
 </template>
 
 <script>
-import router from "../router";
-import gitlab from "../api/gitlab";
+import router from "@/router";
+import gitlab from "@/api/gitlab";
 
 export default {
   name: "IssueTable",

@@ -68,11 +68,12 @@
 </template>
 
 <script>
-import Modal from "@/components/Modal.vue";
-import backend from "../api/backend";
+import Modal from "@/components/Modal";
+import Backend from "@/api/backend";
 import Navigation from "@/components/Navigation";
 
 export default {
+  name: "profile",
   props: {
     projectId: String
   },
@@ -94,7 +95,7 @@ export default {
   },
   methods: {
     setAddressModalSave: function(newAddress) {
-      const client = backend.getClient();
+      const client = Backend.getClient();
       const self = this;
       // TODO get project id from context
       client
@@ -125,7 +126,7 @@ export default {
         });
     },
     updateData: function() {
-      const client = backend.getClient();
+      const client = Backend.getClient();
       const self = this;
       // TODO handle / display errors in component
       // TODO get project id from context

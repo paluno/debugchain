@@ -8,11 +8,12 @@
 
 
 <script>
-import { GitlabOAuth, UserSession } from "../auth";
-import Storage from "../webStorage";
+import { GitlabOAuth, UserSession } from "@/auth";
+import Storage from "@/webStorage";
 import Navigation from "@/components/Navigation";
 
 export default {
+  name: "login",
   components: {
     Navigation
   },

@@ -8,10 +8,11 @@
 </template>
 
 <script>
-import gitlab from "../api/gitlab";
+import gitlab from "@/api/gitlab";
 import Navigation from "@/components/Navigation";
 
 export default {
+  name: "debug",
   components: {
     Navigation
   },

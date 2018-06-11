@@ -7,9 +7,10 @@
 </template>
 
 <script>
-import UserSession from "../auth.js";
+import UserSession from "@/auth.js";
 
 export default {
+  name: "navigation",
   data: function() {
     return {
       session: UserSession.state
