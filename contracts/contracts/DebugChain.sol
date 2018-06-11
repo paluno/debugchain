@@ -19,7 +19,7 @@ contract DebugChain {
 
     uint projectId;
     address maintainer;
-    // issues als mapping von GitLab-ID auf ein Issue-Struct
+    // issues as a mapping of a GitLab-ID to an issue struct
     mapping(uint => Issue) issues;
     mapping(address => uint) pendingWithdrawals;
 
@@ -38,19 +38,26 @@ contract DebugChain {
     /**
      * Payable donation function. Takes the value-pair of message sender and
      * the added eth (wei) payload (msg.value) and adds it to the desired issue
-     * dontaion mapping.
+     * donation mapping.
      * Only allows the donation to non-completed issues.
+     * If an issue isn't registered at the point of donation, it is created and
+     * the donation value is added.
      *
      * @param _id issue ID to which the donation gets added
      */
-    function donate(uint _id) payable public issueExists(_id) {
-        // check if issue is completed.
-        require(!issues[_id].isCompleted);
-
+    function donate(uint _id) payable public {
+        // check if issue exists - if not create it
+        if (!issues[_id].exists) {
+            createIssue(_id);
+        } else {
+            // if an issue exists, check if the issue is completed
+            require(!issues[_id].isCompleted);
+        }
+        // if it exists and is not completed, append the donation value
         issues[_id].donations[msg.sender] = msg.value;
         issues[_id].donationSum += msg.value;
-
-        dontationRecieved(msg.sender, _id, msg.value);
+        // emit corresponding event
+        donationRecieved(msg.sender, _id, msg.value);
     }
 
     /**
@@ -77,12 +84,10 @@ contract DebugChain {
      * Adds a new issue-object to the central issue-mapping. Uses the passed
      * GitLab-ID as a key to render lookups trivial.
      *
-     * @param _id gitlab-issue-id to be used as map key
+     * @param _id gitlab issue id to be used as map key
      */
-    function createIssue(uint _id) public {
-        // check that the issue does not already exist
-        require(!issues[_id].exists);
-        // create in-memory array and persist it to storage
+    function createIssue(uint _id) private {
+        // create new in-memory struct and persist it to storage
         Issue memory issue = Issue({
             id: _id,
             donationSum: 0,
@@ -115,6 +120,11 @@ contract DebugChain {
     }
 
     // TODO: getIssues([])
+    function getIssues(address[] _ids) public {
+        for (uint i = 0; i < _ids.length; i++) {
+
+        }
+    }
 
     /**
      * Setter for an issues developer address.
@@ -172,7 +182,7 @@ contract DebugChain {
      *
      **/
 
-    event dontationRecieved (
+    event donationRecieved (
         address indexed _from,
         uint indexed _id,
         uint _amount
