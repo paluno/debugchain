@@ -1,19 +1,23 @@
 <template>
-    <div>
-        <h1>{{ computedToken }}</h1>
-        <input type="submit" value="Login" v-on:click="loginViaGitlab"/>
-    </div>
+  <div>
+    <h1>{{ computedToken }}</h1>
+    <input type="submit" value="Login" v-on:click="loginViaGitlab" />
+  </div>
 </template>
 
 
 <script>
-import { GitlabOAuth, UserSession } from "../auth.js";
+import { GitlabOAuth, UserSession } from "../auth";
+import Storage from "../webStorage";
 
 export default {
   // We use computed properties based on 'props' to avoid any complex logic in our template
   computed: {
     computedToken: function() {
-      if (this.session.token != null && this.session.token.accessToken != null) {
+      if (
+        this.session.token != null &&
+        this.session.token.accessToken != null
+      ) {
         return "Token: " + this.session.token.accessToken;
       } else {
         return "No token";
@@ -26,22 +30,39 @@ export default {
     };
   },
   created: function() {
-    // lifecycle-hook. prüfen, ob uri den token beinhaltet, wir also aus Gitlab zurückkommen
-    const that = this;
-    if (window.location.href.includes("access_token")) {
-      GitlabOAuth.token.getToken(window.location.href).then(function(result) {
-        that.setToken(result);
-      });
+    if (UserSession.loggedIn) {
+      // User is already authenticated. Perform redirect, if requested
+      this.performRedirect();
+    } else {
+      // if #access_token exists, set token, then redirect, if requested
+      const that = this;
+      if (window.location.href.includes("access_token")) {
+        GitlabOAuth.token.getToken(window.location.href).then(function(token) {
+          that.login(token);
+          that.performRedirect();
+        });
+      }
     }
   },
   methods: {
     loginViaGitlab: function(event) {
-      console.log("Login-Button geklickt. Leite um auf GitLab");
+      Storage.setLoginRedirect(this.$route.query.redirect);
       window.location.href = GitlabOAuth.token.getUri();
     },
-    setToken: function(newToken) {
+    login: function(newToken) {
       UserSession.token = newToken;
       UserSession.loggedIn = true;
+    },
+    performRedirect: function() {
+      if (this.$route.query.hasOwnProperty("redirect")) {
+        this.$router.push(this.$router.query.redirect);
+        return;
+      }
+      const redirect = Storage.getLoginRedirect();
+      if (redirect != null) {
+        this.$router.push(redirect);
+        Storage.setLoginRedirect(null);
+      }
     }
   }
 };
