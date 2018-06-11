@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.19;
 
 contract DebugChain {
 
@@ -30,7 +30,7 @@ contract DebugChain {
      *
      * @param _pId project ID to be persisted
      */
-    constructor(uint _pId) public {
+    function DebugChain(uint _pId) public {
         maintainer = msg.sender;
         projectId = _pId;
     }
@@ -39,6 +39,7 @@ contract DebugChain {
      * Payable donation function. Takes the value-pair of message sender and
      * the added eth (wei) payload (msg.value) and adds it to the desired issue
      * dontaion mapping.
+     * Only allows the donation to non-completed issues.
      *
      * @param _id issue ID to which the donation gets added
      */
@@ -49,7 +50,7 @@ contract DebugChain {
         issues[_id].donations[msg.sender] = msg.value;
         issues[_id].donationSum += msg.value;
 
-        emit dontationRecieved(msg.sender, _id, msg.value);
+        dontationRecieved(msg.sender, _id, msg.value);
     }
 
     /**
@@ -113,6 +114,8 @@ contract DebugChain {
         );
     }
 
+    // TODO: getIssues([])
+
     /**
      * Setter for an issues developer address.
      *
@@ -156,7 +159,7 @@ contract DebugChain {
         pendingWithdrawals[maintainer] = issues[_id].donationSum;
         issues[_id].isCompleted = true;
 
-        emit issueCompleted(msg.sender, _id);
+        issueCompleted(msg.sender, _id);
     }
 
     function deleteIssue(uint _id) public issueExists(_id) {
@@ -213,7 +216,7 @@ contract DebugChain {
 
     /**
      *
-     *      MODIFIER
+     *      MODIFIERS
      *
      **/
 
@@ -223,25 +226,42 @@ contract DebugChain {
      * @param _id issue id to check
      */
     modifier issueExists(uint _id) {
-        require(issues[_id].exists == true);
+        require(issues[_id].exists);
         _;
     }
 
     /**
-     * Set a condition to be met, otherwise an error will be thrown and
-     * any funds connected to this transaction will be automatically
-     * returned.
+     * Modifier to check if the message sender is the maintainer.
      */
     modifier onlyMaintainer() {
         require(msg.sender == maintainer);
         _;
     }
 
-    modifier onlyDeveloper() {
+    /**
+     * Modifier to check if the message sender is an issues assigned developer.
+     *
+     * @param _id issue id
+     */
+    modifier onlyDeveloper(uint _id) {
+        require(msg.sender == issues[_id].developer);
         _;
     }
 
-    modifier onlyReviewer() {
+    /**
+     * Modifier to check if the message sender is one of an issues assigned
+     * reviewers.
+     *
+     * @param _id issue id
+     */
+    modifier onlyReviewer(uint _id) {
+        bool isReviewer = false;
+        for (uint i = 0; i < issues[_id].reviewers.length; i++) {
+            if (msg.sender == issues[_id].reviewers[i]) {
+                isReviewer = true;
+            }
+        }
+        require(isReviewer);
         _;
     }
 
