@@ -18,7 +18,7 @@ import gitlab from "../api/gitlab";
 export default {
   name: "IssueTable",
   props: {
-    projectId: Number
+    projectId: String
   },
   data: function() {
     return {
@@ -79,7 +79,7 @@ export default {
         name: "issue",
         params: {
           projectId: this.projectId,
-          issueId: params.row.id
+          issueId: params.row.id.toString()
         }
       });
     }

@@ -72,7 +72,7 @@ import backend from "../api/backend";
 
 export default {
   props: {
-    projectId: Number
+    projectId: String
   },
   data: function() {
     return {

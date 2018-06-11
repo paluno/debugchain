@@ -8,8 +8,8 @@
 export default {
   name: "IssueDetail",
   props: {
-    projectId: Number,
-    issueId: Number
+    projectId: String,
+    issueId: String
   }
 };
 </script>
