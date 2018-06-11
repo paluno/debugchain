@@ -6,6 +6,8 @@ import due.debugchain.api.dto.UserResource;
 import due.debugchain.api.mappers.ProjectMapper;
 import due.debugchain.persistence.ProjectService;
 import io.swagger.annotations.ApiParam;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,24 +25,18 @@ import java.io.IOException;
 import java.util.List;
 
 @Controller
+@RequiredArgsConstructor
 public class ProjectsApiController implements ProjectsApi {
 
     private static final Logger log = LoggerFactory.getLogger(ProjectsApiController.class);
 
-    @Autowired
-    private ProjectService projectService;
+    private final ProjectService projectService;
 
-    private ProjectMapper projectMapper = Mappers.getMapper(ProjectMapper.class);
+    private final ProjectMapper projectMapper;
 
     private final ObjectMapper objectMapper;
 
     private final HttpServletRequest request;
-
-    @org.springframework.beans.factory.annotation.Autowired
-    public ProjectsApiController(ObjectMapper objectMapper, HttpServletRequest request) {
-        this.objectMapper = objectMapper;
-        this.request = request;
-    }
 
     @Override
     public ResponseEntity<Void> addProject(@ApiParam(value = "The project to be added", required = true) @Valid @RequestBody ProjectResource project) {
