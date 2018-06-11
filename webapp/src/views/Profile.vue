@@ -14,7 +14,7 @@
       </template>
     </Modal>
 
-    <Navigation/>
+    <Navigation v-bind:projectId="projectId"/>
     <h1>Profile</h1>
     <div class="form-group row">
       <label class="col-md-3" for="username">Username:</label>

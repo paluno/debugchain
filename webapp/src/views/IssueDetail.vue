@@ -1,6 +1,6 @@
 <template>
   <div class="issue_detail">
-    <Navigation/>
+    <Navigation v-bind:projectId="projectId"/>
     <h1>This is an issue detail page.</h1>
   </div>
 </template>

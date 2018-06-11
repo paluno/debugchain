@@ -1,8 +1,16 @@
 <template>
-  <div id="nav" v-if="session.loggedIn">
-    <router-link :to="{ name: 'home', params: { projectId: '1' }}">Issue Overview</router-link> |
-    <router-link :to="{ name: 'profile', params: { projectId: '1' }}">Profile</router-link> |
-    <router-link to="/debug">Debug</router-link>
+  <div id="nav">
+    <template v-if="session.loggedIn">
+      <router-link :to="{ name: 'home', params: { projectId: projectId }}">
+        Issue Overview
+      </router-link> |
+      <router-link :to="{ name: 'profile', params: { projectId: projectId }}">
+        Profile
+      </router-link> |
+    </template>
+    <router-link to="/debug">
+      Debug
+    </router-link>
   </div>
 </template>
 
@@ -11,6 +19,13 @@ import UserSession from "@/auth.js";
 
 export default {
   name: "navigation",
+  props: {
+    projectId: {
+      type: String,
+      // TODO remove debug default
+      default: "1"
+    }
+  },
   data: function() {
     return {
       session: UserSession.state
