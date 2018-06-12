@@ -2,25 +2,21 @@
   <div class="projectsetup">
     <Navigation/>
 
-    <vue-good-table 
-      :columns="columns"
-      :rows="gitlabProjects"
-      :pagination-options="{ enabled: true, perPage: 10}"
-      :search-options="{ enabled: true}"
-      styleClass="vgt-table striped bordered"
-      @on-row-click="onRowClick">
+    <vue-good-table :columns="columns" :rows="gitlabProjects" :pagination-options="{ enabled: true, perPage: 10}" :search-options="{ enabled: true}" styleClass="vgt-table striped bordered" @on-row-click="onRowClick">
     </vue-good-table>
+    <button @click="showCreateProjectModal()">Create new</button>
 
     <Modal v-model="createProjectModal.show" title="Create Project">
       <p>
         Do you want to create a DebugChain project for this GitLab project?<br />
       </p>
       <div class="alert alert-primary">
-        ID: {{ createProjectModal.id }}, URL: {{ createProjectModal.url }}
+        <label>ID: <input type="text" class="form-control" v-model="createProjectModal.id" /></label>
+        <label>URL <input type="text" class="form-control" v-model="createProjectModal.url"/></label>
       </div>
 
       <template slot="footer">
-        <button type="button" class="btn btn-primary" @click="selectGitlabProject(id)">Save</button>
+        <button type="button" class="btn btn-primary" @click="createProjectModalSave()">Save</button>
         <button type="button" class="btn btn-secondary" @click="closeCreateProjectModal()">Close</button>
       </template>
     </Modal>
@@ -68,9 +64,14 @@ export default {
     this.updateData();
   },
   methods: {
-    createProject: function(id) {
+    createProjectModalSave: function(){
+      this.createProject(this.createProjectModal.id, this.createProjectModal.url);
+    },
+    createProject: function(id, url) {
+      console.log("create project called with ID / url:");
+      console.log(this.createProjectModal.id);
+      console.log(this.createProjectModal.url);
       //TODO meta mask + backend calls
-      console.log(this.id);
     },
     setProjects: function(newProjects) {
       this.gitlabProjects = newProjects.map(project => {
@@ -90,8 +91,6 @@ export default {
     },
     showCreateProjectModal: function(params) {
       this.createProjectModal.show = true;
-      this.createProjectModal.id = params.row.id;
-      this.createProjectModal.url = params.row.url;
     },
     closeCreateProjectModal: function() {
       this.createProjectModal.show = false;
@@ -99,8 +98,8 @@ export default {
       this.createProjectModal.id = "";
     },
     openProject: function(id) {
-      // TODO see if project already exists in our system, 
-      //   open its issue table if yes, 
+      // TODO see if project already exists in our system,
+      //   open its issue table if yes,
       //   else
       //   open Modal to create new project
       this.$router.push({
