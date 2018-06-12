@@ -8,7 +8,7 @@
       :pagination-options="{ enabled: true, perPage: 10}"
       :search-options="{ enabled: true}"
       styleClass="vgt-table striped bordered"
-      @on-row-click="showCreateProjectModal">
+      @on-row-click="onRowClick">
     </vue-good-table>
 
     <Modal v-model="createProjectModal.show" title="Create Project">
@@ -68,10 +68,6 @@ export default {
     this.updateData();
   },
   methods: {
-    selectGitlabProject: function(id) {
-      //TODO see if project already exists in our system, open its issue table if yes, else open Model to create new project
-    },
-
     createProject: function(id) {
       //TODO meta mask + backend calls
       console.log(this.id);
@@ -101,6 +97,19 @@ export default {
       this.createProjectModal.show = false;
       this.createProjectModal.address = 0;
       this.createProjectModal.id = "";
+    },
+    openProject: function(id) {
+      // TODO see if project already exists in our system, 
+      //   open its issue table if yes, 
+      //   else
+      //   open Modal to create new project
+      this.$router.push({
+        name: "issueList",
+        params: { projectId: id.toString() }
+      });
+    },
+    onRowClick: function(params) {
+      this.openProject(params.row.id);
     }
   }
 };
