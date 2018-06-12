@@ -1,5 +1,6 @@
 <template>
   <div class="projectsetup">
+    <Navigation/>
 
     <vue-good-table 
       :columns="columns"
@@ -30,9 +31,14 @@
 <script>
 import Gitlab from "@/api/gitlab";
 import Modal from "@/components/Modal.vue";
+import Navigation from "@/components/Navigation";
 
 export default {
   name: "projectSetup",
+  components: {
+    Modal,
+    Navigation
+  },
   data: function() {
     return {
       createProjectModal: {
@@ -57,9 +63,6 @@ export default {
       ],
       gitlabProjects: []
     };
-  },
-  components: {
-    Modal
   },
   created: function() {
     this.updateData();
