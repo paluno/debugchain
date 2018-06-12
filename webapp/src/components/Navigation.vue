@@ -1,7 +1,7 @@
 <template>
   <div id="nav">
     <template v-if="session.loggedIn">
-      <router-link :to="{ name: 'home', params: { projectId: projectId }}">
+      <router-link :to="{ name: 'issueList', params: { projectId: projectId }}">
         Issue Overview
       </router-link> |
       <router-link :to="{ name: 'profile', params: { projectId: projectId }}">

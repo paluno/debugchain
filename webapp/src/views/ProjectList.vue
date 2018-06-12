@@ -34,7 +34,7 @@ import Modal from "@/components/Modal.vue";
 import Navigation from "@/components/Navigation";
 
 export default {
-  name: "projectSetup",
+  name: "projectList",
   components: {
     Modal,
     Navigation

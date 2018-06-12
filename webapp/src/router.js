@@ -1,12 +1,12 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import Home from './views/Home.vue'
+import IssueList from './views/IssueList.vue'
 import Debug from './views/Debug'
 import Login from './views/Login.vue'
 import Profile from './views/Profile.vue'
 import IssueDetail from './views/IssueDetail'
-import ProjectSetup from './views/ProjectSetup'
+import ProjectList from './views/ProjectList'
 
 import UserSession from './auth'
 
@@ -24,13 +24,13 @@ const router = new Router({
     {
       path: '/projects',
       name: 'projects',
-      component: ProjectSetup,
+      component: ProjectList,
       meta: { requiresAuth: true }
     },
     {
       path: '/projects/:projectId',
-      name: 'home',
-      component: Home,
+      name: 'issueList',
+      component: IssueList,
       props: true,
       meta: { requiresAuth: true }
     },
