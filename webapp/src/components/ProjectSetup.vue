@@ -1,7 +1,7 @@
 <template>
   <div class="projectsetup">
 
-    <vue-good-table
+    <vue-good-table 
       :columns="columns"
       :rows="gitlabProjects"
       :pagination-options="{ enabled: true, perPage: 10}"
@@ -14,10 +14,10 @@
       <p>
         Do you want to create a DebugChain project for this GitLab project?<br />
       </p>
-        <div class="alert alert-primary">
+      <div class="alert alert-primary">
         ID: {{ createProjectModal.id }}, URL: {{ createProjectModal.url }}
-        </div>
-      
+      </div>
+
       <template slot="footer">
         <button type="button" class="btn btn-primary" @click="selectGitlabProject(id)">Save</button>
         <button type="button" class="btn btn-secondary" @click="closeCreateProjectModal()">Close</button>
@@ -28,20 +28,20 @@
 </template>
 
 <script>
-import gitlab from "../api/gitlab";
+import Gitlab from "@/api/gitlab";
 import Modal from "@/components/Modal.vue";
 
 export default {
-  name: "ProjectSetup",
-  data() {
+  name: "projectSetup",
+  data: function() {
     return {
-        createProjectModal: {
-            show: false,
-            id: 0,
-            url: ""
-        },
-        columns: [
-            {
+      createProjectModal: {
+        show: false,
+        id: 0,
+        url: ""
+      },
+      columns: [
+        {
           label: "ID",
           field: "id",
           type: "number"
@@ -54,47 +54,47 @@ export default {
           label: "URL",
           field: "url"
         }
-        ],
-        gitlabProjects: []
-    }
+      ],
+      gitlabProjects: []
+    };
   },
   components: {
-      Modal
+    Modal
   },
   created: function() {
     this.updateData();
   },
   methods: {
-      selectGitlabProject(id) {
-          //TODO see if project already exists in our system, open its issue table if yes, else open Model to create new project
-      },
+    selectGitlabProject: function(id) {
+      //TODO see if project already exists in our system, open its issue table if yes, else open Model to create new project
+    },
 
-      createProject(id) {
-          //TODO meta mask + backend calls
-          console.log(this.id);
-      },
-      setProjects(newProjects) {
-        this.gitlabProjects = newProjects.map(project => {
+    createProject: function(id) {
+      //TODO meta mask + backend calls
+      console.log(this.id);
+    },
+    setProjects: function(newProjects) {
+      this.gitlabProjects = newProjects.map(project => {
         return {
-        id: project.id,
-        url: project.web_url,
-        owner: project.owner.username
+          id: project.id,
+          url: project.web_url,
+          owner: project.owner.username
         };
       });
-      },
-      updateData() {
-        const client = gitlab.getClient();
-        const that = this;
-        client.projects.list().then(projects => {
+    },
+    updateData: function() {
+      const client = Gitlab.getClient();
+      const that = this;
+      client.projects.list().then(projects => {
         that.setProjects(projects);
       });
-      },
-      showCreateProjectModal: function(params) {
+    },
+    showCreateProjectModal: function(params) {
       this.createProjectModal.show = true;
       this.createProjectModal.id = params.row.id;
       this.createProjectModal.url = params.row.url;
     },
-      closeCreateProjectModal: function() {
+    closeCreateProjectModal: function() {
       this.createProjectModal.show = false;
       this.createProjectModal.address = 0;
       this.createProjectModal.id = "";
