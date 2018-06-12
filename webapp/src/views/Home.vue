@@ -1,17 +1,22 @@
 <template>
   <div class="home">
-    <IssueTable />
+    <Navigation v-bind:projectId="projectId"/>
+    <IssueTable v-bind:projectId="projectId" />
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import IssueTable from "@/components/IssueTable.vue";
+import IssueTable from "@/components/IssueTable";
+import Navigation from "@/components/Navigation";
 
 export default {
   name: "home",
+  props: {
+    projectId: String
+  },
   components: {
-    IssueTable
+    IssueTable,
+    Navigation
   }
 };
 </script>

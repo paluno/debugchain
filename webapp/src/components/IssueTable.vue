@@ -12,12 +12,14 @@
 </template>
 
 <script>
-import router from "../router";
-import gitlab from "../api/gitlab";
+import router from "@/router";
+import gitlab from "@/api/gitlab";
 
 export default {
   name: "IssueTable",
-  props: {},
+  props: {
+    projectId: String
+  },
   data: function() {
     return {
       columns: [
@@ -68,12 +70,18 @@ export default {
     updateData: function() {
       const client = gitlab.getClient();
       const that = this;
-      client.projects.issues.list(1).then(issues => {
+      client.projects.issues.list(this.projectId).then(issues => {
         that.setIssues(issues);
       });
     },
     navigate: function(params) {
-      router.push({ path: "issue", query: { id: params.row.id } });
+      router.push({
+        name: "issue",
+        params: {
+          projectId: this.projectId,
+          issueId: params.row.id.toString()
+        }
+      });
     }
   }
 };

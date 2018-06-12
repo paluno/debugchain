@@ -5,7 +5,7 @@ import Debug from './views/Debug'
 import Login from './views/Login.vue'
 import Profile from './views/Profile.vue'
 import IssueDetail from './views/IssueDetail'
-import {UserSession} from './auth'
+import UserSession from './auth'
 
 Vue.use(Router);
 
@@ -13,15 +13,27 @@ const router = new Router({
   mode: 'history',
   routes: [
     {
+      // TODO replace with start page 
       path: '/',
+      redirect: {
+        name: 'home',
+        params: {
+          projectId: 1
+        }
+      }
+    },
+    {
+      path: '/projects/:projectId',
       name: 'home',
       component: Home,
+      props: true,
       meta: { requiresAuth: true }
     },
     {
-      path: '/profile',
+      path: '/projects/:projectId/profile',
       name: 'profile',
       component: Profile,
+      props: true,
       meta: { requiresAuth: true }
     },
     {
@@ -35,10 +47,11 @@ const router = new Router({
       component: Login
     },
     {
-      path: '/issue',
+      path: '/projects/:projectId/issue/:issueId',
       name: 'issue',
       component: IssueDetail,
-      meta: { requiresAuth: true }      
+      props: true,
+      meta: { requiresAuth: true }
     }
   ]
 });
@@ -46,7 +59,7 @@ const router = new Router({
 //Die Routen durchlaufen und jeweils auf Auth prüfen.
 //Ist der Nutzer nicht eingeloggt werden alle Seiten die Auth benötigen auf /login umgeleitet um den Login durchzuführen
 router.beforeEach((to, from, next) => {
-  if (to.matched.some(record => record.meta.requiresAuth) && !UserSession.loggedIn) {
+  if (to.matched.some(record => record.meta.requiresAuth) && !UserSession.state.loggedIn) {
     next({ path: '/login', query: { redirect: to.fullPath } });
   } else {
     next();
