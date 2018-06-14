@@ -20,7 +20,7 @@ import java.util.Collection;
  * Endpoint for operations on reviewers.
  */
 @RestController
-@RequestMapping("/projects/{projectId}/members")
+@RequestMapping("${spring.data.rest.base-path}/projects/{projectId}/members")
 @RequiredArgsConstructor
 public class ProjectMemberController {
 

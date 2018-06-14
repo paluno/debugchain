@@ -50,44 +50,32 @@ public class ProjectsApiController implements ProjectsApi {
 
     public ResponseEntity<ProjectResource> getProjectById(@ApiParam(value = "The id of the project",required=true) @PathVariable("projectId") Integer projectId) {
         String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
             try {
                 return new ResponseEntity<>(objectMapper.readValue("{  \"gitlabId\" : \"0\",  \"address\" : \"none\"  }", ProjectResource.class), HttpStatus.NOT_IMPLEMENTED);
             } catch (IOException e) {
                 log.error("Couldn't serialize response for content type application/json", e);
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
-        }
-
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     public ResponseEntity<List<UserResource>> getProjectReviewers(@ApiParam(value = "The id of the project",required=true) @PathVariable("projectId") Integer projectId) {
         String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
             try {
                 return new ResponseEntity<List<UserResource>>(objectMapper.readValue("[ {  \"gitlabId\" : \"0\",  \"address\" : \"none\"  }, {  \"gitlabId\" : \"0\",  \"address\" : \"none\"  } ]", List.class), HttpStatus.NOT_IMPLEMENTED);
             } catch (IOException e) {
                 log.error("Couldn't serialize response for content type application/json", e);
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
-        }
-
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     public ResponseEntity<List<ProjectResource>> getProjects(@ApiParam(value = "A searchterm for searching and filtering the projects") @Valid @RequestParam(value = "searchterm", required = false) String searchterm) {
         String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
             try {
                 return new ResponseEntity<List<ProjectResource>>(objectMapper.readValue("[ {  \"gitlabId\" : \"0\",  \"address\" : \"none\"  },  {  \"gitlabId\" : \"0\",  \"address\" : \"none\"  } ]", List.class), HttpStatus.NOT_IMPLEMENTED);
             } catch (IOException e) {
                 log.error("Couldn't serialize response for content type application/json", e);
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
-        }
-
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
 }
