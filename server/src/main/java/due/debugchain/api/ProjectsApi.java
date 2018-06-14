@@ -37,7 +37,7 @@ public interface ProjectsApi {
     @RequestMapping(value = "/projects/{projectId}",
         produces = { MediaType.APPLICATION_JSON_VALUE },
         method = RequestMethod.GET)
-    ResponseEntity<ProjectResource> getProjectById(@ApiParam(value = "The id of the project", required = true) @PathVariable("projectId") Integer projectId);
+    ResponseEntity<ProjectResource> getProjectById(@ApiParam(value = "The id of the project", required = true) @PathVariable("projectId") long projectId);
 
 
     @ApiOperation(value = "Get the reviewers of a project", nickname = "getProjectReviewers", notes = "Get the reviewers of a project, which are assigned for this project", response = UserResource.class, responseContainer = "List", tags={ "projects", })
