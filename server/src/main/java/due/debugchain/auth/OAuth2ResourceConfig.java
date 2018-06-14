@@ -33,7 +33,8 @@ public class OAuth2ResourceConfig extends ResourceServerConfigurerAdapter {
                 "/swagger-ui.html",
                 "/webjars/springfox-swagger-ui/**").permitAll()
             .antMatchers(GET, "/projects/*/members").permitAll()
-            .anyRequest().authenticated();
+            //.anyRequest().authenticated();
+            .anyRequest().permitAll();
     }
 
     @Override

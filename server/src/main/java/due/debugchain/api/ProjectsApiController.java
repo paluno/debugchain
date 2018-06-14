@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,12 +80,11 @@ public class ProjectsApiController implements ProjectsApi {
     public ResponseEntity<List<ProjectResource>> getProjects(@ApiParam(value = "A searchterm for searching and filtering the projects") @Valid @RequestParam(value = "searchterm", required = false) String searchterm) {
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<List<ProjectResource>>(objectMapper.readValue("[ {  \"gitlabId\" : \"0\",  \"address\" : \"none\"  },  {  \"gitlabId\" : \"0\",  \"address\" : \"none\"  } ]", List.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+
+            List<ProjectResource> projects = new ArrayList<>();
+            projectService.getAll().forEach(p -> projects.add(projectMapper.entityToResource(p)));
+
+            return new ResponseEntity<List<ProjectResource>>(projects, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
