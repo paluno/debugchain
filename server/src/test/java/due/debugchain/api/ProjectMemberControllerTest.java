@@ -26,7 +26,7 @@ public class ProjectMemberControllerTest extends IntegrationTest {
         String addressJson = new JSONObject()
             .put("address", address)
             .toString();
-        mockMvc.perform(post("/projects/999/members")
+        mockMvc.perform(post("/api/projects/999/members")
             .with(userToken())
             .content(addressJson)
             .contentType(APPLICATION_JSON_UTF8))
@@ -42,7 +42,7 @@ public class ProjectMemberControllerTest extends IntegrationTest {
         String addressJson = new JSONObject()
             .put("address", address)
             .toString();
-        mockMvc.perform(post("/projects/999/members")
+        mockMvc.perform(post("/api/projects/999/members")
             .content(addressJson)
             .contentType(APPLICATION_JSON_UTF8))
             .andExpect(status().isUnauthorized());
@@ -54,7 +54,7 @@ public class ProjectMemberControllerTest extends IntegrationTest {
         String firstAddressJson = new JSONObject()
             .put("address", firstAddress)
             .toString();
-        mockMvc.perform(post("/projects/999/members")
+        mockMvc.perform(post("/api/projects/999/members")
             .with(userToken(1336L))
             .content(firstAddressJson)
             .contentType(APPLICATION_JSON_UTF8))
@@ -66,7 +66,7 @@ public class ProjectMemberControllerTest extends IntegrationTest {
         String secondAddressJson = new JSONObject()
             .put("address", secondAddress)
             .toString();
-        mockMvc.perform(post("/projects/999/members")
+        mockMvc.perform(post("/api/projects/999/members")
             .with(userToken(1337L))
             .content(secondAddressJson)
             .contentType(APPLICATION_JSON_UTF8))
@@ -78,7 +78,10 @@ public class ProjectMemberControllerTest extends IntegrationTest {
 
     @Test
     public void fetchProjectMembers() throws Exception {
-        mockMvc.perform(get("/projects/999/members"))
+        mockMvc.perform(get("/api/projects/999/members")
+                .with(userToken(1336L))
+                .contentType(APPLICATION_JSON_UTF8)
+        )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", iterableWithSize(2)))
             .andExpect(jsonPath("$[?(@.gitlabId == 676 && @.address == '0x99861c8068bfe2e0a5137e16d23a648962c79b5c')]").exists())
