@@ -71,10 +71,11 @@ export default {
   },
   methods: {
     createProject: function() {
-      //TODO meta mask + backend calls
+      //TODO meta mask
       console.log("Create project called for project: ID = " + this.createProjectModal.id + ", URL = " + this.createProjectModal.url);
 
-      //dummy POST to create project without actual maintainer address
+      //dummy POST to create project without actual contract address
+      //-----just creates project with dummy contract address for dev purposes----
       const client = Backend.getClient();
       const self = this;
       client.post("/projects/", {
