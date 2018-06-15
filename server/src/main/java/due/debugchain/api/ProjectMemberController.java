@@ -11,18 +11,15 @@ import due.debugchain.persistence.entities.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.transaction.Transactional;
 import java.util.Collection;
 
-/**
- * Endpoint for operations on reviewers.
- */
 @RestController
-@RequestMapping("/projects/{projectId}/members")
 @RequiredArgsConstructor
-public class ProjectMemberController {
+public class ProjectMemberController implements ProjectMemberAPI{
 
     private final ProjectService projectService;
 
@@ -37,7 +34,6 @@ public class ProjectMemberController {
      * @param authentication current user authentication
      * @param request dto
      */
-    @PostMapping
     @Transactional
     public void addMember(ProjectEntity project, Authentication authentication, @RequestBody MembershipRequest request) {
         GitLabUser principal = (GitLabUser) authentication.getPrincipal();
@@ -59,7 +55,6 @@ public class ProjectMemberController {
      * @param project project whose members to resolve
      * @return project's members
      */
-    @GetMapping
     public Collection<UserResource> getMembers(ProjectEntity project) {
         return userMapper.entitiesToResources(projectService.getMembers(project));
     }
