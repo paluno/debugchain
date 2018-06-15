@@ -20,8 +20,8 @@
       </div>
 
       <template slot="footer">
-        <button type="button" class="btn btn-primary" @click="selectGitlabProject(id)">Save</button>
-        <button type="button" class="btn btn-secondary" @click="closeCreateProjectModal()">Close</button>
+        <button type="button" class="btn btn-primary" @click="createProject">Save</button>
+        <button type="button" class="btn btn-secondary" @click="closeCreateProjectModal">Close</button>
       </template>
     </Modal>
   </div>
@@ -32,6 +32,7 @@
 import Gitlab from "@/api/gitlab";
 import Modal from "@/components/Modal.vue";
 import Navigation from "@/components/Navigation";
+import Backend from "@/api/backend";
 
 export default {
   name: "projectList",
@@ -41,6 +42,7 @@ export default {
   },
   data: function() {
     return {
+      projects: [],
       createProjectModal: {
         show: false,
         id: 0,
@@ -68,9 +70,24 @@ export default {
     this.updateData();
   },
   methods: {
-    createProject: function(id) {
+    createProject: function() {
       //TODO meta mask + backend calls
-      console.log(this.id);
+      console.log("Create project called for project: ID = " + this.createProjectModal.id + ", URL = " + this.createProjectModal.url);
+
+      //dummy POST to create project without actual maintainer address
+      const client = Backend.getClient();
+      const self = this;
+      client.post("/projects/", {
+          address: "0x123456789",
+          gitlabId: self.createProjectModal.id
+        })
+        .then(function(response) {
+          console.log("Project created");
+          self.$router.push({
+              name: "issueList",
+              params: { projectId: self.createProjectModal.id.toString() }
+            });
+        });
     },
     setProjects: function(newProjects) {
       this.gitlabProjects = newProjects.map(project => {
@@ -88,28 +105,41 @@ export default {
         that.setProjects(projects);
       });
     },
-    showCreateProjectModal: function(params) {
+    showCreateProjectModal: function(id, url) {
       this.createProjectModal.show = true;
-      this.createProjectModal.id = params.row.id;
-      this.createProjectModal.url = params.row.url;
+      this.createProjectModal.id = id;
+      this.createProjectModal.url = url;
     },
     closeCreateProjectModal: function() {
       this.createProjectModal.show = false;
       this.createProjectModal.address = 0;
       this.createProjectModal.id = "";
     },
-    openProject: function(id) {
-      // TODO see if project already exists in our system, 
-      //   open its issue table if yes, 
-      //   else
-      //   open Modal to create new project
-      this.$router.push({
-        name: "issueList",
-        params: { projectId: id.toString() }
-      });
+    openProject: function(id, url) {
+      const client = Backend.getClient();
+      const self = this;
+
+      client
+        .get("/projects")
+        .then(function(response) {
+          self.projects = response.data;
+          
+          if (self.projects.filter(e => e.gitlabId === id).length > 0) {
+            self.$router.push({
+              name: "issueList",
+              params: { projectId: id.toString() }
+            });
+          }
+          else {
+            self.showCreateProjectModal(id, url);
+          }
+        })
+        .catch(function(error) {
+          alert("Could not load projects from backend: " + error.message);
+        });
     },
     onRowClick: function(params) {
-      this.openProject(params.row.id);
+      this.openProject(params.row.id, params.row.url);
     }
   }
 };
