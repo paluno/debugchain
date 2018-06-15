@@ -28,12 +28,9 @@ public class OAuth2ResourceConfig extends ResourceServerConfigurerAdapter {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .authorizeRequests()
-            .antMatchers(// dev paths
-                "/api-docs/**",
-                "/swagger-ui.html",
-                "/webjars/springfox-swagger-ui/**").permitAll()
-            .antMatchers(GET, "/projects/*/members").permitAll()
-            .anyRequest().authenticated();
+            .antMatchers("/api/**").authenticated() // lock all API interfaces
+            .antMatchers(GET, "/projects/*/members").permitAll() // explicitly open specific endpoints
+            .anyRequest().permitAll(); // allow everything else
     }
 
     @Override

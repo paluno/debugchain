@@ -27,7 +27,7 @@ public class ProjectApiControllerTest extends IntegrationTest {
                 .put("gitlabId",gitlabId)
                 .put("address", address)
                 .toString();
-        mockMvc.perform(post("/projects")
+        mockMvc.perform(post("/api/projects")
                 .with(userToken())
                 .accept(APPLICATION_JSON)
                 .content(projectJson)
@@ -47,7 +47,7 @@ public class ProjectApiControllerTest extends IntegrationTest {
                 .put("gitlabId",gitlabId)
                 .put("address", address)
                 .toString();
-        mockMvc.perform(post("/projects")
+        mockMvc.perform(post("/api/projects")
                 .content(projectJson)
                 .contentType(APPLICATION_JSON_UTF8))
                 .andExpect(status().isUnauthorized());
