@@ -59,4 +59,8 @@ public class UserService {
         return userRepository.save(userEntity).getMemberships();
     }
 
+    public UserEntity updateUser(UserEntity user) {
+        return userRepository.save(user);
+    }
+
 }

@@ -24,7 +24,7 @@ public class ProfileControllerTest extends IntegrationTest {
     private UserRepository userRepository;
 
     @Test
-    public void saveProfile() throws Exception {
+    public void saveProfileForNoneExistentUser() throws Exception {
         String address = "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae";
         String addressJson = new JSONObject()
             .put("address", address)
@@ -35,6 +35,22 @@ public class ProfileControllerTest extends IntegrationTest {
             .contentType(APPLICATION_JSON_UTF8))
             .andExpect(status().isOk());
         UserEntity member = userRepository.findById(123L)
+            .orElseThrow(IllegalStateException::new);
+        assertThat(member.getAddress().toString()).isEqualTo(address);
+    }
+
+    @Test
+    public void saveProfileForExistentUser() throws Exception {
+        String address = "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae";
+        String addressJson = new JSONObject()
+            .put("address", address)
+            .toString();
+        mockMvc.perform(post("/api/profile")
+            .with(userToken(USER_ID))
+            .content(addressJson)
+            .contentType(APPLICATION_JSON_UTF8))
+            .andExpect(status().isOk());
+        UserEntity member = userRepository.findById(USER_ID)
             .orElseThrow(IllegalStateException::new);
         assertThat(member.getAddress().toString()).isEqualTo(address);
     }
