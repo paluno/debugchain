@@ -1,6 +1,6 @@
 import getWeb3 from "getWeb3"
 import debugchainJson from '../../abi/___contracts_contracts_DebugChain_sol_DebugChain';
-//const debugchainJson from '../../abi/___contracts_contracts_DebugChain_sol_DebugChain.json';
+//const debugchainJsojn from '../../abi/___contracts_contracts_DebugChain_sol_DebugChain.json';
 
 var appContract = {
   registerWeb3 () {
