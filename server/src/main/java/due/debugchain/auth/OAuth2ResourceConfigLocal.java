@@ -17,8 +17,8 @@ import static org.springframework.http.HttpMethod.GET;
 @Configuration
 @EnableResourceServer
 @RequiredArgsConstructor
-@Profile("prod")
-public class OAuth2ResourceConfig extends ResourceServerConfigurerAdapter {
+@Profile("local")
+public class OAuth2ResourceConfigLocal extends ResourceServerConfigurerAdapter {
 
     private final GitLabTokenServices tokenServices;
 
@@ -30,8 +30,6 @@ public class OAuth2ResourceConfig extends ResourceServerConfigurerAdapter {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .authorizeRequests()
-            .antMatchers("/api/**").authenticated() // lock all API interfaces
-            .antMatchers(GET, "/projects/*/members").permitAll() // explicitly open specific endpoints
             .anyRequest().permitAll(); // allow everything else
     }
 
