@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.List;
 
 
-@RequestMapping("${spring.data.rest.base-path}/projects/{projectId}/members")
+@RequestMapping("${server.restPath}/projects/{projectId}/members")
 public interface ProjectMemberAPI {
 
     @ApiOperation(value = "Add logged in user to the reviewers of a project", nickname = "addMember", notes = "Add logged user to the reviwer list of a project", tags={ "projects", })
