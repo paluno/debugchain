@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-@Api(value = "${spring.data.rest.base-path}/projects", description = "the projects API")
-@RequestMapping("${spring.data.rest.base-path}")
+@Api(value = "${server.restPath}/projects", description = "the projects API")
+@RequestMapping("${server.restPath}")
 public interface ProjectsApi {
 
     @ApiOperation(value = "Add a project", nickname = "addProject", notes = "Add a project", response = ProjectResource.class, tags={ "projects", })
