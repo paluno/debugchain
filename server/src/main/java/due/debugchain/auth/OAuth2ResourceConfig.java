@@ -17,7 +17,7 @@ import static org.springframework.http.HttpMethod.GET;
 @Configuration
 @EnableResourceServer
 @RequiredArgsConstructor
-@Profile("prod")
+@Profile({"default", "prod"})
 public class OAuth2ResourceConfig extends ResourceServerConfigurerAdapter {
 
     private final GitLabTokenServices tokenServices;
