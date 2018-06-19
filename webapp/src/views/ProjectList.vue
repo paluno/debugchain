@@ -124,8 +124,9 @@ export default {
         .get("/projects")
         .then(function(response) {
           self.projects = response.data;
-          
-          if (self.projects.filter(e => e.gitlabId === id).length > 0) {
+          const project = self.projects.find(e => e.gitlabId === id);
+
+          if (project !== undefined) {
             self.$router.push({
               name: "issueList",
               params: { projectId: id.toString() }
@@ -136,6 +137,7 @@ export default {
           }
         })
         .catch(function(error) {
+          // TODO error handling
           alert("Could not load projects from backend: " + error.message);
         });
     },
