@@ -7,6 +7,7 @@
       <div class="alert alert-warning">
         This address will be used for your interactions with the Ethereum Smart Contract and can not be changed afterwards.
       </div>
+      <!-- TODO validate Ethereum address -->
       <input class="form-control" type="text" placeholder="Enter your Ethereum address..." v-model="setAddressModal.address" />
       <template slot="footer">
         <button type="button" class="btn btn-primary" @click="setAddressModalSave(setAddressModal.address)">Save</button>
@@ -14,7 +15,7 @@
       </template>
     </Modal>
 
-    <Navigation v-bind:projectId="projectId"/>
+    <Navigation v-bind:projectId="projectId" />
     <h1>Profile</h1>
     <div class="form-group row">
       <label class="col-md-3" for="username">Username:</label>
@@ -79,7 +80,7 @@ export default {
   },
   data: function() {
     return {
-      address: null,
+      address: undefined,
       setAddressModal: {
         show: false,
         address: null
@@ -97,11 +98,11 @@ export default {
     setAddressModalSave: function(newAddress) {
       const client = Backend.getClient();
       const self = this;
+      
       // TODO get project id from context
       client
-        .post("/projects/1/members", {
-          address: newAddress,
-          reviewer: false
+        .post("/profile", {
+          address: newAddress
         })
         .then(function(response) {
           self.updateData();
@@ -128,13 +129,10 @@ export default {
     updateData: function() {
       const client = Backend.getClient();
       const self = this;
+
       // TODO handle / display errors in component
-      // TODO get project id from context
-      client.get("/projects/1/members").then(function(response) {
-        self.address = response.data.find(element => {
-          // TODO get user id from context
-          return element.gitlabId == 1;
-        }).address.value;
+      client.get("/profile").then(function(response) {
+        self.address = response.data.address;
       });
     },
     showSetAddressModal: function() {
