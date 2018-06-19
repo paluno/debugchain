@@ -12,6 +12,9 @@ import javax.persistence.Converter;
 public class AddressConverter implements AttributeConverter<Address, String> {
     @Override
     public String convertToDatabaseColumn(Address address) {
+        if (address == null) {
+            return null;
+        }
         return address.toString();
     }
 

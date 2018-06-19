@@ -7,8 +7,6 @@ import due.debugchain.persistence.ProjectService;
 import due.debugchain.persistence.entities.ProjectEntity;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,11 +20,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.springframework.http.HttpStatus.*;
+
 @RestController
 @RequiredArgsConstructor
-public class ProjectsApiController implements ProjectsApi {
-
-    private static final Logger log = LoggerFactory.getLogger(ProjectsApiController.class);
+public class ProjectsController implements ProjectsApi {
 
     private final ProjectService projectService;
 
@@ -41,22 +39,20 @@ public class ProjectsApiController implements ProjectsApi {
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             projectService.addProject(projectMapper.resourceToEntity(project));
-            return new ResponseEntity<>(HttpStatus.CREATED);
+            return new ResponseEntity<>(CREATED);
         }
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(BAD_REQUEST);
     }
 
     public ResponseEntity<ProjectResource> getProjectById(@ApiParam(value = "The id of the project", required = true) @PathVariable("projectId") long projectId) {
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             Optional<ProjectEntity> project = projectService.getProject(projectId);
-
-            if (project.isPresent()) {
-                return new ResponseEntity<>(projectMapper.entityToResource(project.get()), HttpStatus.OK);
-            }
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return project
+                    .map(projectEntity -> ResponseEntity.ok(projectMapper.entityToResource(projectEntity)))
+                    .orElseGet(() -> new ResponseEntity<>(NOT_FOUND));
         }
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(BAD_REQUEST);
     }
 
     public ResponseEntity<List<ProjectResource>> getProjects(@ApiParam(value = "A searchterm for searching and filtering the projects") @Valid @RequestParam(value = "searchterm", required = false) String searchterm) {
@@ -66,9 +62,9 @@ public class ProjectsApiController implements ProjectsApi {
             List<ProjectResource> projects = new ArrayList<>();
             projectService.getAll().forEach(p -> projects.add(projectMapper.entityToResource(p)));
 
-            return new ResponseEntity<List<ProjectResource>>(projects, HttpStatus.OK);
+            return new ResponseEntity<List<ProjectResource>>(projects, OK);
         }
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(BAD_REQUEST);
     }
 
 }
