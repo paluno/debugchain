@@ -1,5 +1,6 @@
 package due.debugchain.api;
 
+import due.debugchain.api.dto.AddressResource;
 import due.debugchain.api.dto.MembershipResource;
 import due.debugchain.api.dto.UserResource;
 import due.debugchain.api.mappers.MembershipMapper;
@@ -29,8 +30,8 @@ public class ProfileController {
     private final MembershipMapper membershipMapper;
 
     @PostMapping
-    public UserResource saveProfile(@RequestBody @Valid UserResource userResource, UserEntity currentUser) {
-        currentUser.setAddress(new Address(userResource.getAddress()));
+    public UserResource saveProfile(@RequestBody @Valid AddressResource addressResource, UserEntity currentUser) {
+        currentUser.setAddress(new Address(addressResource.getAddress()));
         return userMapper.entityToResource(userService.updateUser(currentUser));
     }
 

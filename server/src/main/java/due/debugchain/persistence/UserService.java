@@ -44,16 +44,6 @@ public class UserService {
         return userRepository.save(userEntity);
     }
 
-    /**
-     * Resolves user associated current authentication.
-     *
-     * @return currently authenticated user-entity
-     */
-    public Optional<UserEntity> currentUser() {
-        GitLabUser principal = (GitLabUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userRepository.findById(principal.getId());
-    }
-
     public Collection<MembershipEntity> saveMemberships(UserEntity userEntity, Collection<MembershipEntity> memberships) {
         userEntity.setMemberships(memberships);
         return userRepository.save(userEntity).getMemberships();
