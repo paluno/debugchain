@@ -8,8 +8,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.resource.PathResourceResolver;
 
+import javax.annotation.Resource;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -28,5 +33,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
         List<HandlerMethodArgumentResolver> argumentResolvers) {
         argumentResolvers.add(new ProjectResolver(projectService));
         argumentResolvers.add(new UserResolver(userService));
+    }
+
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addRedirectViewController("/", "index.html");
     }
 }
