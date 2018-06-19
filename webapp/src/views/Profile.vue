@@ -97,17 +97,16 @@ export default {
   methods: {
     setAddressModalSave: function(newAddress) {
       const client = Backend.getClient();
-      const self = this;
       
-      // TODO get project id from context
       client
         .post("/profile", {
           address: newAddress
         })
-        .then(function(response) {
-          self.updateData();
+        .then(response => {
+          this.updateData();
+          this.closeSetAddressModal();
         })
-        .catch(function(error) {
+        .catch(error => {
           // TODO handle / display errors in component
           const msg = "Could not save address.\n";
           if (error.response) {
@@ -128,11 +127,10 @@ export default {
     },
     updateData: function() {
       const client = Backend.getClient();
-      const self = this;
 
       // TODO handle / display errors in component
-      client.get("/profile").then(function(response) {
-        self.address = response.data.address;
+      client.get("/profile").then(response => {
+        this.address = response.data.address;
       });
     },
     showSetAddressModal: function() {
