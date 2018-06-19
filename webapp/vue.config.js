@@ -1,10 +1,10 @@
 module.exports = {
   lintOnSave: false,
   devServer: {
+    port: 9000,
     proxy: {
       "/api" : {
-        target: "http://localhost:8081",
-        pathRewrite: {"^/api" : ""}
+        target: "http://localhost:8080"
       }
     }
   },

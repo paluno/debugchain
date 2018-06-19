@@ -26,6 +26,7 @@ export default {
         {
           label: "ID",
           field: "id",
+          type: "number",
           filterOptions: {
             enabled: true
           }
