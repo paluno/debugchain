@@ -33,7 +33,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 @Sql( {"/schema.sql", "/test_data.sql"})
 public abstract class IntegrationTest {
 
-    protected static Long USER_ID = 4723L;
+    protected static Long USER_ID = 676L;
 
     @Autowired
     private RestTemplate restTemplate;

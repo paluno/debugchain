@@ -13,6 +13,14 @@ import java.util.Collection;
 @Mapper
 public interface UserMapper {
     /**
+     * Specification for converter from persistence entity to resource.
+     *
+     * @param entity persistence entity
+     * @return mapped user resource
+     */
+    UserResource entityToResource(UserEntity entity);
+
+    /**
      * Specification for collection converter from persistence entity to resource.
      *
      * @param entities persistence entities
