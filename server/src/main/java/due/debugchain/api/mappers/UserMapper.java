@@ -35,6 +35,9 @@ public interface UserMapper {
      * @return string representation of address
      */
     default String addressToString(Address address) {
+        if (address == null){
+            return null;
+        }
         return address.toString();
     }
 }
