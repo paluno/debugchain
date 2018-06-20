@@ -33,6 +33,7 @@ import Gitlab from "@/api/gitlab";
 import Modal from "@/components/Modal.vue";
 import Navigation from "@/components/Navigation";
 import Backend from "@/api/backend";
+import appContract from "@/api/contract"
 
 export default {
   name: "projectList",
@@ -71,11 +72,11 @@ export default {
   },
   methods: {
     createProject: function() {
-      //TODO meta mask
       console.log("Create project called for project: ID = " + this.createProjectModal.id + ", URL = " + this.createProjectModal.url);
 
-      //dummy POST to create project without actual contract address
-      //-----just creates project with dummy contract address for dev purposes----
+      var debugchainContractDeployed = appContract.newContract(id);
+      console.log(debugchainContractDeployed);
+
       const client = Backend.getClient();
       const self = this;
       client.post("/projects/", {
