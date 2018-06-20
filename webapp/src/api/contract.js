@@ -2,10 +2,6 @@ import getWeb3 from "./getWeb3"
 import debugchainJson from '../../abi/___contracts_contracts_DebugChain_sol_DebugChain.json';
 
 const abiFile = require('../../abi/___contracts_contracts_DebugChain_sol_DebugChain.abi');
-// import byteCode from 
-
-  //const obj = JSON.parse(abiFile.toString());
-
 
 var appContract = {
   
@@ -22,12 +18,6 @@ var appContract = {
     let debugchainContract = null;
     console.log("initContract");
     console.log("create debugchain Contract:");
-    
-    //console.log("abiFile");
-    //const obj = JSON.parse(JSON.stringify(abiFile));
-    //var obj = fetch(abiFile).then(response => response.text);
-    
-    //console.log(obj);
 
     console.log(debugchainJson);
     appContract.registerWeb3();

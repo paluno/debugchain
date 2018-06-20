@@ -4,7 +4,6 @@
 
     <vue-good-table :columns="columns" :rows="gitlabProjects" :pagination-options="{ enabled: true, perPage: 10}" :search-options="{ enabled: true}" styleClass="vgt-table striped bordered" @on-row-click="onRowClick">
     </vue-good-table>
-    <button @click="showCreateProjectModal()">Create new</button>
 
     <Modal v-model="createProjectModal.show" title="Create Project">
       <p>
@@ -16,8 +15,8 @@
       </div>
 
       <template slot="footer">
-        <button type="button" class="btn btn-primary" @click="createProjectModalSave()">Save</button>
-        <button type="button" class="btn btn-secondary" @click="closeCreateProjectModal()">Close</button>
+        <button type="button" class="btn btn-primary" @click="createProject">Save</button>
+        <button type="button" class="btn btn-secondary" @click="closeCreateProjectModal">Close</button>
       </template>
     </Modal>
   </div>
@@ -29,6 +28,7 @@
 import Gitlab from "@/api/gitlab";
 import Modal from "@/components/Modal.vue";
 import Navigation from "@/components/Navigation";
+import Backend from "@/api/backend";
 import appContract from "@/api/contract"
 
 export default {
@@ -39,6 +39,7 @@ export default {
   },
   data: function() {
     return {
+      projects: [],
       createProjectModal: {
         show: false,
         id: 0,
@@ -67,19 +68,24 @@ export default {
   },
   
   methods: {
-    createProjectModalSave: function(){
-      this.createProject(this.createProjectModal.id, this.createProjectModal.url);
-    },
+    createProject: function() {
+      var debugchainContractDeployed = appContract.newContract(this.createProjectModal.id);
+      console.log("DEPLOYED: " + debugchainContractDeployed);
 
-    createProject: function(id, url) {
-      console.log("create project called with ID / url:");
-      console.log(this.createProjectModal.id);
-      console.log(this.createProjectModal.url);
-      //TODO meta mask + backend calls
-      //deploy contract
-      var debugchainContractDeployed = appContract.newContract(id);
-      console.log(debugchainContractDeployed);
-
+      const client = Backend.getClient();
+      const self = this;
+      client.post("/projects/", {
+        //TODO: address has to be set accordingly from result of appContract.newContract - call
+          address: "0x123456789",
+          gitlabId: self.createProjectModal.id
+        })
+        .then(function(response) {
+          console.log("Project created");
+          self.$router.push({
+              name: "issueList",
+              params: { projectId: self.createProjectModal.id.toString() }
+            });
+        });
     },
     setProjects: function(newProjects) {
       this.gitlabProjects = newProjects.map(project => {
@@ -97,26 +103,43 @@ export default {
         that.setProjects(projects);
       });
     },
-    showCreateProjectModal: function(params) {
+    showCreateProjectModal: function(id, url) {
       this.createProjectModal.show = true;
+      this.createProjectModal.id = id;
+      this.createProjectModal.url = url;
     },
     closeCreateProjectModal: function() {
       this.createProjectModal.show = false;
       this.createProjectModal.address = 0;
       this.createProjectModal.id = "";
     },
-    openProject: function(id) {
-      // TODO see if project already exists in our system,
-      //   open its issue table if yes,
-      //   else
-      //   open Modal to create new project
-      this.$router.push({
-        name: "issueList",
-        params: { projectId: id.toString() }
-      });
+    openProject: function(id, url) {
+      const client = Backend.getClient();
+      const self = this;
+
+      client
+        .get("/projects")
+        .then(function(response) {
+          self.projects = response.data;
+          const project = self.projects.find(e => e.gitlabId === id);
+
+          if (project !== undefined) {
+            self.$router.push({
+              name: "issueList",
+              params: { projectId: id.toString() }
+            });
+          }
+          else {
+            self.showCreateProjectModal(id, url);
+          }
+        })
+        .catch(function(error) {
+          // TODO error handling
+          alert("Could not load projects from backend: " + error.message);
+        });
     },
     onRowClick: function(params) {
-      this.openProject(params.row.id);
+      this.openProject(params.row.id, params.row.url);
     }
   }
 };

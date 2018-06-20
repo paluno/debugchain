@@ -6,7 +6,6 @@
 package due.debugchain.api;
 
 import due.debugchain.api.dto.ProjectResource;
-import due.debugchain.api.dto.UserResource;
 import io.swagger.annotations.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-@Api(value = "projects", description = "the projects API")
+@Api(value = "${server.restPath}/projects", description = "the projects API")
+@RequestMapping("${server.restPath}")
 public interface ProjectsApi {
 
     @ApiOperation(value = "Add a project", nickname = "addProject", notes = "Add a project", response = ProjectResource.class, tags={ "projects", })
@@ -24,7 +24,6 @@ public interface ProjectsApi {
             @ApiResponse(code = 400, message = "ResponseBody does not contain a valid project or wrong HTTP-Headers") })
     @RequestMapping(value = "/projects",
             consumes = { MediaType.APPLICATION_JSON_VALUE },
-            produces = { MediaType.APPLICATION_JSON_VALUE },
             method = RequestMethod.POST)
     ResponseEntity<Void> addProject(@ApiParam(value = "The project to be added", required = true) @Valid @RequestBody ProjectResource project);
 
@@ -36,18 +35,7 @@ public interface ProjectsApi {
     @RequestMapping(value = "/projects/{projectId}",
         produces = { MediaType.APPLICATION_JSON_VALUE },
         method = RequestMethod.GET)
-    ResponseEntity<ProjectResource> getProjectById(@ApiParam(value = "The id of the project", required = true) @PathVariable("projectId") Integer projectId);
-
-
-    @ApiOperation(value = "Get the reviewers of a project", nickname = "getProjectReviewers", notes = "Get the reviewers of a project, which are assigned for this project", response = UserResource.class, responseContainer = "List", tags={ "projects", })
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Reviewers were returned successfully", response = UserResource.class, responseContainer = "List"),
-        @ApiResponse(code = 404, message = "No reviewers assigned or no project with this id found") })
-    @RequestMapping(value = "/projects/{projectId}/reviewers",
-        produces = { MediaType.APPLICATION_JSON_VALUE },
-        method = RequestMethod.GET)
-    ResponseEntity<List<UserResource>> getProjectReviewers(@ApiParam(value = "The id of the project", required = true) @PathVariable("projectId") Integer projectId);
-
+    ResponseEntity<ProjectResource> getProjectById(@ApiParam(value = "The id of the project", required = true) @PathVariable("projectId") long projectId);
 
     @ApiOperation(value = "Get all projects", nickname = "getProjects", notes = "Get all projects which are tracked by a debugchain-contract", response = ProjectResource.class, responseContainer = "List", tags={ "projects", })
     @ApiResponses(value = { 

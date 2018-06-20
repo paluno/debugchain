@@ -9,12 +9,12 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class ProjectApiControllerTest extends IntegrationTest {
+public class ProjectsControllerTest extends IntegrationTest {
 
     @Autowired
     private ProjectRepository projectRepository;
@@ -27,7 +27,7 @@ public class ProjectApiControllerTest extends IntegrationTest {
                 .put("gitlabId",gitlabId)
                 .put("address", address)
                 .toString();
-        mockMvc.perform(post("/projects")
+        mockMvc.perform(post("/api/projects")
                 .with(userToken())
                 .accept(APPLICATION_JSON)
                 .content(projectJson)
@@ -47,7 +47,7 @@ public class ProjectApiControllerTest extends IntegrationTest {
                 .put("gitlabId",gitlabId)
                 .put("address", address)
                 .toString();
-        mockMvc.perform(post("/projects")
+        mockMvc.perform(post("/api/projects")
                 .content(projectJson)
                 .contentType(APPLICATION_JSON_UTF8))
                 .andExpect(status().isUnauthorized());

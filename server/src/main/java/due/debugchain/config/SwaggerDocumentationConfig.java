@@ -1,5 +1,6 @@
 package due.debugchain.config;
 
+import due.debugchain.persistence.entities.UserEntity;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -22,19 +23,20 @@ public class SwaggerDocumentationConfig {
             .licenseUrl("http://unlicense.org")
             .termsOfServiceUrl("")
             .version("1.0.0")
-            .contact(new Contact("","", ""))
+            .contact(new Contact("", "", ""))
             .build();
     }
 
     @Bean
-    public Docket customImplementation(){
+    public Docket customImplementation() {
         return new Docket(DocumentationType.SWAGGER_2)
-                .select()
-                    .apis(RequestHandlerSelectors.basePackage("due.debugchain"))
-                    .build()
-                .directModelSubstitute(org.threeten.bp.LocalDate.class, java.sql.Date.class)
-                .directModelSubstitute(org.threeten.bp.OffsetDateTime.class, java.util.Date.class)
-                .apiInfo(apiInfo());
+            .select()
+            .apis(RequestHandlerSelectors.basePackage("due.debugchain"))
+            .build()
+            .directModelSubstitute(org.threeten.bp.LocalDate.class, java.sql.Date.class)
+            .directModelSubstitute(org.threeten.bp.OffsetDateTime.class, java.util.Date.class)
+            .apiInfo(apiInfo())
+            .ignoredParameterTypes(UserEntity.class);
     }
 
 }

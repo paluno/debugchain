@@ -1,3 +1,4 @@
+INSERT INTO project_entity (gitlab_id) VALUES (998);
 INSERT INTO project_entity (gitlab_id) VALUES (999);
 INSERT INTO user_entity (gitlab_id, address) VALUES (
   676, '0x99861c8068bfe2e0a5137e16d23a648962c79b5c'
