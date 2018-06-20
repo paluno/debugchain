@@ -11,7 +11,7 @@ import Web3 from 'web3'
 let getWeb3 = new Promise(function (resolve, reject) {
   // Check for injected web3 (mist/metamask)
   //var web3js = window.web3
-  //if (typeof web3js !== 'undefined') {
+  if (typeof web3 == 'undefined') {
     //var web3 = new Web3(web3js.currentProvider)
     var web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:7545'))
     console.log("web3 instance")
@@ -22,10 +22,11 @@ let getWeb3 = new Promise(function (resolve, reject) {
         return web3
       }
     })
-  //} else {
+  } else {
     // web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:7545')) GANACHE FALLBACK
+    console.log("web3 instance existing")
     //reject(new Error('Unable to connect to Metamask'))
-  //}
+  }
 })
 
 export default getWeb3

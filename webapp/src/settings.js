@@ -11,6 +11,7 @@ const SETTINGS = {
     gitlabConnection: {
         url: "http://localhost",
     }
+    
 };
 
 export default SETTINGS;
