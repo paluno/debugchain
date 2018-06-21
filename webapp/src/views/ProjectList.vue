@@ -5,6 +5,8 @@
     <vue-good-table :columns="columns" :rows="gitlabProjects" :pagination-options="{ enabled: true, perPage: 10}" :search-options="{ enabled: true}" styleClass="vgt-table striped bordered" @on-row-click="onRowClick">
     </vue-good-table>
 
+    <button @click="showCreateProjectModal()">Create new</button>
+
     <Modal v-model="createProjectModal.show" title="Create Project">
       <p>
         Do you want to create a DebugChain project for this GitLab project?<br />
@@ -70,8 +72,8 @@ export default {
   methods: {
     createProject: function() {
       var debugchainContractDeployed = appContract.newContract(this.createProjectModal.id);
-      console.log("DEPLOYED: " + debugchainContractDeployed);
-
+      // TODO wait for Ethereum/Ganache Event ...
+      console.log("DEPLOYED: " + debugchainContractDeployed.contract.address);
       const client = Backend.getClient();
       const self = this;
       client.post("/projects/", {

@@ -35,7 +35,9 @@
     "node-sass": "^4.7.2",
     "sass-loader": "^6.0.6",
     "solc": "^0.4.24",
-    "vue-template-compiler": "^2.5.13"
+    "vue-template-compiler": "^2.5.13",
+    "json-loader": "0.5.7",
+    "raw-loader": "0.5.1"
   },
   "babel": {
     "presets": [
