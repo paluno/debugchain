@@ -1,19 +1,6 @@
 <template>
   <div id="profile">
-    <Modal v-model="setAddressModal.show" title="Set Ethereum address">
-      <p>
-        To execute some actions in this application, we need the public address of your Ethereum wallet. Please enter it below.<br />
-      </p>
-      <div class="alert alert-warning">
-        This address will be used for your interactions with the Ethereum Smart Contract and can not be changed afterwards.
-      </div>
-      <!-- TODO validate Ethereum address -->
-      <input class="form-control" type="text" placeholder="Enter your Ethereum address..." v-model="setAddressModal.address" />
-      <template slot="footer">
-        <button type="button" class="btn btn-primary" @click="setAddressModalSave(setAddressModal.address)">Save</button>
-        <button type="button" class="btn btn-secondary" @click="closeSetAddressModal()">Close</button>
-      </template>
-    </Modal>
+    <set-address-modal v-model="showAddressModal" v-on:save="addressModalSaveEvent"/>
 
     <Navigation v-bind:projectId="projectId" />
     <h1>Profile</h1>
@@ -27,7 +14,7 @@
       <label class="col-md-3" for="address">Ethereum Address:</label>
       <div v-if="address === null" class="col-md-9">
         <span>No address has been set.</span>
-        <button class="btn btn-outline-secondary btn-sm" @click="showSetAddressModal()">Set address</button>
+        <button class="btn btn-outline-secondary btn-sm" @click="showAddressModal = true">Set address</button>
       </div>
       <div v-else class="col-md-9">
         <span>{{address}}</span>
@@ -70,6 +57,7 @@
 
 <script>
 import Modal from "@/components/Modal";
+import SetAddressModal from "@/components/modals/SetAddressModal";
 import Backend from "@/api/backend";
 import Navigation from "@/components/Navigation";
 
@@ -81,21 +69,19 @@ export default {
   data: function() {
     return {
       address: undefined,
-      setAddressModal: {
-        show: false,
-        address: null
-      }
+      showAddressModal: false
     };
   },
   components: {
     Modal,
+    SetAddressModal,
     Navigation
   },
   created: function() {
     this.updateData();
   },
   methods: {
-    setAddressModalSave: function(newAddress) {
+    addressModalSaveEvent: function(newAddress) {
       const client = Backend.getClient();
       
       client
@@ -104,7 +90,7 @@ export default {
         })
         .then(response => {
           this.updateData();
-          this.closeSetAddressModal();
+          this.showAddressModal = false;
         })
         .catch(error => {
           // TODO handle / display errors in component
@@ -132,14 +118,6 @@ export default {
       client.get("/profile").then(response => {
         this.address = response.data.address;
       });
-    },
-    showSetAddressModal: function() {
-      this.setAddressModal.show = true;
-      this.setAddressModal.address = null;
-    },
-    closeSetAddressModal: function() {
-      this.setAddressModal.show = false;
-      this.setAddressModal.address = null;
     }
   }
 };
