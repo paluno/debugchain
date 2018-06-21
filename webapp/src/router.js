@@ -61,8 +61,15 @@ const router = new Router({
       component: Login
     },
     {
-      path: '*',
+      path: '/404',
+      name: "notFound",
       component: NotFound
+    },
+    {
+      path: '*',
+      redirect: {
+        name: 'notFound',
+      }
     }
   ]
 });
