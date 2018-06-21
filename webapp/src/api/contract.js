@@ -26,10 +26,11 @@ var appContract = {
     return debugchainContract;
   },
 
-  newContract: function(id){
+  newContract: function(id, client, self){
     //init contract
     let debugchainContract = appContract.initContract();
-    return debugchainContract.new(
+    let createdContract = null;
+    createdContract =  debugchainContract.new(
               id,
               {
                   from: web3.eth.accounts[0],
@@ -39,9 +40,27 @@ var appContract = {
                   console.log(e, contract);
                   if (typeof contract.address !== 'undefined') {
                         console.log('Contract mined! address: ' + contract.address + ' transactionHash: ' + contract.transactionHash);
+                        
+                        client.post("/projects/", {
+                          //TODO: address has to be set accordingly from result of appContract.newContract - call
+                            address: contract.address,
+                            gitlabId: id
+                          })
+                          .then(function(response) {
+                            console.log("Project created");
+                            self.$router.push({
+                                name: "issueList",
+                                params: { projectId: id.toString() }
+                              });
+                          });
+                  
                   }
                 }
             );
+    console.log("createdContract "+createdContract);
+    
+
+    return createdContract
   }
 }
 export default appContract

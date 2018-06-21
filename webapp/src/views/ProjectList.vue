@@ -71,9 +71,9 @@ export default {
   
   methods: {
     createProject: function() {
-      var debugchainContractDeployed = appContract.newContract(this.createProjectModal.id);
+      var CreatedDebugchainContract = appContract.newContract(this.createProjectModal.id);
       // TODO wait for Ethereum/Ganache Event ...
-      console.log("DEPLOYED: " + debugchainContractDeployed.contract.address);
+      console.log("DEPLOYED: " + CreatedDebugchainContract.contract.address);
       const client = Backend.getClient();
       const self = this;
       client.post("/projects/", {
