@@ -1,27 +1,26 @@
 <template>
-  <div id="nav">
-    <template v-if="session.loggedIn">
-      <router-link :to="{ name: 'projects' }">
+  <nav id="nav" class="navbar navbar-expand bg-light navbar-light">
+    <span class="navbar-brand">Debug-Chain</span>
+    <div class="navbar-nav mr-auto" v-if="session.loggedIn">
+      <router-link class="nav-item nav-link" :to="{ name: 'projects' }">
         Projects
-      </router-link> |
-      <template v-if="projectId">
-        <router-link :to="{ name: 'issueList', params: { projectId: projectId }}">
-          Project #{{projectId}}
-        </router-link> |
-      </template>
-      <template v-if="projectId && issueId">
-        <router-link :to="{ name: 'issue', params: { projectId: projectId, issueId: issueId }}">
-          Issue #{{issueId}}
-        </router-link> |
-      </template>
-      <router-link :to="{ name: 'profile'}">
+      </router-link>
+      <router-link v-if="projectId" class="nav-item nav-link" :to="{ name: 'issueList', params: { projectId: projectId }}">
+        Project #{{projectId}}
+      </router-link>
+      <router-link v-if="projectId && issueId" class="nav-item nav-link" :to="{ name: 'issue', params: { projectId: projectId, issueId: issueId }}">
+        Issue #{{issueId}}
+      </router-link>
+    </div>
+    <div class="navbar-nav">
+      <router-link v-if="session.loggedIn" class="nav-item nav-link" :to="{ name: 'profile'}">
         Profile
-      </router-link> |
-    </template>
-    <router-link to="/debug">
-      Debug
-    </router-link>
-  </div>
+      </router-link>
+      <router-link class="nav-item nav-link" :to="{name: 'debug'}">
+        Debug
+      </router-link>
+    </div>
+  </nav>
 </template>
 
 <script>
@@ -49,13 +48,6 @@ export default {
 
 <style lang="scss" scoped>
 #nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
+  margin-bottom: 1rem;
 }
 </style>
