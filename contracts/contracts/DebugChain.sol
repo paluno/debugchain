@@ -5,6 +5,7 @@ contract DebugChain {
     struct Issue {
         uint id;
         mapping(address => uint) donations;
+        address[] donationsLookup;
         uint donationSum;
         address developer;
         address[] reviewers;
@@ -13,7 +14,7 @@ contract DebugChain {
         bool isDeveloped;
         mapping(address => bool) isReviewed;
         bool isCompleted;
-        // to be able to check existence - solidity specialty
+        // to be able to check existence (solidity characteristic)
         bool exists;
     }
 
@@ -36,6 +37,13 @@ contract DebugChain {
     }
 
     /**
+     * Returns some basic contract/project related information.
+     */
+    function info() public view returns (uint, address) {
+        return (projectId, maintainer);
+    }
+
+    /**
      * Payable donation function. Takes the value-pair of message sender and
      * the added eth (wei) payload (msg.value) and adds it to the desired issue
      * donation mapping.
@@ -54,10 +62,30 @@ contract DebugChain {
             require(!issues[_id].isCompleted);
         }
         // if it exists and is not completed, append the donation value
-        issues[_id].donations[msg.sender] = msg.value;
+        issues[_id].donations[msg.sender] += msg.value;
         issues[_id].donationSum += msg.value;
+        // add the donator to the lookup array
+        if (!isRegisteredDonator(_id, msg.sender)) {
+            issues[_id].donationsLookup.push(msg.sender);
+        }
         // emit corresponding event
         donationRecieved(msg.sender, _id, msg.value);
+    }
+
+    /**
+     * Checks if the given address is already registered as a donator for the
+     * given issue.
+     *
+     * @param _id issue id
+     * @param _donator the donators wallet address
+     */
+    function isRegisteredDonator(uint _id, address _donator) private view returns (bool) {
+        for (uint i = 0; i < issues[_id].donationsLookup.length; i++) {
+            if (issues[_id].donationsLookup[i] == _donator) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -74,10 +102,24 @@ contract DebugChain {
     /**
      * Returns the pending withdrawal amount in wei for a given user address.
      *
-     * @param a wallet address to be checked for pending funds
+     * @param _add wallet address to be checked for pending funds
      */
-    function getPendingWithdrawals(address a) public view returns (uint) {
-        return pendingWithdrawals[a];
+    function getPendingWithdrawals(address _add) public view returns (uint) {
+        return pendingWithdrawals[_add];
+    }
+
+    /**
+     * Returns the pending withdrawal amount in wei for a given array of user
+     * addresses.
+     *
+     * @param _adds array of wallet addresses
+     */
+    function getPendingWithdrawals(address[] _adds) public view returns (uint[]) {
+        uint[] memory result;
+        for (uint i = 0; i < _adds.length; i++) {
+            result[i] = (pendingWithdrawals[_adds[i]]);
+        }
+        return result;
     }
 
     /**
@@ -90,6 +132,7 @@ contract DebugChain {
         // create new in-memory struct and persist it to storage
         Issue memory issue = Issue({
             id: _id,
+            donationsLookup: new address[](0),
             donationSum: 0,
             developer: address(0),
             reviewers: new address[](0),
@@ -103,27 +146,71 @@ contract DebugChain {
     }
 
     /**
-     * Returns an issue split up in its individual fields since returning
-     * structs is not possible in Solidity.
+     * Returns an issue split up in its individual fields as an array since
+     * returning structs is not supported by solidity.
      *
      * @param _id issue to get
      */
-    function getIssue(uint _id) public view issueExists(_id) returns
-    (uint, uint, address[], bool) {
-        // IN PROGRESS
-        return (
-        issues[_id].id,
-        issues[_id].donationSum,
-        issues[_id].reviewers,
-        issues[_id].isCompleted
-        );
+    function getIssue(uint _id) public issueExists(_id) view returns (
+        uint,
+        uint,
+        address,
+        address[],
+        bool[],
+        bool,
+        bool,
+        bool,
+        bool,
+        address[],
+        uint[]
+    ) {
+        return parseIssue(_id);
     }
 
-    // TODO: getIssues([])
-    function getIssues(address[] _ids) public {
-        for (uint i = 0; i < _ids.length; i++) {
+    /**
+     * Parses an issue struct to an array.
+     *
+     * @param _id the issue to parse
+     */
+    function parseIssue(uint _i) private view returns (
+    // TODO COMPLEXITY FLAGS
+        uint _id,
+        uint _donationSum,
+        address _developer,
+        address[] _reviewers,
+        bool[] _reviewStatus,
+        bool _isApproved,
+        bool _isLocked,
+        bool _isDeveloped,
+        bool _isCompleted,
+        address[] _donators,
+        uint[] _donationValues
+    ) {
+        _id = _i;
+        _donationSum = issues[_i].donationSum;
+        _developer = issues[_i].developer;
+        _reviewers = issues[_i].reviewers;
+        _reviewStatus = getReviewStatus(_i);
+        _isApproved = issues[_i].isApproved;
+        _isLocked = issues[_i].isLocked;
+        _isDeveloped = issues[_i].isDeveloped;
+        _isCompleted = issues[_i].isCompleted;
+        _donators = issues[_i].donationsLookup;
+        _donationValues = getDonationValues(issues[_i].id);
+    }
 
+    /**
+     * Returns the array of an issues donation values per donator.
+     *
+     * @param _id issue id
+     */
+    function getDonationValues(uint _id) private view returns(uint[]) {
+        uint[] memory values = new uint[](issues[_id].donationsLookup.length);
+        // for each donator(-address) add the corresponding donation amount
+        for (uint i = 0; i < issues[_id].donationsLookup.length; i++) {
+            values[i] = issues[_id].donations[issues[_id].donationsLookup[i]];
         }
+        return values;
     }
 
     /**
@@ -153,6 +240,10 @@ contract DebugChain {
      */
     function setReviewers(uint _id, address[] _reviewers) public issueExists(_id) {
         issues[_id].reviewers = _reviewers;
+        // TODO probably not necessary
+        for (uint i = 0; i < _reviewers.length; i++) {
+            issues[_id].isReviewed[_reviewers[i]] = false;
+        }
     }
 
     /**
@@ -164,8 +255,23 @@ contract DebugChain {
         return issues[_id].reviewers;
     }
 
+    /**
+     * Returns the review status for each of the registered reviewers as a
+     * boolean array.
+     *
+     * @param _id issue id
+     */
+    function getReviewStatus(uint _id) public view issueExists(_id) returns (bool[]) {
+        bool[] memory _status = new bool[](issues[_id].reviewers.length);
+        for (uint i = 0; i < issues[_id].reviewers.length; i++) {
+            // return the boolean review status for each reqistered reviewer
+            _status[i] = issues[_id].isReviewed[issues[_id].reviewers[i]];
+        }
+        return _status;
+    }
+
     function completeIssue(uint _id) public issueExists(_id) {
-        // IN PROGRESS
+        // TODO IN PROGRESS
         pendingWithdrawals[maintainer] = issues[_id].donationSum;
         issues[_id].isCompleted = true;
 
