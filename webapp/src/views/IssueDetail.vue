@@ -1,14 +1,15 @@
 <template>
   <div class="issue_detail">
-    <Navigation v-bind:projectId="projectId"/>
+    <Navigation v-bind:projectId="projectId" />
     <div v-if="issue">
-      <h1><span :class="badgeState">{{state}}</span> {{issue.title}}</h1>
+      <h1>
+        <span :class="badgeState">{{state}}</span> {{issue.title}}</h1>
       <div class="row">
         <div class="col">
           <label>Created</label>
           <span>at {{prettyTime}}</span>
           <label>by</label>
-          <span>{{issue.author.username}} </span><img class="avatar" :src="issue.author.avatar_url"/>
+          <span>{{issue.author.username}} </span><img class="avatar" :src="issue.author.avatar_url" />
         </div>
       </div>
       <hr>
@@ -38,13 +39,7 @@
     </div>
   </div>
 </template>
-<style>
-.avatar {
-  border-radius: 50%;
-  height: 25px;
-  width: 25px;
-}
-</style>
+
 <script>
 import Navigation from "@/components/Navigation";
 import gitlab from "@/api/gitlab";
@@ -116,11 +111,18 @@ export default {
     },
     updateData: function() {
       const client = gitlab.getClient();
-      const that = this;
       client.projects.issues.one(this.projectId, this.issueId).then(issue => {
-        that.setIssue(issue);
+        this.setIssue(issue);
       });
     }
   }
 };
 </script>
+
+<style>
+.avatar {
+  border-radius: 50%;
+  height: 25px;
+  width: 25px;
+}
+</style>
