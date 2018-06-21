@@ -2,14 +2,24 @@
   <div class="issue_detail">
     <Navigation v-bind:projectId="projectId" />
     <div v-if="issue">
-      <h1>
-        <span :class="badgeState">{{state}}</span> {{issue.title}}</h1>
+      <div class="form-group row">
+        <div class="col">
+          <h1>{{issue.title}}</h1>
+        </div>
+        <div class="col-auto">
+          <button class="btn btn-outline-secondary btn-sm">Donate Ether</button>
+        </div>
+      </div>
       <div class="row">
         <div class="col">
+          <span :class="badgeState">{{state}}</span>
           <label>Created</label>
           <span>at {{prettyTime}}</span>
           <label>by</label>
-          <span>{{issue.author.username}} </span><img class="avatar" :src="issue.author.avatar_url" />
+          <img class="avatar" :src="issue.author.avatar_url" />
+          <span>
+            <b>{{issue.author.username}}</b>
+          </span>
         </div>
       </div>
       <hr>
@@ -18,12 +28,6 @@
           <p>
             {{issue.description}}
           </p>
-        </div>
-      </div>
-      <hr>
-      <div class="form-group row">
-        <div class="col">
-          <button class="btn btn-outline-secondary btn-sm">Donate Ether</button>
         </div>
       </div>
     </div>
