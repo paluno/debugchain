@@ -71,23 +71,11 @@ export default {
   
   methods: {
     createProject: function() {
-      var CreatedDebugchainContract = appContract.newContract(this.createProjectModal.id);
-      // TODO wait for Ethereum/Ganache Event ...
-      console.log("DEPLOYED: " + CreatedDebugchainContract.contract.address);
       const client = Backend.getClient();
       const self = this;
-      client.post("/projects/", {
-        //TODO: address has to be set accordingly from result of appContract.newContract - call
-          address: "0x123456789",
-          gitlabId: self.createProjectModal.id
-        })
-        .then(function(response) {
-          console.log("Project created");
-          self.$router.push({
-              name: "issueList",
-              params: { projectId: self.createProjectModal.id.toString() }
-            });
-        });
+      // create contract and post to "/projects/"
+      var CreatedDebugchainContract = appContract.newContract(this.createProjectModal.id, client, self);
+      
     },
     setProjects: function(newProjects) {
       this.gitlabProjects = newProjects.map(project => {
