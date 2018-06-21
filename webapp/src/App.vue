@@ -1,6 +1,5 @@
 <template>
   <div id="app" class="container">
-      <Navigation/>
     <router-view/>
   </div>
 </template>
@@ -9,12 +8,9 @@
 
 import 'bootstrap/dist/css/bootstrap.css'
 
-import Navigation from "@/components/Navigation.vue";
+import Navigation from "@/components/Navigation";
 
 export default {
-  components: {
-    Navigation
-  }
 };
 </script>
 

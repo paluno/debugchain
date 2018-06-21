@@ -14,6 +14,7 @@
       </template>
     </Modal>
 
+    <Navigation v-bind:projectId="projectId"/>
     <h1>Profile</h1>
     <div class="form-group row">
       <label class="col-md-3" for="username">Username:</label>
@@ -67,10 +68,15 @@
 </template>
 
 <script>
-import Modal from "@/components/Modal.vue";
-import backend from "../api/backend";
+import Modal from "@/components/Modal";
+import Backend from "@/api/backend";
+import Navigation from "@/components/Navigation";
 
 export default {
+  name: "profile",
+  props: {
+    projectId: String
+  },
   data: function() {
     return {
       address: null,
@@ -81,14 +87,15 @@ export default {
     };
   },
   components: {
-    Modal
+    Modal,
+    Navigation
   },
   created: function() {
     this.updateData();
   },
   methods: {
     setAddressModalSave: function(newAddress) {
-      const client = backend.getClient();
+      const client = Backend.getClient();
       const self = this;
       // TODO get project id from context
       client
@@ -119,7 +126,7 @@ export default {
         });
     },
     updateData: function() {
-      const client = backend.getClient();
+      const client = Backend.getClient();
       const self = this;
       // TODO handle / display errors in component
       // TODO get project id from context
