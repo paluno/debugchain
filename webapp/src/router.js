@@ -7,6 +7,7 @@ import Login from './views/Login.vue'
 import Profile from './views/Profile.vue'
 import IssueDetail from './views/IssueDetail'
 import ProjectList from './views/ProjectList'
+import NotFound from './views/NotFound'
 
 import UserSession from './auth'
 
@@ -58,6 +59,10 @@ const router = new Router({
       path: '/login',
       name: 'login',
       component: Login
+    },
+    {
+      path: '*',
+      component: NotFound
     }
   ]
 });
