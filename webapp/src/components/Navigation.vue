@@ -1,10 +1,20 @@
 <template>
   <div id="nav">
     <template v-if="session.loggedIn">
-      <router-link :to="{ name: 'issueList', params: { projectId: projectId }}">
-        Issue Overview
+      <router-link :to="{ name: 'projects' }">
+        Projects
       </router-link> |
-      <router-link :to="{ name: 'profile', params: { projectId: projectId }}">
+      <template v-if="projectId">
+        <router-link :to="{ name: 'issueList', params: { projectId: projectId }}">
+          Project #{{projectId}}
+        </router-link> |
+      </template>
+      <template v-if="projectId && issueId">
+        <router-link :to="{ name: 'issue', params: { projectId: projectId, issueId: issueId }}">
+          Issue #{{issueId}}
+        </router-link> |
+      </template>
+      <router-link :to="{ name: 'profile'}">
         Profile
       </router-link> |
     </template>
@@ -15,15 +25,18 @@
 </template>
 
 <script>
+// TODO load and display project name and / or issuename in nav items
+
 import UserSession from "@/auth.js";
 
 export default {
   name: "navigation",
   props: {
     projectId: {
-      type: String,
-      // TODO remove debug default
-      default: "1"
+      type: String
+    },
+    issueId: {
+      type: String
     }
   },
   data: function() {

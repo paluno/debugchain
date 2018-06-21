@@ -35,10 +35,16 @@ const router = new Router({
       meta: { requiresAuth: true }
     },
     {
-      path: '/projects/:projectId/profile',
+      path: '/projects/:projectId/issue/:issueId',
+      name: 'issue',
+      component: IssueDetail,
+      props: true,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/profile',
       name: 'profile',
       component: Profile,
-      props: true,
       meta: { requiresAuth: true }
     },
     {
@@ -50,13 +56,6 @@ const router = new Router({
       path: '/login',
       name: 'login',
       component: Login
-    },
-    {
-      path: '/projects/:projectId/issue/:issueId',
-      name: 'issue',
-      component: IssueDetail,
-      props: true,
-      meta: { requiresAuth: true }
     }
   ]
 });
