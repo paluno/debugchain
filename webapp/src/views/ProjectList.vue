@@ -2,21 +2,18 @@
   <div class="projectsetup">
     <Navigation/>
 
-    <vue-good-table 
-      :columns="columns"
-      :rows="gitlabProjects"
-      :pagination-options="{ enabled: true, perPage: 10}"
-      :search-options="{ enabled: true}"
-      styleClass="vgt-table striped bordered"
-      @on-row-click="onRowClick">
+    <vue-good-table :columns="columns" :rows="gitlabProjects" :pagination-options="{ enabled: true, perPage: 10}" :search-options="{ enabled: true}" styleClass="vgt-table striped bordered" @on-row-click="onRowClick">
     </vue-good-table>
+
+    <button @click="showCreateProjectModal()">Create new</button>
 
     <Modal v-model="createProjectModal.show" title="Create Project">
       <p>
         Do you want to create a DebugChain project for this GitLab project?<br />
       </p>
       <div class="alert alert-primary">
-        ID: {{ createProjectModal.id }}, URL: {{ createProjectModal.url }}
+        <label>ID: <input type="text" class="form-control" v-model="createProjectModal.id" /></label>
+        <label>URL <input type="text" class="form-control" v-model="createProjectModal.url"/></label>
       </div>
 
       <template slot="footer">
@@ -28,11 +25,13 @@
 
 </template>
 
+
 <script>
 import Gitlab from "@/api/gitlab";
 import Modal from "@/components/Modal.vue";
 import Navigation from "@/components/Navigation";
 import Backend from "@/api/backend";
+import appContract from "@/api/contract"
 
 export default {
   name: "projectList",
@@ -69,26 +68,14 @@ export default {
   created: function() {
     this.updateData();
   },
+  
   methods: {
     createProject: function() {
-      //TODO meta mask
-      console.log("Create project called for project: ID = " + this.createProjectModal.id + ", URL = " + this.createProjectModal.url);
-
-      //dummy POST to create project without actual contract address
-      //-----just creates project with dummy contract address for dev purposes----
       const client = Backend.getClient();
       const self = this;
-      client.post("/projects/", {
-          address: "0x123456789",
-          gitlabId: self.createProjectModal.id
-        })
-        .then(function(response) {
-          console.log("Project created");
-          self.$router.push({
-              name: "issueList",
-              params: { projectId: self.createProjectModal.id.toString() }
-            });
-        });
+      // create contract and post to "/projects/"
+      var CreatedDebugchainContract = appContract.newContract(this.createProjectModal.id, client, self);
+      
     },
     setProjects: function(newProjects) {
       this.gitlabProjects = newProjects.map(project => {

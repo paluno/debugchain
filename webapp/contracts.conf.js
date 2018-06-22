@@ -6,5 +6,5 @@ glob("../contracts/contracts/**/*.sol", (err, files) => {
     if (err) {
         throw err
     }
-    exec(`solcjs ${files.join(' ')} --abi --o ./abi`)
+    exec(`solcjs ${files.join(' ')} --abi --bin --o ./contracts`)
 });

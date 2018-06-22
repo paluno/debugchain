@@ -31,8 +31,14 @@ node/
 node_modules/
 
 ### Web ###
-/webapp/abi
+
+/webapp/contracts
+
 server/src/main/resources/public/
 
+
+
 ### Contracts ###
+
 contracts/build/
+
