@@ -1,26 +1,44 @@
 image: openjdk:8-jdk
 
-variables:
-  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository -Dorg.slf4j.simpleLogger.defaultLogLevel=info -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dspring.profiles.active=prod"
-
-cache:
-  paths:
-    - contracts/node_modules
-    - webapp/node_modules
-    - .m2/repository
-
 stages:
   - build
+  - package
+
+variables:
+  DOCKER_DRIVER: overlay
+  CONTAINER_RELEASE_IMAGE: git.uni-due.de:6666/debug-chain/debug-chain/sever-app:latest
 
 before_script:
-  - chmod +x ./mvnw
-  - apt-get update > /dev/null
-  - apt-get install --no-install-suggests --no-install-recommends -y apt-utils build-essential python > /dev/null
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN git.uni-due.de
 
-build:
+maven-build:
+  image: openjdk:8-jdk
   stage: build
+  variables:
+    MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository -Dorg.slf4j.simpleLogger.defaultLogLevel=info -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dspring.profiles.active=prod"
+  cache:
+    paths:
+      - contracts/node_modules
+      - webapp/node_modules
+      - .m2/repository
+  before_script:
+    - chmod +x ./mvnw
+    - apt-get update > /dev/null
+    - apt-get install --no-install-suggests --no-install-recommends -y apt-utils build-essential python > /dev/null
   script:
     - ./mvnw -B compile
     - ./mvnw -B -q -pl :contracts frontend:npm@test-rpc &
     - sleep 5
     - ./mvnw -B test
+  artifacts:
+      paths:
+        - server/target/*.jar
+
+docker-build:
+  stage: package
+  script:
+    - docker build -t $CONTAINER_RELEASE_IMAGE ./server
+    - docker push $CONTAINER_RELEASE_IMAGE
+  only:
+    - DEB-109-vm
+
