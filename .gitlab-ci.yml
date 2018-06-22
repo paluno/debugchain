@@ -32,6 +32,7 @@ maven-build:
     - ./mvnw -B -q -pl :contracts frontend:npm@test-rpc &
     - sleep 5
     - ./mvnw -B test
+    - mvnw -pl :server install
     - ls
     - cd server
     - ls
