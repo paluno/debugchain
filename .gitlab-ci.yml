@@ -33,14 +33,9 @@ maven-build:
     - sleep 5
     - ./mvnw -B test
     - ./mvnw -pl :server install
-    - ls
-    - cd server
-    - ls
-    - cd target
-    - ls
   artifacts:
       paths:
-        - server
+        - server/target/*.jar
       expire_in: 1 week
 
 docker-build:
