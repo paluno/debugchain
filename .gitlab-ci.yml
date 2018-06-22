@@ -1,4 +1,6 @@
-image: openjdk:8-jdk
+image: docker:stable
+services:
+- docker:dind
 
 stages:
   - build
@@ -9,7 +11,7 @@ variables:
   CONTAINER_RELEASE_IMAGE: git.uni-due.de:6666/debug-chain/debug-chain/sever-app:latest
 
 before_script:
-  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN git.uni-due.de
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
 
 maven-build:
   image: openjdk:8-jdk
@@ -33,6 +35,8 @@ maven-build:
   artifacts:
       paths:
         - server/target/*.jar
+        - server/target/debugchain-server.jar
+        - target/*.jar
 
 docker-build:
   stage: package
