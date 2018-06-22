@@ -33,10 +33,14 @@ maven-build:
     - sleep 5
     - ./mvnw -B test
     - ls
+    - cd server
+    - ls
+    - cd target
+    - ls
   artifacts:
       paths:
-        - ./server/target/*.jar
-        - ./server/target/debugchain-server.jar
+        - server
+      expire_in: 1 week
 
 docker-build:
   stage: package
