@@ -32,11 +32,11 @@ maven-build:
     - ./mvnw -B -q -pl :contracts frontend:npm@test-rpc &
     - sleep 5
     - ./mvnw -B test
+    - ls
   artifacts:
       paths:
-        - server/target/*.jar
-        - server/target/debugchain-server.jar
-        - target/*.jar
+        - ./server/target/*.jar
+        - ./server/target/debugchain-server.jar
 
 docker-build:
   stage: package
