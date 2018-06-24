@@ -29,7 +29,7 @@ const UserSession = {
         document.cookie = "debugchain=" + value + ";" + expires + ";"; // cookie setzen
     },
     deleteCookie: function () {
-        setCookie("", -1); // Cookie wird gelöscht, wenn das expire-datum abgelaufen ist
+        this.setCookie("", -1); // Cookie wird gelöscht, wenn das expire-datum abgelaufen ist
     },
     getCookie: function () {
         var name = "debugchain";
