@@ -113,10 +113,10 @@ export default {
   },
   methods: {
     donateEther: function() {
-      //TODO: Hier muss der Metamask-Aufruf für das Donaten rein
+      alert("Hier muss der Metamask-Aufruf für das Donaten rein");
     },
     approveIssue: function() {
-      //TODO: Hier muss der Metamask-Aufruf für das Approven des Issues rein
+      alert("Hier muss der Metamask-Aufruf für das Approven des Issues rein");
     },
     setIssue: function(issue) {
       this.issue = issue;
