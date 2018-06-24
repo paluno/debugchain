@@ -48,7 +48,6 @@ const UserSession = {
     checkCookie: function () {
         var token = this.getCookie();
         if (token != "") {
-            alert("Welcome again " + token);
             this.state.accessToken = token;
             this.state.loggedIn = true;
         }
