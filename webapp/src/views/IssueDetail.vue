@@ -1,6 +1,6 @@
 <template>
   <div class="issue_detail">
-    <Navigation v-bind:projectId="projectId" />
+    <Navigation v-bind:projectId="projectId" v-bind:issueId="issueId" />
     <div v-if="issue">
       <div class="form-group row">
         <div class="col">
