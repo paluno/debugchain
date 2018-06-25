@@ -20,6 +20,9 @@ public class AddressConverter implements AttributeConverter<Address, String> {
 
     @Override
     public Address convertToEntityAttribute(String dbData) {
+        if (dbData == null) {
+            return null;
+        }
         return new Address(dbData);
     }
 }

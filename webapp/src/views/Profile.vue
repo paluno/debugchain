@@ -1,20 +1,8 @@
 <template>
   <div id="profile">
-    <Modal v-model="setAddressModal.show" title="Set Ethereum address">
-      <p>
-        To execute some actions in this application, we need the public address of your Ethereum wallet. Please enter it below.<br />
-      </p>
-      <div class="alert alert-warning">
-        This address will be used for your interactions with the Ethereum Smart Contract and can not be changed afterwards.
-      </div>
-      <input class="form-control" type="text" placeholder="Enter your Ethereum address..." v-model="setAddressModal.address" />
-      <template slot="footer">
-        <button type="button" class="btn btn-primary" @click="setAddressModalSave(setAddressModal.address)">Save</button>
-        <button type="button" class="btn btn-secondary" @click="closeSetAddressModal()">Close</button>
-      </template>
-    </Modal>
+    <set-address-modal v-model="showAddressModal" v-on:save="addressModalSaveEvent"/>
 
-    <Navigation v-bind:projectId="projectId"/>
+    <Navigation v-bind:projectId="projectId" />
     <h1>Profile</h1>
     <div class="form-group row">
       <label class="col-md-3" for="username">Username:</label>
@@ -26,7 +14,7 @@
       <label class="col-md-3" for="address">Ethereum Address:</label>
       <div v-if="address === null" class="col-md-9">
         <span>No address has been set.</span>
-        <button class="btn btn-outline-secondary btn-sm" @click="showSetAddressModal()">Set address</button>
+        <button class="btn btn-outline-secondary btn-sm" @click="showAddressModal = true">Set address</button>
       </div>
       <div v-else class="col-md-9">
         <span>{{address}}</span>
@@ -69,6 +57,7 @@
 
 <script>
 import Modal from "@/components/Modal";
+import SetAddressModal from "@/components/modals/SetAddressModal";
 import Backend from "@/api/backend";
 import Navigation from "@/components/Navigation";
 
@@ -79,34 +68,31 @@ export default {
   },
   data: function() {
     return {
-      address: null,
-      setAddressModal: {
-        show: false,
-        address: null
-      }
+      address: undefined,
+      showAddressModal: false
     };
   },
   components: {
     Modal,
+    SetAddressModal,
     Navigation
   },
   created: function() {
     this.updateData();
   },
   methods: {
-    setAddressModalSave: function(newAddress) {
+    addressModalSaveEvent: function(newAddress) {
       const client = Backend.getClient();
-      const self = this;
-      // TODO get project id from context
+      
       client
-        .post("/projects/1/members", {
-          address: newAddress,
-          reviewer: false
+        .post("/profile", {
+          address: newAddress
         })
-        .then(function(response) {
-          self.updateData();
+        .then(response => {
+          this.updateData();
+          this.showAddressModal = false;
         })
-        .catch(function(error) {
+        .catch(error => {
           // TODO handle / display errors in component
           const msg = "Could not save address.\n";
           if (error.response) {
@@ -127,23 +113,11 @@ export default {
     },
     updateData: function() {
       const client = Backend.getClient();
-      const self = this;
+
       // TODO handle / display errors in component
-      // TODO get project id from context
-      client.get("/projects/1/members").then(function(response) {
-        self.address = response.data.find(element => {
-          // TODO get user id from context
-          return element.gitlabId == 1;
-        }).address.value;
+      client.get("/profile").then(response => {
+        this.address = response.data.address;
       });
-    },
-    showSetAddressModal: function() {
-      this.setAddressModal.show = true;
-      this.setAddressModal.address = null;
-    },
-    closeSetAddressModal: function() {
-      this.setAddressModal.show = false;
-      this.setAddressModal.address = null;
     }
   }
 };

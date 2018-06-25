@@ -16,6 +16,7 @@
       <router-link v-if="session.loggedIn" class="nav-item nav-link" :to="{ name: 'profile'}">
         Profile
       </router-link>
+      <a v-if="session.loggedIn" v-on:click="logout" href="/" class="nav-item nav-link">Logout</a>
       <router-link class="nav-item nav-link" :to="{name: 'debug'}">
         Debug
       </router-link>
@@ -42,6 +43,11 @@ export default {
     return {
       session: UserSession.state
     };
+  },
+  methods: {
+    logout: function() {
+      UserSession.logout();
+    }
   }
 };
 </script>
