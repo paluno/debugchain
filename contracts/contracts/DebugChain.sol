@@ -14,15 +14,17 @@ contract DebugChain {
         bool isDeveloped;
         mapping(address => bool) isReviewed;
         bool isCompleted;
+        // TODO uint lifecycleStatus
         // to be able to check existence (solidity characteristic)
         bool exists;
     }
 
-    uint projectId;
-    address maintainer;
+    uint public projectId;
+    address public maintainer;
     // issues as a mapping of a GitLab-ID to an issue struct
-    mapping(uint => Issue) issues;
-    mapping(address => uint) pendingWithdrawals;
+    mapping(uint => Issue) public issues;
+    uint[] public issuesLookup;
+    mapping(address => uint) public pendingWithdrawals;
 
     /**
      * Contract constructor.
@@ -54,9 +56,14 @@ contract DebugChain {
      * @param _id issue ID to which the donation gets added
      */
     function donate(uint _id) payable public {
+        // Only allow non-empty donations
+        require(msg.value != 0);
+
         // check if issue exists - if not create it
         if (!issues[_id].exists) {
             createIssue(_id);
+            // and add the issue id to the global lookup table
+            issuesLookup.push(_id);
         } else {
             // if an issue exists, check if the issue is completed
             require(!issues[_id].isCompleted);
@@ -114,7 +121,8 @@ contract DebugChain {
      *
      * @param _adds array of wallet addresses
      */
-    function getPendingWithdrawals(address[] _adds) public view returns (uint[]) {
+    function getPendingWithdrawalList(address[] _adds) public view returns (uint[]) {
+        // TODO Parameter overloading messes with remix - test independently
         uint[] memory result;
         for (uint i = 0; i < _adds.length; i++) {
             result[i] = (pendingWithdrawals[_adds[i]]);
@@ -156,10 +164,10 @@ contract DebugChain {
         uint,
         address,
         address[],
+        bool,
+        bool,
+        bool,
         bool[],
-        bool,
-        bool,
-        bool,
         bool,
         address[],
         uint[]
@@ -178,10 +186,10 @@ contract DebugChain {
         uint _donationSum,
         address _developer,
         address[] _reviewers,
-        bool[] _reviewStatus,
         bool _isApproved,
         bool _isLocked,
         bool _isDeveloped,
+        bool[] _reviewStatus,
         bool _isCompleted,
         address[] _donators,
         uint[] _donationValues
@@ -190,10 +198,10 @@ contract DebugChain {
         _donationSum = issues[_i].donationSum;
         _developer = issues[_i].developer;
         _reviewers = issues[_i].reviewers;
-        _reviewStatus = getReviewStatus(_i);
         _isApproved = issues[_i].isApproved;
         _isLocked = issues[_i].isLocked;
         _isDeveloped = issues[_i].isDeveloped;
+        _reviewStatus = getReviewStatus(_i);
         _isCompleted = issues[_i].isCompleted;
         _donators = issues[_i].donationsLookup;
         _donationValues = getDonationValues(issues[_i].id);
@@ -221,6 +229,8 @@ contract DebugChain {
      */
     function setDeveloper(uint _id, address _developer) public issueExists(_id) {
         issues[_id].developer = _developer;
+        // lock the issue after a ddeveloper is assigned
+        setLocked(_id, true);
     }
 
     /**
@@ -233,15 +243,27 @@ contract DebugChain {
     }
 
     /**
+     * Unlocks an issue. Resets the developer address and sets the locked status
+     * to false.
+     *
+     * @param _id issue id
+     */
+    function unlockIssue(uint _id) public issueExists(_id) {
+        issues[_id].developer = address(0);
+        setLocked(_id, false);
+    }
+
+    /**
      * Setter for an issues reviewer addresses.
      *
      * @param _id issue id
      * @param _reviewers reviewer addresses to set
      */
     function setReviewers(uint _id, address[] _reviewers) public issueExists(_id) {
+        // set the new reviewers
         issues[_id].reviewers = _reviewers;
-        // TODO probably not necessary
-        for (uint i = 0; i < _reviewers.length; i++) {
+        // set all the review stati to false
+        for (uint i = 0; i < issues[_id].reviewers.length; i++) {
             issues[_id].isReviewed[_reviewers[i]] = false;
         }
     }
@@ -270,16 +292,143 @@ contract DebugChain {
         return _status;
     }
 
-    function completeIssue(uint _id) public issueExists(_id) {
-        // TODO IN PROGRESS
-        pendingWithdrawals[maintainer] = issues[_id].donationSum;
-        issues[_id].isCompleted = true;
+    /**
+     * Setter for an issues approved status.
+     *
+     * @param _id issue id
+     * @param _val approved status to set
+     */
+    function setApproved(uint _id, bool _val) public issueExists(_id) onlyMaintainer {
+        issues[_id].isApproved = _val;
+        // fire lifecycle event
+        issueApproved(msg.sender, _id);
+    }
 
+    /**
+     * Setter for an issues locked status.
+     *
+     * @param _id issue id
+     * @param _val locked status to set
+     */
+    function setLocked(uint _id, bool _val) private issueExists(_id) {
+        issues[_id].isLocked = _val;
+        // fire lifecycle event
+        if (_val) {
+            issueLocked(msg.sender, _id);
+        } else {
+            issueUnlocked(msg.sender, _id);
+        }
+    }
+
+    /**
+     * Setter for an issues developed status.
+     *
+     * @param _id issue id
+     * @param _val developed status to set
+     */
+    function setDeveloped(uint _id, bool _val) public issueExists(_id) onlyDeveloper(_id) {
+        issues[_id].isDeveloped = _val;
+        // fire lifecycle event
+        issueDeveloped(msg.sender, _id);
+    }
+
+    /**
+     * Setter for an issues reviewed status.
+     *
+     * @param _id issue id
+     * @param _val reviewed status to set
+     */
+    function setReviewed(uint _id, bool _val) public issueExists(_id) onlyReviewer(_id) {
+        issues[_id].isReviewed[msg.sender] = _val;
+        // fire lifecycle event
+        issueReviewed(msg.sender, _id);
+    }
+
+    /**
+     * Mark an issue as completes and release its donated funds to the assigned
+     * developer.
+     *
+     * @param _id issue id
+     */
+    function completeIssue(uint _id) public issueExists(_id) {
+        pendingWithdrawals[issues[_id].developer] = issues[_id].donationSum;
+        issues[_id].isCompleted = true;
+        // fire lifecycle event
         issueCompleted(msg.sender, _id);
     }
 
-    function deleteIssue(uint _id) public issueExists(_id) {
+    /**
+     * Resets an issues reviewers and its corresponding review status.
+     *
+     * @param _id issue id
+     */
+    function resetIssue(uint _id) public issueExists(_id) {
+        // reset the review stati
+        for (uint i = 0; i < issues[_id].reviewers.length; i++) {
+            // return the boolean review status for each reqistered reviewer
+            issues[_id].isReviewed[issues[_id].reviewers[i]] = false;
+        }
+        // reset the reviewers address array
+        setReviewers(_id, new address[](0));
+        // fire lifecycle event
+        issueReset(msg.sender, _id);
+    }
 
+    /**
+     * Deletes an issue and releases all funds back to the donators.
+     * Only accessible to the project maintainer.
+     *
+     * @param _id issue id
+     */
+    function deleteIssue(uint _id) public issueExists(_id) onlyMaintainer {
+        // release funds to withdrawal mapping for each donator
+        releaseDonatedFunds(_id);
+        // delete issue from lookup array and mapping
+        removeFromIssueLookup(_id);
+        delete issues[_id];
+        // TODO depending on performance optimization, clear mappings prior to removal
+        // clearIssueMappings(_id);
+        // fire lifecycle event
+        issueDeleted(msg.sender, _id);
+    }
+
+    /**
+     * Removes an entry from the lookup array - cleanly - based on the given id.
+     *
+     * @param _id issue id
+     */
+    function removeFromIssueLookup(uint _id) private {
+        uint index;
+        // find the issue to be deleted
+        for (uint i = 0; i < issuesLookup.length; i++) {
+            if (issuesLookup[i] == _id) {
+                index = i;
+            }
+        }
+        // take the last element in the lookup table and replace value to be deleted
+        issuesLookup[index] = issuesLookup[issuesLookup.length-1];
+        // shorten the array by one, de facto removing the now duplicate
+        issuesLookup.length--;
+    }
+
+    /**
+     * Returns the issue lookup table, which contains all the keys that
+     * are present in the issues hashmap.
+     */
+    function getIssueLookup() public view returns (uint[]) {
+        return issuesLookup;
+    }
+
+    /**
+     * Releases an issues donated funds back to the original donators.
+     *
+     * @param _id issue id
+     */
+    function releaseDonatedFunds(uint _id) private {
+        // go over each of the issues donators and credit their donated value back
+        for (uint i = 0; i < issues[_id].donationsLookup.length; i++) {
+            pendingWithdrawals[issues[_id].donationsLookup[i]] = issues[_id].donations[issues[_id].donationsLookup[i]];
+        }
     }
 
     /**
@@ -314,6 +463,11 @@ contract DebugChain {
         uint indexed _id
     );
 
+    event issueReviewed (
+        address indexed _by,
+        uint indexed _id
+    );
+
     event issueCompleted (
         address indexed _by,
         uint indexed _id
@@ -321,7 +475,6 @@ contract DebugChain {
 
     event issueReset (
         address indexed _by,
-        address[] _reviewers,
         uint indexed _id
     );
 
