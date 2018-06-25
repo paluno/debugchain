@@ -61,6 +61,8 @@ const router = new Router({
   ]
 });
 
+UserSession.checkCookie(); // Prüft vorab, ob Cookie vorhanden und setzt dann ggf. den login-State
+
 //Die Routen durchlaufen und jeweils auf Auth prüfen.
 //Ist der Nutzer nicht eingeloggt werden alle Seiten die Auth benötigen auf /login umgeleitet um den Login durchzuführen
 router.beforeEach((to, from, next) => {

@@ -7,6 +7,7 @@
       <router-link :to="{ name: 'profile', params: { projectId: projectId }}">
         Profile
       </router-link> |
+      <a href="/projects" v-on:click="logout">Logout</a> |
     </template>
     <router-link to="/debug">
       Debug
@@ -30,6 +31,11 @@ export default {
     return {
       session: UserSession.state
     };
+  },
+  methods: {
+    logout: function() {
+      UserSession.logout();
+    }
   }
 };
 </script>

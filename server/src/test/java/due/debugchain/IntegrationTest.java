@@ -3,6 +3,7 @@ package due.debugchain;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import due.debugchain.auth.GitLabUser;
+import due.debugchain.contracts.DebugChain;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +20,18 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
+import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
+
+import java.math.BigInteger;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.web3j.tx.Contract.GAS_LIMIT;
+import static org.web3j.tx.ManagedTransaction.GAS_PRICE;
 
 @RunWith(SpringRunner.class)
 @WebAppConfiguration
@@ -48,6 +54,8 @@ public abstract class IntegrationTest {
     private WebApplicationContext context;
 
     protected MockMvc mockMvc;
+
+    protected String contractAddress;
 
     private MockRestServiceServer server;
 

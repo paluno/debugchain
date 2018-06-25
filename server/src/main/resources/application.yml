@@ -7,3 +7,6 @@ spring:
         databasePlatform: "org.hibernate.dialect.PostgreSQLDialect"
         hibernate:
             ddlAuto: none
+    cache:
+      jcache:
+        config: classpath:ehcache.xml
