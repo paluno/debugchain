@@ -164,10 +164,10 @@ contract DebugChain {
         uint,
         address,
         address[],
-        bool,
-        bool,
-        bool,
         bool[],
+        bool,
+        bool,
+        bool,
         bool,
         address[],
         uint[]
@@ -186,10 +186,10 @@ contract DebugChain {
         uint _donationSum,
         address _developer,
         address[] _reviewers,
+        bool[] _reviewStatus,
         bool _isApproved,
         bool _isLocked,
         bool _isDeveloped,
-        bool[] _reviewStatus,
         bool _isCompleted,
         address[] _donators,
         uint[] _donationValues
@@ -229,7 +229,7 @@ contract DebugChain {
      */
     function setDeveloper(uint _id, address _developer) public issueExists(_id) {
         issues[_id].developer = _developer;
-        // lock the issue after a ddeveloper is assigned
+        // lock the issue after a developer is assigned
         setLocked(_id, true);
     }
 
