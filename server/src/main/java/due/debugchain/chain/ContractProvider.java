@@ -9,6 +9,9 @@ import org.web3j.protocol.Web3j;
 import org.web3j.tx.ReadonlyTransactionManager;
 import org.web3j.tx.TransactionManager;
 
+import java.math.BigInteger;
+import java.util.function.Consumer;
+
 import static org.web3j.protocol.core.DefaultBlockParameterName.EARLIEST;
 import static org.web3j.protocol.core.DefaultBlockParameterName.LATEST;
 import static org.web3j.tx.Contract.GAS_LIMIT;
@@ -32,6 +35,7 @@ public class ContractProvider {
      * Will setup read-only transaction manager.
      *
      * @param web3j web3j instance
+     * @param eventPublisher app event publisher
      */
     @Autowired
     public ContractProvider(Web3j web3j, ApplicationEventPublisher eventPublisher) {
@@ -48,8 +52,15 @@ public class ContractProvider {
      */
     public DebugChain readOnlyContract(String contractAddress) {
         DebugChain contract = DebugChain.load(contractAddress, web3j, transactionManager, GAS_PRICE, GAS_LIMIT);
-        // TODO subscribe to more events
-        contract.issueDeletedEventObservable(EARLIEST, LATEST).subscribe(event -> emitIssueUpdate(contractAddress, event._id.longValue()));
+        Consumer<BigInteger> emitter = id -> emitIssueUpdate(contractAddress, id.longValue());
+        // TODO try to generify (rx.merge won't work with different types)
+        contract.issueDeletedEventObservable(EARLIEST, LATEST).subscribe(event -> emitter.accept(event._id));
+        contract.issueApprovedEventObservable(EARLIEST, LATEST).subscribe(event -> emitter.accept(event._id));
+        contract.issueCompletedEventObservable(EARLIEST, LATEST).subscribe(event -> emitter.accept(event._id));
+        contract.issueDeletedEventObservable(EARLIEST, LATEST).subscribe(event -> emitter.accept(event._id));
+        contract.issueLockedEventObservable(EARLIEST, LATEST).subscribe(event -> emitter.accept(event._id));
+        contract.issueUnlockedEventObservable(EARLIEST, LATEST).subscribe(event -> emitter.accept(event._id));
+        contract.issueResetEventObservable(EARLIEST, LATEST).subscribe(event -> emitter.accept(event._id));
         return contract;
     }
 
