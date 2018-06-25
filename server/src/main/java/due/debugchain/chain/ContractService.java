@@ -24,7 +24,7 @@ public class ContractService {
     private final ContractProvider provider;
 
     // TODO: return domain object instead of tuple?
-    @Cacheable(value = "issuesCache", key = "#contractAddress + '-' + #issueId")
+    @Cacheable(value = "issues", key = "#contractAddress + '-' + #issueId")
     public Tuple4<BigInteger, BigInteger, List<String>, Boolean> getIssue(String contractAddress, Long issueId) {
         return send(contract(contractAddress).getIssue(BigInteger.valueOf(issueId)));
     }
@@ -37,7 +37,7 @@ public class ContractService {
      * @param event event indicating issue update
      */
     @EventListener
-    @CacheEvict(value = "issuesCache", key = "#event.contractAddress + '-' + #event.issueId")
+    @CacheEvict(value = "issues", key = "#event.contractAddress + '-' + #event.issueId")
     public void evictIssue(IssueUpdateEvent event) {
         log.info(String.format("Cache evicted for issue %s in contract %s", event.getIssueId(), event.getContractAddress()));
         // NOOP
