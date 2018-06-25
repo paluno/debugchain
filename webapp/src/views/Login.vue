@@ -1,8 +1,15 @@
 <template>
   <div>
     <Navigation v-if="session.loggedIn"/>
-    <h1>{{ computedToken }}</h1>
-    <input type="submit" value="Login" v-on:click="loginViaGitlab" />
+      <div class="row">
+        <div class="col text-center">
+          <h1>Login</h1>
+          <p>
+          You are not authenticated. Please login using your Gitlab-Account.
+          </p>
+          <button class="btn btn-outline-secondary btn-sm" v-on:click="loginViaGitlab">Gitlab Login</button>
+        </div>
+      </div>
   </div>
 </template>
 
@@ -16,15 +23,6 @@ export default {
   name: "login",
   components: {
     Navigation
-  },
-  computed: {
-    computedToken: function() {
-      if (this.session.accessToken != null) {
-        return "Token: " + this.session.accessToken;
-      } else {
-        return "No token";
-      }
-    }
   },
   data: function() {
     return {
@@ -59,9 +57,8 @@ export default {
       const redirect = Storage.getLoginRedirect();
       if (redirect != null) {
         this.$router.push(redirect);
-        
-        Storage.setLoginRedirect(null);
 
+        Storage.setLoginRedirect(null);
       }
     }
   }
