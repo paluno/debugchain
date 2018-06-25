@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.web3j.protocol.core.RemoteCall;
-import org.web3j.tuples.generated.Tuple4;
+import org.web3j.tuples.generated.Tuple11;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -49,19 +49,14 @@ public class ContractServiceTest extends IntegrationTest {
     public void shouldCacheIssue() {
         long issueId = 1L;
         BigInteger bigIssueId = BigInteger.valueOf(issueId);
-        RemoteCall<Tuple4<BigInteger, BigInteger, List<String>, Boolean>> issueCall =
-            new RemoteCall<>(() -> new Tuple4<>(bigIssueId, ZERO, emptyList(), false));
-        doReturn(issueCall).when(mockContract).getIssue(bigIssueId);
-        Tuple4<BigInteger, BigInteger, List<String>, Boolean> issueFirst = service.getIssue(address, issueId);
-        Tuple4<BigInteger, BigInteger, List<String>, Boolean> issueSecond = service.getIssue(address, issueId);
+        doReturn(issueCall(bigIssueId)).when(mockContract).getIssue(bigIssueId);
+        IssueStruct issueFirst = service.getIssue(address, issueId);
+        IssueStruct issueSecond = service.getIssue(address, issueId);
         // make sure only called once for real
         verify(mockContract, times(1)).getIssue(bigIssueId);
         assertThat(issueFirst).satisfies(issue -> {
-            assertThat(issue.getValue1()).isEqualTo(issueId);
-            assertThat(issue.getValue1()).isEqualTo(issueSecond.getValue1());
-            assertThat(issue.getValue2()).isEqualTo(issueSecond.getValue2());
-            assertThat(issue.getValue3().size()).isEqualTo(issueSecond.getValue3().size());
-            assertThat(issue.getValue4()).isEqualTo(issueSecond.getValue4());
+            assertThat(issue.getId()).isEqualTo(issueId);
+            assertThat(issue.getId()).isEqualTo(issueSecond.getId());
         });
     }
 
@@ -71,16 +66,12 @@ public class ContractServiceTest extends IntegrationTest {
         long issueIdTwo = 2L;
         BigInteger bigIssueIdOne = BigInteger.valueOf(issueIdOne);
         BigInteger bigIssueIdTwo = BigInteger.valueOf(issueIdTwo);
-        RemoteCall<Tuple4<BigInteger, BigInteger, List<String>, Boolean>> issueCallOne =
-            new RemoteCall<>(() -> new Tuple4<>(bigIssueIdOne, ZERO, emptyList(), false));
-        RemoteCall<Tuple4<BigInteger, BigInteger, List<String>, Boolean>> issueCallTwo =
-            new RemoteCall<>(() -> new Tuple4<>(bigIssueIdTwo, ZERO, emptyList(), false));
-        doReturn(issueCallOne).when(mockContract).getIssue(bigIssueIdOne);
-        doReturn(issueCallTwo).when(mockContract).getIssue(bigIssueIdTwo);
-        Tuple4<BigInteger, BigInteger, List<String>, Boolean> issueOne = service.getIssue(address, issueIdOne);
-        Tuple4<BigInteger, BigInteger, List<String>, Boolean> issueTwo = service.getIssue(address, issueIdTwo);
-        assertThat(issueOne.getValue1()).isEqualTo(issueIdOne);
-        assertThat(issueTwo.getValue1()).isEqualTo(issueIdTwo);
+        doReturn(issueCall(bigIssueIdOne)).when(mockContract).getIssue(bigIssueIdOne);
+        doReturn(issueCall(bigIssueIdTwo)).when(mockContract).getIssue(bigIssueIdTwo);
+        IssueStruct issueOne = service.getIssue(address, issueIdOne);
+        IssueStruct issueTwo = service.getIssue(address, issueIdTwo);
+        assertThat(issueOne.getId()).isEqualTo(issueIdOne);
+        assertThat(issueTwo.getId()).isEqualTo(issueIdTwo);
         verify(mockContract, times(1)).getIssue(bigIssueIdOne);
         verify(mockContract, times(1)).getIssue(bigIssueIdTwo);
     }
@@ -89,12 +80,17 @@ public class ContractServiceTest extends IntegrationTest {
     public void shouldEvictIssueCacheOnUpdate() {
         long issueId = 1L;
         BigInteger bigIssueId = BigInteger.valueOf(issueId);
-        RemoteCall<Tuple4<BigInteger, BigInteger, List<String>, Boolean>> issueCall =
-            new RemoteCall<>(() -> new Tuple4<>(bigIssueId, ZERO, emptyList(), false));
-        doReturn(issueCall).when(mockContract).getIssue(bigIssueId);
+        doReturn(issueCall(bigIssueId)).when(mockContract).getIssue(bigIssueId);
         service.getIssue(address, issueId); // fetch once
         eventPublisher.publishEvent(new IssueUpdateEvent(this, address, issueId));
         service.getIssue(address, issueId); // fetch second time
         verify(mockContract, times(2)).getIssue(bigIssueId);
+    }
+
+    private RemoteCall<Tuple11<BigInteger, BigInteger, String, List<String>, List<Boolean>, Boolean, Boolean, Boolean,
+        Boolean, List<String>, List<BigInteger>>> issueCall(BigInteger issueId) {
+        return new RemoteCall<>(() -> new Tuple11<>(issueId, ZERO, "0x4ad3c9d222043e219901353bf1a0cdbef4570c68", emptyList(), emptyList(), false, false, false,
+            false, emptyList(), emptyList())
+        );
     }
 }

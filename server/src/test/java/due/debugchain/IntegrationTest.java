@@ -99,18 +99,4 @@ public abstract class IntegrationTest {
             throw new RuntimeException(e);
         }
     }
-
-    // helper method for setting up contract for integration testing
-    // TODO use in setup or will we mock the contract all the time?
-    private void setupContract() throws Exception {
-        Credentials credentials = Credentials.create("c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3");
-        // deploy contract
-        DebugChain contract = DebugChain
-            .deploy(web3j, credentials, GAS_PRICE, GAS_LIMIT, BigInteger.valueOf(999L))
-            .send();
-        contractAddress = contract.getContractAddress();
-        // create issue
-        contract.createIssue(BigInteger.valueOf(1L))
-            .send();
-    }
 }

@@ -8,10 +8,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.web3j.protocol.core.RemoteCall;
-import org.web3j.tuples.generated.Tuple4;
 
-import java.math.BigInteger;
-import java.util.List;
+import static due.debugchain.chain.IssueStruct.fromTuple;
+import static java.math.BigInteger.valueOf;
 
 /**
  * Service for contract interaction.
@@ -23,10 +22,9 @@ public class ContractService {
 
     private final ContractProvider provider;
 
-    // TODO: return domain object instead of tuple?
     @Cacheable(value = "issues", key = "#contractAddress + '-' + #issueId")
-    public Tuple4<BigInteger, BigInteger, List<String>, Boolean> getIssue(String contractAddress, Long issueId) {
-        return send(contract(contractAddress).getIssue(BigInteger.valueOf(issueId)));
+    public IssueStruct getIssue(String contractAddress, Long issueId) {
+        return fromTuple(send(contract(contractAddress).getIssue(valueOf(issueId))));
     }
 
     /**
