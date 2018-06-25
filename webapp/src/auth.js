@@ -32,7 +32,7 @@ const UserSession = {
         this.setCookie("", -1); // Cookie wird gelöscht, wenn das expire-datum abgelaufen ist
     },
     getCookie: function () {
-        var name = "debugchain";
+        var name = "debugchain=";
         var ca = document.cookie.split(';');
         for (var i = 0; i < ca.length; i++) {
             var c = ca[i];
