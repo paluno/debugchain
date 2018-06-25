@@ -1,10 +1,13 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from './views/Home.vue'
+
+import IssueList from './views/IssueList.vue'
 import Debug from './views/Debug'
 import Login from './views/Login.vue'
 import Profile from './views/Profile.vue'
 import IssueDetail from './views/IssueDetail'
+import ProjectList from './views/ProjectList'
+
 import UserSession from './auth'
 
 Vue.use(Router);
@@ -13,19 +16,21 @@ const router = new Router({
   mode: 'history',
   routes: [
     {
-      // TODO replace with start page 
       path: '/',
       redirect: {
-        name: 'home',
-        params: {
-          projectId: 1
-        }
+        name: 'projects',
       }
     },
     {
+      path: '/projects',
+      name: 'projects',
+      component: ProjectList,
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/projects/:projectId',
-      name: 'home',
-      component: Home,
+      name: 'issueList',
+      component: IssueList,
       props: true,
       meta: { requiresAuth: true }
     },

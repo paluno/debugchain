@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div class="issueList">
     <Navigation v-bind:projectId="projectId"/>
     <IssueTable v-bind:projectId="projectId" />
   </div>
@@ -10,7 +10,7 @@ import IssueTable from "@/components/IssueTable";
 import Navigation from "@/components/Navigation";
 
 export default {
-  name: "home",
+  name: "issueList",
   props: {
     projectId: String
   },

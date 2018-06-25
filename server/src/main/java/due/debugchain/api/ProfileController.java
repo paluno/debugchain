@@ -35,6 +35,11 @@ public class ProfileController {
         return userMapper.entityToResource(userService.updateUser(currentUser));
     }
 
+    @GetMapping
+    public UserResource getProfile(UserEntity currentUser) {
+        return userMapper.entityToResource(currentUser);
+    }
+
     @PostMapping("/memberships")
     public void updateMemberships(@RequestBody Collection<MembershipResource> memberships, UserEntity currentUser) {
         memberships.forEach(m -> Assert.isTrue(currentUser.getGitlabId().equals(m.getUserGitlabId()), "Can only modify owned memberships"));

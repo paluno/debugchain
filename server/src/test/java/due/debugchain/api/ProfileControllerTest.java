@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.transaction.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.iterableWithSize;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -22,6 +23,15 @@ public class ProfileControllerTest extends IntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Test
+    public void getProfile() throws Exception {
+        mockMvc.perform(get("/api/profile")
+            .with(userToken()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.gitlabId", equalTo(676)))
+            .andExpect(jsonPath("$.address", equalTo("0x99861c8068bfe2e0a5137e16d23a648962c79b5c")));
+    }
 
     @Test
     public void saveProfileForNoneExistentUser() throws Exception {
