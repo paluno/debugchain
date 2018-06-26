@@ -7,10 +7,17 @@
 
     <Modal v-model="createProjectModal.show" title="Create Project">
       <p>
-        Do you want to create a DebugChain project for this GitLab project?<br />
+        Do you want to create a DebugChain project for this GitLab project?
       </p>
-      <div class="alert alert-primary">
-        {{createProjectModal.url}}
+      <div class="row">
+        <label class="col-sm-3">Name:</label>
+        <div class="col">{{createProjectModal.name}}</div>
+      </div>
+      <div class="row">
+        <label class="col-sm-3">URL:</label>
+        <div class="col">
+          <a :href="createProjectModal.url">{{createProjectModal.url}}</a>
+        </div>
       </div>
 
       <template slot="footer">
@@ -41,6 +48,7 @@ export default {
       createProjectModal: {
         show: false,
         id: 0,
+        name: "",
         url: ""
       },
       columns: [
@@ -89,6 +97,7 @@ export default {
         return {
           id: project.id,
           url: project.web_url,
+          name: project.name,
           owner: project.owner.username
         };
       });
@@ -99,17 +108,19 @@ export default {
         this.setProjects(projects);
       });
     },
-    showCreateProjectModal: function(id, url) {
+    showCreateProjectModal: function(id, name, url) {
       this.createProjectModal.show = true;
       this.createProjectModal.id = id;
+      this.createProjectModal.name = name;
       this.createProjectModal.url = url;
     },
     closeCreateProjectModal: function() {
       this.createProjectModal.show = false;
       this.createProjectModal.id = 0;
+      this.createProjectModal.name = "";
       this.createProjectModal.url = "";
     },
-    openProject: function(id, url) {
+    openProject: function(id, name, url) {
       const client = Backend.getClient();
 
       client
@@ -124,7 +135,7 @@ export default {
               params: { projectId: id.toString() }
             });
           } else {
-            this.showCreateProjectModal(id, url);
+            this.showCreateProjectModal(id, name, url);
           }
         })
         .catch(function(error) {
@@ -133,7 +144,7 @@ export default {
         });
     },
     onRowClick: function(params) {
-      this.openProject(params.row.id, params.row.url);
+      this.openProject(params.row.id, params.row.name, params.row.url);
     }
   }
 };
