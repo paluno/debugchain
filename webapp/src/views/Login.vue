@@ -1,15 +1,14 @@
 <template>
-  <div>
-    <Navigation v-if="session.loggedIn"/>
-      <div class="row">
-        <div class="col text-center">
-          <h1>Login</h1>
-          <p>
+  <div v-if="!session.loggedIn">
+    <div class="row">
+      <div class="col text-center">
+        <h1>Login</h1>
+        <p>
           You are not authenticated. Please login using your Gitlab-Account.
-          </p>
-          <button class="btn btn-outline-secondary btn-sm" v-on:click="loginViaGitlab">Gitlab Login</button>
-        </div>
+        </p>
+        <button class="btn btn-outline-secondary btn-sm" v-on:click="loginViaGitlab">Gitlab Login</button>
       </div>
+    </div>
   </div>
 </template>
 
@@ -17,13 +16,9 @@
 <script>
 import { GitlabOAuth, UserSession } from "@/auth";
 import Storage from "@/webStorage";
-import Navigation from "@/components/Navigation";
 
 export default {
   name: "login",
-  components: {
-    Navigation
-  },
   data: function() {
     return {
       session: UserSession.state
@@ -40,24 +35,20 @@ export default {
       redirect = Storage.getLoginRedirect();
       Storage.setLoginRedirect(null);
     }
+    if (!redirect) {
+      // default: redirect to home
+      redirect = "/";
+    }
 
     if (window.location.href.includes("access_token")) {
-      // if #access_token exists, set token, then redirect, if requested
+      // if #access_token exists, set token, then redirect
       GitlabOAuth.token.getToken(window.location.href).then(token => {
         UserSession.login(token.accessToken);
-        if (redirect) {
-          next(redirect);
-        } else {
-          next();
-        }
+        next(redirect);
       });
     } else if (UserSession.state.loggedIn) {
-      // if already logged in, redirect, if requested
-      if (redirect) {
-        next(redirect);
-      } else {
-        next();
-      }
+      // if already logged in, redirect
+      next(redirect);
     } else {
       // not logged in and no access_token > no action / show login
       next();
