@@ -29,7 +29,7 @@ import Gitlab from "@/api/gitlab";
 import Modal from "@/components/Modal.vue";
 import Navigation from "@/components/Navigation";
 import Backend from "@/api/backend";
-import appContract from "@/api/contract"
+import Contract from "../api/contract";
 
 export default {
   name: "projectList",
@@ -66,14 +66,25 @@ export default {
   created: function() {
     this.updateData();
   },
-  
+
   methods: {
     createProject: function() {
       const client = Backend.getClient();
-      const self = this;
-      // create contract and post to "/projects/"
-      var CreatedDebugchainContract = appContract.newContract(this.createProjectModal.id, client, self);
-      
+        const contract = new Contract();
+        const projectId = this.createProjectModal.id;
+        contract.deploy(projectId)
+            .then(address => {
+                client.post("/projects/", {
+                    address: address,
+                    gitlabId: projectId
+                })
+            })
+            .then(() => {
+                this.$router.push({
+                    name: "issueList",
+                    params: {projectId: projectId.toString()}
+                });
+            });
     },
     setProjects: function(newProjects) {
       this.gitlabProjects = newProjects.map(project => {

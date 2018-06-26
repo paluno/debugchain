@@ -19,7 +19,7 @@
     "vue": "^2.5.16",
     "vue-good-table": "^2.6.2",
     "vue-router": "^3.0.1",
-    "web3": "0.20.0",
+    "web3": "0.20.6",
     "webpack-base-config": "^0.2.9"
   },
   "devDependencies": {
