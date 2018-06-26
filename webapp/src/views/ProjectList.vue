@@ -10,8 +10,7 @@
         Do you want to create a DebugChain project for this GitLab project?<br />
       </p>
       <div class="alert alert-primary">
-        <label>ID: <input type="text" class="form-control" v-model="createProjectModal.id" /></label>
-        <label>URL <input type="text" class="form-control" v-model="createProjectModal.url"/></label>
+        {{createProjectModal.url}}
       </div>
 
       <template slot="footer">
@@ -39,7 +38,6 @@ export default {
   },
   data: function() {
     return {
-      projects: [],
       createProjectModal: {
         show: false,
         id: 0,
@@ -66,25 +64,25 @@ export default {
   created: function() {
     this.updateData();
   },
-
   methods: {
     createProject: function() {
       const client = Backend.getClient();
-        const contract = new Contract();
-        const projectId = this.createProjectModal.id;
-        contract.deploy(projectId)
-            .then(address => {
-                client.post("/projects/", {
-                    address: address,
-                    gitlabId: projectId
-                })
-            })
-            .then(() => {
-                this.$router.push({
-                    name: "issueList",
-                    params: {projectId: projectId.toString()}
-                });
-            });
+      const contract = new Contract();
+      const projectId = this.createProjectModal.id;
+      contract
+        .deploy(projectId)
+        .then(address => {
+          client.post("/projects/", {
+            address: address,
+            gitlabId: projectId
+          });
+        })
+        .then(() => {
+          this.$router.push({
+            name: "issueList",
+            params: { projectId: projectId.toString() }
+          });
+        });
     },
     setProjects: function(newProjects) {
       this.gitlabProjects = newProjects.map(project => {
@@ -97,9 +95,8 @@ export default {
     },
     updateData: function() {
       const client = Gitlab.getClient();
-      const that = this;
       client.projects.list().then(projects => {
-        that.setProjects(projects);
+        this.setProjects(projects);
       });
     },
     showCreateProjectModal: function(id, url) {
@@ -109,27 +106,25 @@ export default {
     },
     closeCreateProjectModal: function() {
       this.createProjectModal.show = false;
-      this.createProjectModal.address = 0;
-      this.createProjectModal.id = "";
+      this.createProjectModal.id = 0;
+      this.createProjectModal.url = "";
     },
     openProject: function(id, url) {
       const client = Backend.getClient();
-      const self = this;
 
       client
         .get("/projects")
-        .then(function(response) {
-          self.projects = response.data;
-          const project = self.projects.find(e => e.gitlabId === id);
+        .then(response => {
+          this.projects = response.data;
+          const project = this.projects.find(e => e.gitlabId === id);
 
           if (project !== undefined) {
-            self.$router.push({
+            this.$router.push({
               name: "issueList",
               params: { projectId: id.toString() }
             });
-          }
-          else {
-            self.showCreateProjectModal(id, url);
+          } else {
+            this.showCreateProjectModal(id, url);
           }
         })
         .catch(function(error) {
