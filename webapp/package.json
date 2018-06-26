@@ -15,12 +15,10 @@
     "bootstrap": "^4.1.1",
     "client-oauth2": "^4.2.1",
     "gitlab-api-wrapper": "^1.3.0",
-    "module": "^1.2.5",
     "vue": "^2.5.16",
     "vue-good-table": "^2.6.2",
     "vue-router": "^3.0.1",
-    "web3": "0.20.0",
-    "webpack-base-config": "^0.2.9"
+    "web3": "0.20.6"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.0.0-beta.10",

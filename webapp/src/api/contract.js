@@ -1,57 +1,40 @@
 import getWeb3 from "./getWeb3"
-import debugchainJson from '../../contracts/___contracts_contracts_DebugChain_sol_DebugChain.abi';
+import abi from '../../contracts/___contracts_contracts_DebugChain_sol_DebugChain.abi';
 import byteCode from '../../contracts/___contracts_contracts_DebugChain_sol_DebugChain.bin';
 
-var appContract = {
-  
-  registerWeb3 () {
-      getWeb3.then(result => {
-        
-      }).catch(e => {
-        console.log('error in action registerWeb3', e)
-      })
-    },
+export default class Contract {
 
-  initContract: function() {
-    let debugchainContract = null;
-    appContract.registerWeb3();
-    debugchainContract = web3.eth.contract(debugchainJson);    
-    return debugchainContract;
-  },
+    constructor(address) {
+        this.web3 = getWeb3();
+        this.contract = this.web3.eth.contract(abi);
+        if (address) {
+            this.contract = this.contract.at(address);
+        }
+    }
 
-  newContract: function(id, client, self){
-    //init contract
-    let debugchainContract = appContract.initContract();
-    let createdContract = null;
-    createdContract =  debugchainContract.new(
-              id,
-              {
-                  from: web3.eth.accounts[0],
-                  data: byteCode,
-                  gas: '4700000'
-              }, function (e, contract){
-                  if (typeof contract.address !== 'undefined') {
-                        console.log('Contract mined! address: ' + contract.address + ' transactionHash: ' + contract.transactionHash);
-
-                        client.post("/projects/", {
-                            address: contract.address,
-                            gitlabId: id
-                          })
-                          .then(function(response) {
-                            console.log("Project created");
-                            self.$router.push({
-                                name: "issueList",
-                                params: { projectId: id.toString() }
-                              });
-                          });
-                  }
-                  else {
-                    window.alert("The contract address is 'undefined'!");
-                  }
+    deploy(projectId) {
+        return new Promise((resolve, reject) => {
+            const address = this.contract.address;
+            if (address) {
+                reject(new Error('Contract already deployed at ' + address));
+            }
+            let firstCall = true;
+            this.contract.new(
+                projectId,
+                {data: byteCode, from: this.web3.eth.accounts[0]},
+                (err, contract) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    // callback is called twice, address is only present the second time
+                    if (firstCall) {
+                        firstCall = false;
+                    } else {
+                        this.contract = contract;
+                        resolve(contract.address);
+                    }
                 }
-            );    
-
-    return createdContract
-  }
+            );
+        })
+    }
 }
-export default appContract

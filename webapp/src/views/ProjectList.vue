@@ -5,15 +5,19 @@
     <vue-good-table :columns="columns" :rows="gitlabProjects" :pagination-options="{ enabled: true, perPage: 10}" :search-options="{ enabled: true}" styleClass="vgt-table striped bordered" @on-row-click="onRowClick">
     </vue-good-table>
 
-    <button @click="showCreateProjectModal()">Create new</button>
-
     <Modal v-model="createProjectModal.show" title="Create Project">
       <p>
-        Do you want to create a DebugChain project for this GitLab project?<br />
+        Do you want to create a DebugChain project for this GitLab project?
       </p>
-      <div class="alert alert-primary">
-        <label>ID: <input type="text" class="form-control" v-model="createProjectModal.id" /></label>
-        <label>URL <input type="text" class="form-control" v-model="createProjectModal.url"/></label>
+      <div class="row">
+        <label class="col-sm-3">Name:</label>
+        <div class="col">{{createProjectModal.name}}</div>
+      </div>
+      <div class="row">
+        <label class="col-sm-3">URL:</label>
+        <div class="col">
+          <a :href="createProjectModal.url">{{createProjectModal.url}}</a>
+        </div>
       </div>
 
       <template slot="footer">
@@ -31,7 +35,7 @@ import Gitlab from "@/api/gitlab";
 import Modal from "@/components/Modal.vue";
 import Navigation from "@/components/Navigation";
 import Backend from "@/api/backend";
-import appContract from "@/api/contract"
+import Contract from "../api/contract";
 
 export default {
   name: "projectList",
@@ -41,10 +45,10 @@ export default {
   },
   data: function() {
     return {
-      projects: [],
       createProjectModal: {
         show: false,
         id: 0,
+        name: "",
         url: ""
       },
       columns: [
@@ -68,59 +72,70 @@ export default {
   created: function() {
     this.updateData();
   },
-  
   methods: {
     createProject: function() {
       const client = Backend.getClient();
-      const self = this;
-      // create contract and post to "/projects/"
-      var CreatedDebugchainContract = appContract.newContract(this.createProjectModal.id, client, self);
-      
+      const contract = new Contract();
+      const projectId = this.createProjectModal.id;
+      contract
+        .deploy(projectId)
+        .then(address => {
+          client.post("/projects/", {
+            address: address,
+            gitlabId: projectId
+          });
+        })
+        .then(() => {
+          this.$router.push({
+            name: "issueList",
+            params: { projectId: projectId.toString() }
+          });
+        });
     },
     setProjects: function(newProjects) {
       this.gitlabProjects = newProjects.map(project => {
         return {
           id: project.id,
           url: project.web_url,
+          name: project.name,
           owner: project.owner.username
         };
       });
     },
     updateData: function() {
       const client = Gitlab.getClient();
-      const that = this;
       client.projects.list().then(projects => {
-        that.setProjects(projects);
+        this.setProjects(projects);
       });
     },
-    showCreateProjectModal: function(id, url) {
+    showCreateProjectModal: function(id, name, url) {
       this.createProjectModal.show = true;
       this.createProjectModal.id = id;
+      this.createProjectModal.name = name;
       this.createProjectModal.url = url;
     },
     closeCreateProjectModal: function() {
       this.createProjectModal.show = false;
-      this.createProjectModal.address = 0;
-      this.createProjectModal.id = "";
+      this.createProjectModal.id = 0;
+      this.createProjectModal.name = "";
+      this.createProjectModal.url = "";
     },
-    openProject: function(id, url) {
+    openProject: function(id, name, url) {
       const client = Backend.getClient();
-      const self = this;
 
       client
         .get("/projects")
-        .then(function(response) {
-          self.projects = response.data;
-          const project = self.projects.find(e => e.gitlabId === id);
+        .then(response => {
+          this.projects = response.data;
+          const project = this.projects.find(e => e.gitlabId === id);
 
           if (project !== undefined) {
-            self.$router.push({
+            this.$router.push({
               name: "issueList",
               params: { projectId: id.toString() }
             });
-          }
-          else {
-            self.showCreateProjectModal(id, url);
+          } else {
+            this.showCreateProjectModal(id, name, url);
           }
         })
         .catch(function(error) {
@@ -129,7 +144,7 @@ export default {
         });
     },
     onRowClick: function(params) {
-      this.openProject(params.row.id, params.row.url);
+      this.openProject(params.row.id, params.row.name, params.row.url);
     }
   }
 };
