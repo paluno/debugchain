@@ -9,11 +9,23 @@ module.exports = {
     }
   },
   configureWebpack: config => {
-    if (process.env.NODE_ENV === 'production') {
-      // mutate config for production...
-    } else {
-      // mutate for development...
-      config.devtool = 'source-map';
-    }
+      // common config mutations
+      config.module.rules.push(
+          {
+              test: /\.abi$/,
+              use: 'json-loader'
+          },
+          {
+              test: /\.bin$/,
+              use: 'raw-loader'
+          }
+      );
+      if (process.env.NODE_ENV === 'production') {
+          // mutate config for production...
+      } else {
+          // mutate for development...
+          config.devtool = 'source-map';
+      }
   }
 }
+
