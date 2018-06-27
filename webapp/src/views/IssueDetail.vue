@@ -32,16 +32,6 @@
         </div>
       </div>
     </div>
-    <div v-else>
-      <div class="row">
-        <div class="col-md-3">
-          <span>Das Issue wird geladen...</span>
-          <div class="progress">
-            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -126,10 +116,15 @@ export default {
     },
     updateData: function() {
       const client = gitlab.getClient();
+
+      this.$parent.showOverlay();
       client.projects.issues.one(this.projectId, this.issueId).then(issue => {
+        this.$parent.hideOverlay();
         this.setIssue(issue);
       });
+      this.$parent.showOverlay();
       client.projects.owned().then(projects => {
+        this.$parent.hideOverlay();
         projects.forEach(project => {
           if (project.id == this.projectId) {
             this.setApprovable();

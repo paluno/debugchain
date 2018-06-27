@@ -83,17 +83,20 @@ export default {
   methods: {
     addressModalSaveEvent: function(newAddress) {
       const client = Backend.getClient();
-      
+
+      this.$parent.showOverlay();
       client
         .post("/profile", {
           address: newAddress
         })
         .then(response => {
+          this.$parent.hideOverlay();
           this.updateData();
           this.showAddressModal = false;
         })
         .catch(error => {
           // TODO handle / display errors in component
+          this.$parent.hideOverlay();
           const msg = "Could not save address.\n";
           if (error.response) {
             alert(
@@ -113,9 +116,11 @@ export default {
     },
     updateData: function() {
       const client = Backend.getClient();
+      this.$parent.showOverlay();
 
       // TODO handle / display errors in component
       client.get("/profile").then(response => {
+        this.$parent.hideOverlay();
         this.address = response.data.address;
       });
     }

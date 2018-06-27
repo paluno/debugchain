@@ -1,12 +1,22 @@
 <template>
   <div class="issueList">
     <Navigation v-bind:projectId="projectId"/>
-    <IssueTable v-bind:projectId="projectId" />
+    <div class="table">
+      <vue-good-table
+        :columns="columns"
+        :rows="rows"
+        :pagination-options="{ enabled: true, perPage: 5}"
+        :search-options="{ enabled: true}"
+        styleClass="vgt-table striped bordered"
+        @on-row-click="navigate"> 
+      </vue-good-table>
+    </div>
   </div>
 </template>
 
 <script>
-import IssueTable from "@/components/IssueTable";
+import router from "@/router";
+import gitlab from "@/api/gitlab";
 import Navigation from "@/components/Navigation";
 
 export default {
@@ -15,8 +25,80 @@ export default {
     projectId: String
   },
   components: {
-    IssueTable,
     Navigation
+  },
+  data: function() {
+    return {
+      columns: [
+        {
+          label: "ID",
+          field: "id",
+          type: "number",
+          filterOptions: {
+            enabled: true
+          }
+        },
+        {
+          label: "Issue",
+          field: "issue",
+          filterOptions: {
+            enabled: true
+          }
+        },
+        {
+          label: "ETH",
+          field: "eth",
+          type: "number"
+        },
+        {
+          label: "Status",
+          field: "status",
+          filterOptions: {
+            enabled: true
+          }
+        }
+      ],
+      rows: []
+    };
+  },
+  created: function() {
+    this.updateData();
+  },
+  methods: {
+    setIssues: function(newIssues) {
+      this.rows = newIssues.map(issue => {
+        return {
+          id: issue.id,
+          issue: issue.title,
+          eth: 0,
+          status: "Unknown"
+        };
+      });
+    },
+    updateData: function() {
+      const client = gitlab.getClient();
+      const that = this;
+      this.$parent.showOverlay();
+      client.projects.issues.list(this.projectId).then(issues => {
+        this.$parent.hideOverlay();
+        that.setIssues(issues);
+      });
+    },
+    navigate: function(params) {
+      router.push({
+        name: "issue",
+        params: {
+          projectId: this.projectId,
+          issueId: params.row.id.toString()
+        }
+      });
+    }
   }
 };
 </script>
+
+<style scoped lang="scss">
+#table {
+  padding: 20px;
+}
+</style>

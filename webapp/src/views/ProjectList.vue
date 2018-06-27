@@ -103,8 +103,10 @@ export default {
       });
     },
     updateData: function() {
+      this.$parent.showOverlay();
       const client = Gitlab.getClient();
       client.projects.list().then(projects => {
+        this.$parent.hideOverlay();
         this.setProjects(projects);
       });
     },
@@ -123,9 +125,11 @@ export default {
     openProject: function(id, name, url) {
       const client = Backend.getClient();
 
+      this.$parent.showOverlay();
       client
         .get("/projects")
         .then(response => {
+          this.$parent.hideOverlay();
           this.projects = response.data;
           const project = this.projects.find(e => e.gitlabId === id);
 
@@ -140,6 +144,7 @@ export default {
         })
         .catch(function(error) {
           // TODO error handling
+          this.$parent.hideOverlay();
           alert("Could not load projects from backend: " + error.message);
         });
     },
