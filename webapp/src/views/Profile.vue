@@ -1,6 +1,6 @@
 <template>
   <div id="profile">
-    <set-address-modal v-model="showAddressModal" v-on:save="addressModalSaveEvent"/>
+    <set-address-modal v-model="showAddressModal" v-on:save="addressModalSaveEvent" />
 
     <Navigation v-bind:projectId="projectId" />
     <h1>Profile</h1>
@@ -84,19 +84,19 @@ export default {
     addressModalSaveEvent: function(newAddress) {
       const client = Backend.getClient();
 
-      this.$parent.showOverlay();
+      this.$emit("isLoading", true);
       client
         .post("/profile", {
           address: newAddress
         })
         .then(response => {
-          this.$parent.hideOverlay();
           this.updateData();
+          this.$emit("isLoading", false);
           this.showAddressModal = false;
         })
         .catch(error => {
           // TODO handle / display errors in component
-          this.$parent.hideOverlay();
+          this.$emit("isLoading", false);
           const msg = "Could not save address.\n";
           if (error.response) {
             alert(
@@ -115,12 +115,12 @@ export default {
         });
     },
     updateData: function() {
-      const client = Backend.getClient();
-      this.$parent.showOverlay();
+      const backend = Backend.getClient();
 
+      this.$emit("isLoading", true);
       // TODO handle / display errors in component
-      client.get("/profile").then(response => {
-        this.$parent.hideOverlay();
+      backend.get("/profile").then(response => {
+        this.$emit("isLoading", false);
         this.address = response.data.address;
       });
     }

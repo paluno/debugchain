@@ -76,10 +76,11 @@ export default {
     },
     updateData: function() {
       const gitlab = Gitlab.getClient();
-      this.$parent.showOverlay();
+      
+      this.$emit("isLoading", true);
       gitlab.projects.issues.list(this.projectId).then(issues => {
-        this.$parent.hideOverlay();
         this.setIssues(issues);
+        this.$emit("isLoading", false);
       });
     },
     navigate: function(params) {

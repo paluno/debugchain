@@ -117,7 +117,7 @@ export default {
     updateData: function() {
       const gitlab = Gitlab.getClient();
 
-      this.$parent.showOverlay();
+      this.$emit("isLoading", true);
       Promise.all([
         gitlab.projects.issues.one(this.projectId, this.issueId),
         gitlab.projects.owned()
@@ -125,11 +125,11 @@ export default {
         const issue = results[0];
         const projects = results[1];
 
-        this.$parent.hideOverlay();
         this.setIssue(issue);
         if (projects.find(project => project.id == this.projectId)) {
           this.setApprovable();
         }
+        this.$emit("isLoading", false);
       });
     }
   }

@@ -77,6 +77,8 @@ export default {
       const client = Backend.getClient();
       const contract = new Contract();
       const projectId = this.createProjectModal.id;
+
+      this.$emit("isLoading", true);
       contract
         .deploy(projectId)
         .then(address => {
@@ -84,6 +86,7 @@ export default {
             address: address,
             gitlabId: projectId
           });
+          this.$emit("isLoading", false);
         })
         .then(() => {
           this.$router.push({
@@ -103,11 +106,12 @@ export default {
       });
     },
     updateData: function() {
-      this.$parent.showOverlay();
       const client = Gitlab.getClient();
+
+      this.$emit("isLoading", true);
       client.projects.list().then(projects => {
-        this.$parent.hideOverlay();
         this.setProjects(projects);
+        this.$emit("isLoading", false);
       });
     },
     showCreateProjectModal: function(id, name, url) {
@@ -125,11 +129,10 @@ export default {
     openProject: function(id, name, url) {
       const client = Backend.getClient();
 
-      this.$parent.showOverlay();
+      this.$emit("isLoading", true);
       client
         .get("/projects")
         .then(response => {
-          this.$parent.hideOverlay();
           this.projects = response.data;
           const project = this.projects.find(e => e.gitlabId === id);
 
@@ -141,10 +144,11 @@ export default {
           } else {
             this.showCreateProjectModal(id, name, url);
           }
+          this.$emit("isLoading", false);
         })
-        .catch(function(error) {
+        .catch(error => {
           // TODO error handling
-          this.$parent.hideOverlay();
+          this.$emit("isLoading", false);
           alert("Could not load projects from backend: " + error.message);
         });
     },

@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="container">
     <LoadingOverlay v-if="loading"/>
-    <router-view/>
+    <router-view @isLoading="onIsLoadingChanged"/>
   </div>
 </template>
 
@@ -19,11 +19,8 @@ export default {
     };
   },
   methods: {
-    showOverlay() {
-      this.loading = true;
-    },
-    hideOverlay() {
-      this.loading = false;
+    onIsLoadingChanged(isLoading) {
+      this.loading = isLoading;
     }
   }
 };
