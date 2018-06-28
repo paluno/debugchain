@@ -1,12 +1,17 @@
 var DebugChain = artifacts.require("DebugChain");
 
+function assertError(error) {
+    const ganacheEnv = error.message.search('status 0') >= 0;
+    const testrpcEnv = error.message.search('VM Exception') >= 0;
+    assert(ganacheEnv || testrpcEnv, 'expected an error, but none was thrown');
+}
+
 contract('DebugChain Lifecycle Test', async (accounts) => {
-    it("should create a new issue and approve it", async () => {
+    it("should create a new issue", async () => {
         let instance = await DebugChain.deployed();
         await instance.donate(1, { value: web3.toWei(1, "ether"), from: accounts[0] });
-        await instance.setApproved(1, true);
         let issue = await instance.getIssue.call(1);
-        assert.isTrue(issue[5]);
+        assert.equal(web3.fromWei(issue[1]), 1);
     });
     it("should not be approved by non-maintainers", async () => {
         let instance = await DebugChain.deployed();
@@ -14,8 +19,14 @@ contract('DebugChain Lifecycle Test', async (accounts) => {
             await instance.setApproved(1, true, { from: accounts[1] });
             assert.fail('should have thrown before');
         } catch (error) {
-            assert.include(error.message, 'status 0', 'access to the function is prohibited');
+            assertError(error);
         }
+    });
+    it("should approve the issue by the maintainer", async () => {
+        let instance = await DebugChain.deployed();
+        await instance.setApproved(1, true, { from: accounts[0] });
+        let issue = await instance.getIssue.call(1);
+        assert.isTrue(issue[5]);
     });
     it("should set the developer address and lock the issue", async () => {
         let instance = await DebugChain.deployed();
@@ -30,7 +41,7 @@ contract('DebugChain Lifecycle Test', async (accounts) => {
             await instance.setApproved(1, true, { from: accounts[2] });
             assert.fail('should have thrown before');
         } catch (error) {
-            assert.include(error.message, 'status 0', 'access to the function is prohibited');
+            assertError(error);
         }
     });
     it("should mark the issue as developed by the developer", async () => {
@@ -45,7 +56,7 @@ contract('DebugChain Lifecycle Test', async (accounts) => {
             await instance.setReviewers(1, [accounts[2]], { from: accounts[2] });
             assert.fail('should have thrown before');
         } catch (error) {
-            assert.include(error.message, 'status 0', 'access to the function is prohibited');
+            assertError(error);
         }
     });
     it("should set the issues reviewers by the maintainer", async () => {
@@ -61,7 +72,7 @@ contract('DebugChain Lifecycle Test', async (accounts) => {
             await instance.setReviewed(1, true, { from: accounts[0] });
             assert.fail('should have thrown before');
         } catch (error) {
-            assert.include(error.message, 'status 0', 'access to the function is prohibited');
+            assertError(error);
         }
     });
     it("should set the review status by a reviewer", async () => {
@@ -98,7 +109,7 @@ contract('DebugChain Lifecycle Test', async (accounts) => {
             await instance.donate(1, { value: web3.toWei(1, "ether"), from: accounts[0] });
             assert.fail('should have thrown before');
         } catch (error) {
-            assert.include(error.message, 'status 0', 'can not donate to a completed issue');
+            assertError(error);
         }
     });
 });
