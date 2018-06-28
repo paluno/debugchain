@@ -41,6 +41,10 @@ public abstract class IntegrationTest {
 
     protected static Long USER_ID = 676L;
 
+    // private key from ganache-cli using mnemonic:
+    // 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'
+    private static final String PRIVATE_KEY = "2631b689696e69aae84657d1d1f1bebae62bd50af72dfff2ef3050c9828bf8f3";
+
     @Autowired
     private RestTemplate restTemplate;
 
@@ -54,8 +58,6 @@ public abstract class IntegrationTest {
     private WebApplicationContext context;
 
     protected MockMvc mockMvc;
-
-    protected String contractAddress;
 
     private MockRestServiceServer server;
 
@@ -99,4 +101,19 @@ public abstract class IntegrationTest {
             throw new RuntimeException(e);
         }
     }
+
+    protected DebugChain deployContract() throws Exception {
+        return deployContract(999L);
+    }
+
+    // helper method for setting up contract for integration testing
+    protected DebugChain deployContract(long projectId) throws Exception {
+        Credentials credentials = Credentials.create(PRIVATE_KEY);
+        // deploy contract
+        return DebugChain
+            .deploy(web3j, credentials, GAS_PRICE, GAS_LIMIT, BigInteger.valueOf(projectId))
+            .send();
+    }
+
+
 }

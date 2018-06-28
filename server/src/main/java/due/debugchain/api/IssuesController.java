@@ -22,7 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Validated
 @RequestMapping("${server.restPath}/projects/{projectId}/issues")
-public class IssueController {
+public class IssuesController {
 
     private final ProjectService projectService;
 

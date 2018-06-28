@@ -10,5 +10,5 @@
         <heap>200</heap>
         <jsr107:mbeans enable-statistics="true"/>
     </cache>
-
+    <!-- TODO: cache configs for issue lists -->
 </config>

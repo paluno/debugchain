@@ -69,6 +69,8 @@ public class ContractService {
      * @param event event indicating issue update
      */
     @EventListener
+    // TODO merge cache eviction methods
+    // TODO setup eh cache namespace
     @CacheEvict(value = "issuesIdList", key = "#event.contractAddress")
     public void evictIssueIdList(IssueUpdateEvent event) {
         log.info(String.format("Cache evicted for issue %s in contract %s", event.getContractAddress()));
