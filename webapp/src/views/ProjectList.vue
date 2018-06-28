@@ -35,7 +35,7 @@ import Gitlab from "@/api/gitlab";
 import Modal from "@/components/Modal.vue";
 import Navigation from "@/components/Navigation";
 import Backend from "@/api/backend";
-import Contract from "../api/contract";
+import Contract from "@/api/contract";
 
 export default {
   name: "projectList",

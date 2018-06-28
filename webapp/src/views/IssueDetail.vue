@@ -37,7 +37,7 @@
 
 <script>
 import Navigation from "@/components/Navigation";
-import gitlab from "@/api/gitlab";
+import Gitlab from "@/api/gitlab";
 
 export default {
   name: "IssueDetail",
@@ -115,21 +115,21 @@ export default {
       this.approvable = true;
     },
     updateData: function() {
-      const client = gitlab.getClient();
+      const gitlab = Gitlab.getClient();
 
       this.$parent.showOverlay();
-      client.projects.issues.one(this.projectId, this.issueId).then(issue => {
+      Promise.all([
+        gitlab.projects.issues.one(this.projectId, this.issueId),
+        gitlab.projects.owned()
+      ]).then(results => {
+        const issue = results[0];
+        const projects = results[1];
+
         this.$parent.hideOverlay();
         this.setIssue(issue);
-      });
-      this.$parent.showOverlay();
-      client.projects.owned().then(projects => {
-        this.$parent.hideOverlay();
-        projects.forEach(project => {
-          if (project.id == this.projectId) {
-            this.setApprovable();
-          }
-        });
+        if (projects.find(project => project.id == this.projectId)) {
+          this.setApprovable();
+        }
       });
     }
   }

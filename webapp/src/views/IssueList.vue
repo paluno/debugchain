@@ -15,12 +15,11 @@
 </template>
 
 <script>
-import router from "@/router";
-import gitlab from "@/api/gitlab";
+import Gitlab from "@/api/gitlab";
 import Navigation from "@/components/Navigation";
 
 export default {
-  name: "issueList",
+  name: "IssueList",
   props: {
     projectId: String
   },
@@ -76,16 +75,15 @@ export default {
       });
     },
     updateData: function() {
-      const client = gitlab.getClient();
-      const that = this;
+      const gitlab = Gitlab.getClient();
       this.$parent.showOverlay();
-      client.projects.issues.list(this.projectId).then(issues => {
+      gitlab.projects.issues.list(this.projectId).then(issues => {
         this.$parent.hideOverlay();
-        that.setIssues(issues);
+        this.setIssues(issues);
       });
     },
     navigate: function(params) {
-      router.push({
+      this.$router.push({
         name: "issue",
         params: {
           projectId: this.projectId,
