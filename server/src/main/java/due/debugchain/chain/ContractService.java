@@ -9,6 +9,10 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.web3j.protocol.core.RemoteCall;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
 import static due.debugchain.chain.IssueStruct.fromTuple;
 import static java.math.BigInteger.valueOf;
 
@@ -27,6 +31,22 @@ public class ContractService {
         return fromTuple(send(contract(contractAddress).getIssue(valueOf(issueId))));
     }
 
+    @Cacheable(value = "issuesIdList", key = "#contractAddress")
+    public List<BigInteger> getIssueIdList(String contractAddress) {
+        return send(contract(contractAddress).getIssueLookup());
+    }
+
+    @Cacheable(value = "issuesList", key = "#contractAddress")
+    public List<IssueStruct> getIssueList(String contractAddress) {
+
+        ArrayList issues = new ArrayList<IssueStruct>();
+
+        getIssueIdList(contractAddress).stream()
+                .forEach(item -> issues.add(getIssue(contractAddress, item.longValue())));
+
+        return issues;
+    }
+
     /**
      * Listens for issue updates and evicts cache accordingly.
      * <br>
@@ -38,6 +58,34 @@ public class ContractService {
     @CacheEvict(value = "issues", key = "#event.contractAddress + '-' + #event.issueId")
     public void evictIssue(IssueUpdateEvent event) {
         log.info(String.format("Cache evicted for issue %s in contract %s", event.getIssueId(), event.getContractAddress()));
+        // NOOP
+    }
+
+    /**
+     * Listens for issue updates and evicts cache accordingly.
+     * <br>
+     * <b>NOTE:</b> this method should probably not be called explicitly
+     *
+     * @param event event indicating issue update
+     */
+    @EventListener
+    @CacheEvict(value = "issuesIdList", key = "#event.contractAddress")
+    public void evictIssueIdList(IssueUpdateEvent event) {
+        log.info(String.format("Cache evicted for issue %s in contract %s", event.getContractAddress()));
+        // NOOP
+    }
+
+    /**
+     * Listens for issue updates and evicts cache accordingly.
+     * <br>
+     * <b>NOTE:</b> this method should probably not be called explicitly
+     *
+     * @param event event indicating issue update
+     */
+    @EventListener
+    @CacheEvict(value = "issuesList", key = "#event.contractAddress")
+    public void evictIssueList(IssueUpdateEvent event) {
+        log.info(String.format("Cache evicted for issue %s in contract %s", event.getContractAddress()));
         // NOOP
     }
 

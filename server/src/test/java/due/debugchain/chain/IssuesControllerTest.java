@@ -24,8 +24,8 @@ public class IssuesControllerTest extends IntegrationTest {
     @Autowired
     protected Web3j web3j;
 
-    //private Credentials credentials = Credentials.create("c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3");
-    private Credentials credentials = Credentials.create("668740748f79c03B1798767DC803deEb169bfDCD");
+    private Credentials credentials = Credentials.create("c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3");
+    //private Credentials credentials = Credentials.create("668740748f79c03B1798767DC803deEb169bfDCD");
 
     private BigInteger pId = new BigInteger("1");
 
