@@ -2,21 +2,22 @@
   <div class="projectsetup">
     <Navigation/>
 
-    <vue-good-table 
-      :columns="columns"
-      :rows="gitlabProjects"
-      :pagination-options="{ enabled: true, perPage: 10}"
-      :search-options="{ enabled: true}"
-      styleClass="vgt-table striped bordered"
-      @on-row-click="onRowClick">
+    <vue-good-table :columns="columns" :rows="gitlabProjects" :pagination-options="{ enabled: true, perPage: 10}" :search-options="{ enabled: true}" styleClass="vgt-table striped bordered" @on-row-click="onRowClick">
     </vue-good-table>
 
     <Modal v-model="createProjectModal.show" title="Create Project">
       <p>
-        Do you want to create a DebugChain project for this GitLab project?<br />
+        Do you want to create a DebugChain project for this GitLab project?
       </p>
-      <div class="alert alert-primary">
-        ID: {{ createProjectModal.id }}, URL: {{ createProjectModal.url }}
+      <div class="row">
+        <label class="col-sm-3">Name:</label>
+        <div class="col">{{createProjectModal.name}}</div>
+      </div>
+      <div class="row">
+        <label class="col-sm-3">URL:</label>
+        <div class="col">
+          <a :href="createProjectModal.url">{{createProjectModal.url}}</a>
+        </div>
       </div>
 
       <template slot="footer">
@@ -28,11 +29,13 @@
 
 </template>
 
+
 <script>
 import Gitlab from "@/api/gitlab";
 import Modal from "@/components/Modal.vue";
 import Navigation from "@/components/Navigation";
 import Backend from "@/api/backend";
+import Contract from "../api/contract";
 
 export default {
   name: "projectList",
@@ -42,10 +45,10 @@ export default {
   },
   data: function() {
     return {
-      projects: [],
       createProjectModal: {
         show: false,
         id: 0,
+        name: "",
         url: ""
       },
       columns: [
@@ -71,23 +74,22 @@ export default {
   },
   methods: {
     createProject: function() {
-      //TODO meta mask
-      console.log("Create project called for project: ID = " + this.createProjectModal.id + ", URL = " + this.createProjectModal.url);
-
-      //dummy POST to create project without actual contract address
-      //-----just creates project with dummy contract address for dev purposes----
       const client = Backend.getClient();
-      const self = this;
-      client.post("/projects/", {
-          address: "0x123456789",
-          gitlabId: self.createProjectModal.id
+      const contract = new Contract();
+      const projectId = this.createProjectModal.id;
+      contract
+        .deploy(projectId)
+        .then(address => {
+          client.post("/projects/", {
+            address: address,
+            gitlabId: projectId
+          });
         })
-        .then(function(response) {
-          console.log("Project created");
-          self.$router.push({
-              name: "issueList",
-              params: { projectId: self.createProjectModal.id.toString() }
-            });
+        .then(() => {
+          this.$router.push({
+            name: "issueList",
+            params: { projectId: projectId.toString() }
+          });
         });
     },
     setProjects: function(newProjects) {
@@ -95,45 +97,45 @@ export default {
         return {
           id: project.id,
           url: project.web_url,
+          name: project.name,
           owner: project.owner.username
         };
       });
     },
     updateData: function() {
       const client = Gitlab.getClient();
-      const that = this;
       client.projects.list().then(projects => {
-        that.setProjects(projects);
+        this.setProjects(projects);
       });
     },
-    showCreateProjectModal: function(id, url) {
+    showCreateProjectModal: function(id, name, url) {
       this.createProjectModal.show = true;
       this.createProjectModal.id = id;
+      this.createProjectModal.name = name;
       this.createProjectModal.url = url;
     },
     closeCreateProjectModal: function() {
       this.createProjectModal.show = false;
-      this.createProjectModal.address = 0;
-      this.createProjectModal.id = "";
+      this.createProjectModal.id = 0;
+      this.createProjectModal.name = "";
+      this.createProjectModal.url = "";
     },
-    openProject: function(id, url) {
+    openProject: function(id, name, url) {
       const client = Backend.getClient();
-      const self = this;
 
       client
         .get("/projects")
-        .then(function(response) {
-          self.projects = response.data;
-          const project = self.projects.find(e => e.gitlabId === id);
+        .then(response => {
+          this.projects = response.data;
+          const project = this.projects.find(e => e.gitlabId === id);
 
           if (project !== undefined) {
-            self.$router.push({
+            this.$router.push({
               name: "issueList",
               params: { projectId: id.toString() }
             });
-          }
-          else {
-            self.showCreateProjectModal(id, url);
+          } else {
+            this.showCreateProjectModal(id, name, url);
           }
         })
         .catch(function(error) {
@@ -142,7 +144,7 @@ export default {
         });
     },
     onRowClick: function(params) {
-      this.openProject(params.row.id, params.row.url);
+      this.openProject(params.row.id, params.row.name, params.row.url);
     }
   }
 };

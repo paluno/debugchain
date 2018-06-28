@@ -1,13 +1,14 @@
 <template>
   <div class="issue_detail">
-    <Navigation v-bind:projectId="projectId" />
+    <Navigation v-bind:projectId="projectId" v-bind:issueId="issueId" />
     <div v-if="issue">
       <div class="form-group row">
         <div class="col">
           <h1>{{issue.title}}</h1>
         </div>
         <div class="col-auto">
-          <button class="btn btn-outline-secondary btn-sm">Donate Ether</button>
+          <button class="btn btn-outline-secondary btn-sm" v-on:click="donateEther">Donate Ether</button>
+          <button v-if="approvable" class="btn btn-outline-success btn-sm" v-on:click="approveIssue">Approve</button>
         </div>
       </div>
       <div class="row">
@@ -103,20 +104,37 @@ export default {
   },
   data: function() {
     return {
-      issue: null
+      issue: null,
+      approvable: false
     };
   },
   created: function() {
     this.updateData();
   },
   methods: {
+    donateEther: function() {
+      alert("Hier muss der Metamask-Aufruf für das Donaten rein");
+    },
+    approveIssue: function() {
+      alert("Hier muss der Metamask-Aufruf für das Approven des Issues rein");
+    },
     setIssue: function(issue) {
       this.issue = issue;
+    },
+    setApprovable: function() {
+      this.approvable = true;
     },
     updateData: function() {
       const client = gitlab.getClient();
       client.projects.issues.one(this.projectId, this.issueId).then(issue => {
         this.setIssue(issue);
+      });
+      client.projects.owned().then(projects => {
+        projects.forEach(project => {
+          if (project.id == this.projectId) {
+            this.setApprovable();
+          }
+        });
       });
     }
   }
