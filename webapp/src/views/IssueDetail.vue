@@ -32,22 +32,12 @@
         </div>
       </div>
     </div>
-    <div v-else>
-      <div class="row">
-        <div class="col-md-3">
-          <span>Das Issue wird geladen...</span>
-          <div class="progress">
-            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script>
 import Navigation from "@/components/Navigation";
-import gitlab from "@/api/gitlab";
+import Gitlab from "@/api/gitlab";
 
 export default {
   name: "IssueDetail",
@@ -125,16 +115,21 @@ export default {
       this.approvable = true;
     },
     updateData: function() {
-      const client = gitlab.getClient();
-      client.projects.issues.one(this.projectId, this.issueId).then(issue => {
+      const gitlab = Gitlab.getClient();
+
+      this.$emit("isLoading", true);
+      Promise.all([
+        gitlab.projects.issues.one(this.projectId, this.issueId),
+        gitlab.projects.owned()
+      ]).then(results => {
+        const issue = results[0];
+        const projects = results[1];
+
         this.setIssue(issue);
-      });
-      client.projects.owned().then(projects => {
-        projects.forEach(project => {
-          if (project.id == this.projectId) {
-            this.setApprovable();
-          }
-        });
+        if (projects.find(project => project.id == this.projectId)) {
+          this.setApprovable();
+        }
+        this.$emit("isLoading", false);
       });
     }
   }

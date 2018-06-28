@@ -1,6 +1,6 @@
 const SETTINGS = {
     oauthConfig: {
-        clientId: "f30a23841e0b180caeb04cb51eb8e442d7ce64727fd1e0929dbdbd9e33d6d25b",
+        clientId: "acb6f1458c7cc4b8fda433f836186c9af1115581389021e9e3aa7536bf8d4f0a",
         accessTokenUri: "http://localhost:80/oauth/token",
         authorizationUri: "http://localhost:80/oauth/authorize",
         redirectUri: "http://localhost:9000/login",
