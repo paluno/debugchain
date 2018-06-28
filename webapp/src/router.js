@@ -7,6 +7,7 @@ import Login from './views/Login.vue'
 import Profile from './views/Profile.vue'
 import IssueDetail from './views/IssueDetail'
 import ProjectList from './views/ProjectList'
+import NotFound from './views/NotFound'
 
 import UserSession from './auth'
 
@@ -14,6 +15,8 @@ Vue.use(Router);
 
 const router = new Router({
   mode: 'history',
+  linkActiveClass: "",
+  linkExactActiveClass: "active",
   routes: [
     {
       path: '/',
@@ -35,10 +38,16 @@ const router = new Router({
       meta: { requiresAuth: true }
     },
     {
-      path: '/projects/:projectId/profile',
+      path: '/projects/:projectId/issue/:issueId',
+      name: 'issue',
+      component: IssueDetail,
+      props: true,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/profile',
       name: 'profile',
       component: Profile,
-      props: true,
       meta: { requiresAuth: true }
     },
     {
@@ -52,11 +61,15 @@ const router = new Router({
       component: Login
     },
     {
-      path: '/projects/:projectId/issue/:issueId',
-      name: 'issue',
-      component: IssueDetail,
-      props: true,
-      meta: { requiresAuth: true }
+      path: '/404',
+      name: "notFound",
+      component: NotFound
+    },
+    {
+      path: '*',
+      redirect: {
+        name: 'notFound',
+      }
     }
   ]
 });

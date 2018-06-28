@@ -1,6 +1,6 @@
 const SETTINGS = {
     oauthConfig: {
-        clientId: "2642be6246ec17f3a9fcebb0571f5db004fa2b4be128e49633964f85924a941e",
+        clientId: "acb6f1458c7cc4b8fda433f836186c9af1115581389021e9e3aa7536bf8d4f0a",
         accessTokenUri: "http://localhost:80/oauth/token",
         authorizationUri: "http://localhost:80/oauth/authorize",
         redirectUri: "http://localhost:9000/login",
@@ -9,6 +9,7 @@ const SETTINGS = {
     gitlabConnection: {
         url: "http://localhost",
     }
+
 };
 
 export default SETTINGS;

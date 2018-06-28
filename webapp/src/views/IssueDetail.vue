@@ -1,13 +1,14 @@
 <template>
   <div class="issue_detail">
-    <Navigation v-bind:projectId="projectId" />
+    <Navigation v-bind:projectId="projectId" v-bind:issueId="issueId" />
     <div v-if="issue">
       <div class="form-group row">
         <div class="col">
           <h1>{{issue.title}}</h1>
         </div>
         <div class="col-auto">
-          <button class="btn btn-outline-secondary btn-sm">Donate Ether</button>
+          <button class="btn btn-outline-secondary btn-sm" v-on:click="donateEther">Donate Ether</button>
+          <button v-if="approvable" class="btn btn-outline-success btn-sm" v-on:click="approveIssue">Approve</button>
         </div>
       </div>
       <div class="row">
@@ -31,22 +32,12 @@
         </div>
       </div>
     </div>
-    <div v-else>
-      <div class="row">
-        <div class="col-md-3">
-          <span>Das Issue wird geladen...</span>
-          <div class="progress">
-            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script>
 import Navigation from "@/components/Navigation";
-import gitlab from "@/api/gitlab";
+import Gitlab from "@/api/gitlab";
 
 export default {
   name: "IssueDetail",
@@ -103,20 +94,42 @@ export default {
   },
   data: function() {
     return {
-      issue: null
+      issue: null,
+      approvable: false
     };
   },
   created: function() {
     this.updateData();
   },
   methods: {
+    donateEther: function() {
+      alert("Hier muss der Metamask-Aufruf für das Donaten rein");
+    },
+    approveIssue: function() {
+      alert("Hier muss der Metamask-Aufruf für das Approven des Issues rein");
+    },
     setIssue: function(issue) {
       this.issue = issue;
     },
+    setApprovable: function() {
+      this.approvable = true;
+    },
     updateData: function() {
-      const client = gitlab.getClient();
-      client.projects.issues.one(this.projectId, this.issueId).then(issue => {
+      const gitlab = Gitlab.getClient();
+
+      this.$emit("isLoading", true);
+      Promise.all([
+        gitlab.projects.issues.one(this.projectId, this.issueId),
+        gitlab.projects.owned()
+      ]).then(results => {
+        const issue = results[0];
+        const projects = results[1];
+
         this.setIssue(issue);
+        if (projects.find(project => project.id == this.projectId)) {
+          this.setApprovable();
+        }
+        this.$emit("isLoading", false);
       });
     }
   }

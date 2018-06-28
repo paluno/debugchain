@@ -1,10 +1,12 @@
 <template>
-    <div id="debug">
-        <Navigation/>
-        <h1>Debug</h1>
-        <input type="submit" value="Get current User" v-on:click="getUser"/>
-        <pre>{{userJson}}</pre>
-    </div>
+  <div id="debug">
+    <Navigation/>
+    <h1>Debug</h1>
+    <input type="submit" value="Get current User" v-on:click="getUser" />
+    <pre>{{userJson}}</pre>
+    <hr>
+    <router-link to="/invalid-url">Test invalid url</router-link>
+  </div>
 </template>
 
 <script>
