@@ -9,12 +9,8 @@ contract DebugChain {
         uint donationSum;
         address developer;
         address[] reviewers;
-        bool isApproved;
-        bool isLocked;
-        bool isDeveloped;
+        uint lifecycleStatus;
         mapping(address => bool) isReviewed;
-        bool isCompleted;
-        // TODO uint lifecycleStatus;
         // to be able to check an issues existence
         bool exists;
     }
@@ -66,7 +62,7 @@ contract DebugChain {
             issuesLookup.push(_id);
         } else {
             // if an issue exists, check if the issue is completed
-            require(!issues[_id].isCompleted);
+            require(issues[_id].lifecycleStatus != 4);
         }
         // if it exists and is not completed, append the donation value
         issues[_id].donations[msg.sender] += msg.value;
@@ -143,10 +139,7 @@ contract DebugChain {
             donationSum: 0,
             developer: address(0),
             reviewers: new address[](0),
-            isApproved: false,
-            isLocked: false,
-            isDeveloped: false,
-            isCompleted: false,
+            lifecycleStatus: 0,
             exists: true
             });
         issues[_id] = issue;
@@ -165,10 +158,7 @@ contract DebugChain {
         address _developer,
         address[] _reviewers,
         bool[] _reviewStatus,
-        bool _isApproved,
-        bool _isLocked,
-        bool _isDeveloped,
-        bool _isCompleted,
+        uint _lifecycleStatus,
         address[] _donators,
         uint[] _donationValues
     ) {
@@ -176,11 +166,8 @@ contract DebugChain {
         _donationSum = issues[_i].donationSum;
         _developer = issues[_i].developer;
         _reviewers = issues[_i].reviewers;
-        _isApproved = issues[_i].isApproved;
-        _isLocked = issues[_i].isLocked;
-        _isDeveloped = issues[_i].isDeveloped;
         _reviewStatus = getReviewStatus(_i);
-        _isCompleted = issues[_i].isCompleted;
+        _lifecycleStatus = issues[_i].lifecycleStatus;
         _donators = issues[_i].donationsLookup;
         _donationValues = getDonationValues(issues[_i].id);
     }
@@ -224,11 +211,12 @@ contract DebugChain {
      * to false.
      *
      * @param _id issue id
-     */
+     *
     function unlockIssue(uint _id) public issueExists(_id) {
         issues[_id].developer = address(0);
         setLocked(_id, false);
     }
+    */
 
     /**
      * Setter for an issues reviewer addresses.
@@ -237,6 +225,8 @@ contract DebugChain {
      * @param _reviewers reviewer addresses to set
      */
     function setReviewers(uint _id, address[] _reviewers) public issueExists(_id) onlyMaintainer {
+        require(_reviewers.length > 0);
+
         // set the new reviewers
         issues[_id].reviewers = _reviewers;
         // set all the review stati to false
@@ -275,8 +265,17 @@ contract DebugChain {
      * @param _id issue id
      * @param _val approved status to set
      */
-    function setApproved(uint _id, bool _val) public issueExists(_id) onlyMaintainer {
-        issues[_id].isApproved = _val;
+    function setApproved(uint _id, bool _val, address[] _reviewers) public issueExists(_id) onlyMaintainer {
+        require(_reviewers.length > 0);
+
+        if (_val) {
+            issues[_id].lifecycleStatus = 1;
+        } else {
+            // TODO should it be possible to unapprove?
+            issues[_id].lifecycleStatus = 0;
+        }
+        // set the reviewers
+        setReviewers(_id, _reviewers);
         // fire lifecycle event
         issueApproved(msg.sender, _id);
     }
@@ -288,11 +287,19 @@ contract DebugChain {
      * @param _val locked status to set
      */
     function setLocked(uint _id, bool _val) private issueExists(_id) {
-        issues[_id].isLocked = _val;
-        // fire lifecycle event
+        // TODO >= or ==
+        require(issues[_id].lifecycleStatus >= 1);
+
         if (_val) {
+            issues[_id].lifecycleStatus = 2;
+            // fire lifecycle event
             issueLocked(msg.sender, _id);
         } else {
+            // reset developer address
+            issues[_id].developer = address(0);
+            // reset lifecycle to allow re-locking
+            issues[_id].lifecycleStatus = 1;
+            // fire lifecycle event
             issueUnlocked(msg.sender, _id);
         }
     }
@@ -304,7 +311,10 @@ contract DebugChain {
      * @param _val developed status to set
      */
     function setDeveloped(uint _id, bool _val) public issueExists(_id) onlyDeveloper(_id) {
-        issues[_id].isDeveloped = _val;
+        // only accept developed flag, when issue is locked
+        require(issues[_id].lifecycleStatus == 2);
+
+        issues[_id].lifecycleStatus = 3;
         // fire lifecycle event
         issueDeveloped(msg.sender, _id);
     }
@@ -316,6 +326,9 @@ contract DebugChain {
      * @param _val reviewed status to set
      */
     function setReviewed(uint _id, bool _val) public issueExists(_id) onlyReviewer(_id) {
+        // only accept reviews, when issue is marked as developed
+        require(issues[_id].lifecycleStatus == 3);
+
         issues[_id].isReviewed[msg.sender] = _val;
         // check if all reviewers approved the developed changes
         if (checkForCompletion(_id)) {
@@ -349,7 +362,7 @@ contract DebugChain {
      */
     function completeIssue(uint _id) private issueExists(_id) {
         pendingWithdrawals[issues[_id].developer] = issues[_id].donationSum;
-        issues[_id].isCompleted = true;
+        issues[_id].lifecycleStatus = 4;
         // fire lifecycle event
         issueCompleted(msg.sender, _id);
     }
