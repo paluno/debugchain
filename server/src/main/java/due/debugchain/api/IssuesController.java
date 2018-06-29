@@ -18,6 +18,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.stream.Collectors.toList;
+
 @RestController
 @RequiredArgsConstructor
 @Validated
@@ -31,18 +33,11 @@ public class IssuesController {
     private final IssueMapper issueMapper;
 
     @GetMapping
-    public Collection<IssueResource> getIssues(@PathVariable("projectId") long projectId) {
-
-        List<IssueStruct> issueStructList;
-        List<IssueResource> issuseResourceList = new ArrayList<>();
-        Optional<ProjectEntity> project = projectService.getProject(projectId);
-
-        issueStructList = project.map(projectEntity -> contractService.getIssueList(projectEntity.getAddress()))
-                .orElseThrow(ProjectNotFoundException::new);
-
-        issueStructList.stream().forEach(item -> issuseResourceList.add(issueMapper.entityToResource(item)));
-
-        return issuseResourceList;
+    public Collection<IssueResource> getIssues(ProjectEntity project) {
+        return contractService.getIssueIdList(project.getAddress()).stream()
+                .map(issueId -> contractService.getIssue(project.getAddress(), issueId.longValue()))
+                .map(issueMapper::entityToResource)
+                .collect(toList());
     }
 
     @GetMapping("/{issueId}")

@@ -39,13 +39,6 @@ public class ContractService {
         return send(contract(contractAddress).getIssueLookup());
     }
 
-    @Cacheable(value = "issuesList", key = "#contractAddress")
-    public List<IssueStruct> getIssueList(String contractAddress) {
-        return getIssueIdList(contractAddress).stream()
-                .map(issueId -> getIssue(contractAddress, issueId.longValue()))
-                .collect(toList());
-    }
-
     /**
      * Listens for issue updates and evicts cache accordingly.
      * <br>
@@ -56,7 +49,6 @@ public class ContractService {
     @EventListener
     @Caching(evict = {
         @CacheEvict(value = "issues", key = "#event.contractAddress + '-' + #event.issueId"),
-        @CacheEvict(value = "issuesList", key = "#event.contractAddress"),
         @CacheEvict(value = "issuesIdList", key = "#event.contractAddress")
     })
     public void evictIssue(IssueUpdateEvent event) {

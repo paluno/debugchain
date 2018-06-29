@@ -18,12 +18,4 @@
         <heap>200</heap>
         <jsr107:mbeans enable-statistics="true"/>
     </cache>
-
-    <cache alias="issuesList">
-        <expiry>
-            <ttl unit="minutes">5</ttl>
-        </expiry>
-        <heap>200</heap>
-        <jsr107:mbeans enable-statistics="true"/>
-    </cache>
 </config>
