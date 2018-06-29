@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static java.math.BigInteger.valueOf;
-import static net.bytebuddy.matcher.ElementMatchers.is;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.iterableWithSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -50,10 +50,12 @@ public class IssuesControllerTest extends IntegrationTest {
                 .with(userToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", iterableWithSize(2)))
-                .andExpect(jsonPath("$[0].id", is(1)).exists())
-                .andExpect(jsonPath("$[0].donationSum", is(1)).exists())
-                .andExpect(jsonPath("$[1].id", is(2)).exists())
-                .andExpect(jsonPath("$[1].donationSum", is(1)).exists());
+                .andExpect(jsonPath("$[0].id", equalTo(1)))
+                .andExpect(jsonPath("$[0].donationSum", equalTo(1)))
+                .andExpect(jsonPath("$[0].donators[0]", equalTo("0x627306090abab3a6e1400e9345bc60c78a8bef57")))
+                .andExpect(jsonPath("$[1].id", equalTo(2)))
+                .andExpect(jsonPath("$[1].donationSum", equalTo(1)))
+                .andExpect(jsonPath("$[0].donators[0]", equalTo("0x627306090abab3a6e1400e9345bc60c78a8bef57")));
     }
 
 

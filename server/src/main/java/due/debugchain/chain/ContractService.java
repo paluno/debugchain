@@ -13,9 +13,11 @@ import org.web3j.protocol.core.RemoteCall;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static due.debugchain.chain.IssueStruct.fromTuple;
 import static java.math.BigInteger.valueOf;
+import static java.util.stream.Collectors.*;
 
 /**
  * Service for contract interaction.
@@ -39,13 +41,9 @@ public class ContractService {
 
     @Cacheable(value = "issuesList", key = "#contractAddress")
     public List<IssueStruct> getIssueList(String contractAddress) {
-
-        ArrayList issues = new ArrayList<IssueStruct>();
-
-        getIssueIdList(contractAddress).stream()
-                .forEach(item -> issues.add(getIssue(contractAddress, item.longValue())));
-
-        return issues;
+        return getIssueIdList(contractAddress).stream()
+                .map(issueId -> getIssue(contractAddress, issueId.longValue()))
+                .collect(toList());
     }
 
     /**
