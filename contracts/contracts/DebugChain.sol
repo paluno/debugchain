@@ -9,6 +9,13 @@ contract DebugChain {
         uint donationSum;
         address developer;
         address[] reviewers;
+        /*
+            0: default
+            1: approved
+            2: locked
+            3: developed
+            4: completed
+        */
         uint lifecycleStatus;
         mapping(address => bool) isReviewed;
         // to be able to check an issues existence
@@ -211,12 +218,12 @@ contract DebugChain {
      * to false.
      *
      * @param _id issue id
-     *
+     */
     function unlockIssue(uint _id) public issueExists(_id) {
-        issues[_id].developer = address(0);
+        // only allow the maintainer and current developer to unlock an issue
+        require(msg.sender == maintainer || msg.sender == issues[_id].developer);
         setLocked(_id, false);
     }
-    */
 
     /**
      * Setter for an issues reviewer addresses.
@@ -271,7 +278,7 @@ contract DebugChain {
         if (_val) {
             issues[_id].lifecycleStatus = 1;
         } else {
-            // TODO should it be possible to unapprove?
+            // TODO possible to unapprove?
             issues[_id].lifecycleStatus = 0;
         }
         // set the reviewers
@@ -287,8 +294,7 @@ contract DebugChain {
      * @param _val locked status to set
      */
     function setLocked(uint _id, bool _val) private issueExists(_id) {
-        // TODO >= or ==
-        require(issues[_id].lifecycleStatus >= 1);
+        require(issues[_id].lifecycleStatus == 1);
 
         if (_val) {
             issues[_id].lifecycleStatus = 2;
@@ -372,7 +378,7 @@ contract DebugChain {
      *
      * @param _id issue id
      */
-    function resetIssue(uint _id) public issueExists(_id) {
+    function resetIssue(uint _id) public issueExists(_id) onlyMaintainer {
         // reset the review stati
         for (uint i = 0; i < issues[_id].reviewers.length; i++) {
             // return the boolean review status for each reqistered reviewer
