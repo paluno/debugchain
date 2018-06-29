@@ -37,25 +37,23 @@ public class IssuesControllerTest extends IntegrationTest {
 
     @Test
     public void getIssuesWithId() throws Exception {
-        System.out.println(mockMvc.perform(get("/api/projects/1/issues/1")
+        mockMvc.perform(get("/api/projects/1/issues/1")
                 .with(userToken()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[?(@.id == 1 && @.donationSum == 1)]").exists())
-                .andReturn().getResponse().getContentAsString());
+                .andExpect(jsonPath("$[?(@.id == 1 && @.donationSum == 1)]").exists());
 
     }
 
     @Test
     public void getIssueList() throws Exception {
-        System.out.println(mockMvc.perform(get("/api/projects/1/issues")
+        mockMvc.perform(get("/api/projects/1/issues")
                 .with(userToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", iterableWithSize(2)))
                 .andExpect(jsonPath("$[0].id", is(1)).exists())
                 .andExpect(jsonPath("$[0].donationSum", is(1)).exists())
                 .andExpect(jsonPath("$[1].id", is(2)).exists())
-                .andExpect(jsonPath("$[1].donationSum", is(1)).exists())
-                .andReturn().getResponse().getContentAsString());
+                .andExpect(jsonPath("$[1].donationSum", is(1)).exists());
     }
 
 
