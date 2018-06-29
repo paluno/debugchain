@@ -14,8 +14,8 @@ contract DebugChain {
         bool isDeveloped;
         mapping(address => bool) isReviewed;
         bool isCompleted;
-        // TODO uint lifecycleStatus
-        // to be able to check existence (solidity characteristic)
+        // TODO uint lifecycleStatus;
+        // to be able to check an issues existence
         bool exists;
     }
 
@@ -121,8 +121,7 @@ contract DebugChain {
      *
      * @param _adds array of wallet addresses
      */
-    function getPendingWithdrawalList(address[] _adds) public view returns (uint[]) {
-        // TODO Parameter overloading messes with remix - test independently
+    function getPendingWithdrawals(address[] _adds) public view returns (uint[]) {
         uint[] memory result;
         for (uint i = 0; i < _adds.length; i++) {
             result[i] = (pendingWithdrawals[_adds[i]]);
@@ -159,29 +158,8 @@ contract DebugChain {
      *
      * @param _id issue to get
      */
-    function getIssue(uint _id) public issueExists(_id) view returns (
-        uint,
-        uint,
-        address,
-        address[],
-        bool[],
-        bool,
-        bool,
-        bool,
-        bool,
-        address[],
-        uint[]
-    ) {
-        return parseIssue(_id);
-    }
-
-    /**
-     * Parses an issue struct to an array.
-     *
-     * @param _id the issue to parse
-     */
-    function parseIssue(uint _i) private view returns (
-    // TODO COMPLEXITY FLAGS
+    function getIssue(uint _i) public view returns (
+    // TODO look into possible complexity flag system
         uint _id,
         uint _donationSum,
         address _developer,
@@ -225,10 +203,9 @@ contract DebugChain {
      * Setter for an issues developer address.
      *
      * @param _id issue id
-     * @param _developer developer address to set
      */
-    function setDeveloper(uint _id, address _developer) public issueExists(_id) {
-        issues[_id].developer = _developer;
+    function setDeveloper(uint _id) public issueExists(_id) {
+        issues[_id].developer = msg.sender;
         // lock the issue after a developer is assigned
         setLocked(_id, true);
     }
@@ -259,7 +236,7 @@ contract DebugChain {
      * @param _id issue id
      * @param _reviewers reviewer addresses to set
      */
-    function setReviewers(uint _id, address[] _reviewers) public issueExists(_id) {
+    function setReviewers(uint _id, address[] _reviewers) public issueExists(_id) onlyMaintainer {
         // set the new reviewers
         issues[_id].reviewers = _reviewers;
         // set all the review stati to false
@@ -340,8 +317,28 @@ contract DebugChain {
      */
     function setReviewed(uint _id, bool _val) public issueExists(_id) onlyReviewer(_id) {
         issues[_id].isReviewed[msg.sender] = _val;
+        // check if all reviewers approved the developed changes
+        if (checkForCompletion(_id)) {
+            completeIssue(_id);
+        }
         // fire lifecycle event
         issueReviewed(msg.sender, _id);
+    }
+
+    /**
+     * Check if all reviewers approved the developed changes to trigger the
+     * issues completion.
+     *
+     * @param _id issue id
+     */
+    function checkForCompletion(uint _id) private view returns (bool) {
+        bool[] memory status = getReviewStatus(_id);
+        for (uint i = 0; i < status.length; i++) {
+            if (!status[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -350,7 +347,7 @@ contract DebugChain {
      *
      * @param _id issue id
      */
-    function completeIssue(uint _id) public issueExists(_id) {
+    function completeIssue(uint _id) private issueExists(_id) {
         pendingWithdrawals[issues[_id].developer] = issues[_id].donationSum;
         issues[_id].isCompleted = true;
         // fire lifecycle event
@@ -367,6 +364,7 @@ contract DebugChain {
         for (uint i = 0; i < issues[_id].reviewers.length; i++) {
             // return the boolean review status for each reqistered reviewer
             issues[_id].isReviewed[issues[_id].reviewers[i]] = false;
+            // TODO delete in place of false?
         }
         // reset the reviewers address array
         setReviewers(_id, new address[](0));
@@ -383,17 +381,41 @@ contract DebugChain {
     function deleteIssue(uint _id) public issueExists(_id) onlyMaintainer {
         // release funds to withdrawal mapping for each donator
         releaseDonatedFunds(_id);
+        // clear mappings prior to removal to ensure complete removal
+        clearIssueMappings(_id);
         // delete issue from lookup array and mapping
         removeFromIssueLookup(_id);
         delete issues[_id];
-        // TODO depending on performance optimization, clear mappings prior to removal
-        // clearIssueMappings(_id);
         // fire lifecycle event
         issueDeleted(msg.sender, _id);
     }
 
     /**
+     * Clear an issues internal mappings to ensure a full deletion of that
+     * issue.
+     * The 'delete' keyword does not traverse into mappings of structs, which
+     * means that the data is kept by the contract. To enable potential
+     * node-self-issued cleanup and prevent errors on re-approving an issue,
+     * mappings are cleared prior to the final deletion.
+     *
+     * @param _id issue id
+     */
+    function clearIssueMappings(uint _id) private {
+        // clear donation mapping
+        for (uint i = 0; i < issues[_id].donationsLookup.length; i++) {
+            delete issues[_id].donations[issues[_id].donationsLookup[i]];
+        }
+        // clear review status
+        for (uint j = 0; j < issues[_id].reviewers.length; j++) {
+            delete issues[_id].isReviewed[issues[_id].reviewers[j]];
+        }
+    }
+
+
+    /**
      * Removes an entry from the lookup array - cleanly - based on the given id.
+     * Since the order of the keys in the lookup array does not matter, an
+     * efficient algorithm was chosen.
      *
      * @param _id issue id
      */
@@ -407,7 +429,7 @@ contract DebugChain {
         }
         // take the last element in the lookup table and replace value to be deleted
         issuesLookup[index] = issuesLookup[issuesLookup.length-1];
-        // shorten the array by one, de facto removing the now duplicate
+        // shorten the array by one, de facto removing the now duplicate element
         issuesLookup.length--;
     }
 

@@ -1,6 +1,6 @@
 var DebugChain = artifacts.require("DebugChain");
 
-contract('DebugChain', () => {
+contract('DebugChain Deployment Test', () => {
     it("should save the projectId", () => {
         return DebugChain.deployed().then(instance => {
             return instance.info.call();
