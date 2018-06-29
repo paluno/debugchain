@@ -18,4 +18,12 @@
         <heap>200</heap>
         <jsr107:mbeans enable-statistics="true"/>
     </cache>
+
+    <cache alias="profileEther">
+        <expiry>
+            <ttl unit="minutes">15</ttl>
+        </expiry>
+        <heap>200</heap>
+        <jsr107:mbeans enable-statistics="true"/>
+    </cache>
 </config>

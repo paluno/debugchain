@@ -12,3 +12,9 @@ INSERT INTO user_entity (gitlab_id, address) VALUES (
 INSERT INTO membership_entity (user_gitlab_id, project_gitlab_id, reviewer) VALUES (
   677, 999, TRUE
 );
+INSERT INTO user_entity (gitlab_id, address) VALUES (
+  678, '0x627306090abab3a6e1400e9345bc60c78a8bef57'
+);
+INSERT INTO membership_entity (user_gitlab_id, project_gitlab_id, reviewer) VALUES (
+  678, 999, TRUE
+);

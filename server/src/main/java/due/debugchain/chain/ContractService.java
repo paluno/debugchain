@@ -39,6 +39,11 @@ public class ContractService {
         return send(contract(contractAddress).getIssueLookup());
     }
 
+    @Cacheable(value = "profileEther", key = "#contractAddress + '-' + #profileAdress")
+    public BigInteger getUserWithdrawals(String contractAddress, String profileAdress) {
+        return send(contract(contractAddress).getPendingWithdrawals(profileAdress));
+    }
+
     /**
      * Listens for issue updates and evicts cache accordingly.
      * <br>
@@ -49,7 +54,8 @@ public class ContractService {
     @EventListener
     @Caching(evict = {
         @CacheEvict(value = "issues", key = "#event.contractAddress + '-' + #event.issueId"),
-        @CacheEvict(value = "issuesIdList", key = "#event.contractAddress")
+        @CacheEvict(value = "issuesIdList", key = "#event.contractAddress"),
+        @CacheEvict(value = "profileEther", key = "#contractAddress + '-' + #profileAdress")
     })
     public void evictIssue(IssueUpdateEvent event) {
         log.info(String.format("Cache evicted for issue %s in contract %s", event.getIssueId(), event.getContractAddress()));

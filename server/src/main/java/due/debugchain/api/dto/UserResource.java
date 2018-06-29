@@ -10,4 +10,5 @@ import lombok.EqualsAndHashCode;
 @Data
 public class UserResource extends AddressResource {
     private Long gitlabId;
+    private Long pendingWithdrawals;
 }
