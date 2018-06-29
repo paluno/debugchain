@@ -1,10 +1,13 @@
 package due.debugchain.persistence;
 
 import due.debugchain.persistence.entities.ProjectEntity;
+import due.debugchain.persistence.entities.UserEntity;
 import due.debugchain.persistence.repositories.ProjectRepository;
+import due.debugchain.persistence.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.Optional;
 
 /**
@@ -15,6 +18,8 @@ import java.util.Optional;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
+
+    private final UserRepository userRepository;
 
     /**
      * Retrieves a persisted.
@@ -31,4 +36,6 @@ public class ProjectService {
     public Iterable<ProjectEntity> getAll() {
         return projectRepository.findAll();
     }
+
+    public Collection<UserEntity> getAllReviewers(Long projectGitlabId) { return userRepository.findUserByProjectGitlabId(projectGitlabId); }
 }
