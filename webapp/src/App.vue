@@ -1,14 +1,28 @@
 <template>
   <div id="app" class="container">
-    <router-view/>
+    <LoadingOverlay v-if="loading"/>
+    <router-view @isLoading="onIsLoadingChanged"/>
   </div>
 </template>
 
 <script>
-
-import 'bootstrap/dist/css/bootstrap.css'
+import "bootstrap/dist/css/bootstrap.css";
+import LoadingOverlay from "@/components/LoadingOverlay";
 
 export default {
+  components: {
+    LoadingOverlay
+  },
+  data: function() {
+    return {
+      loading: (Boolean = false)
+    };
+  },
+  methods: {
+    onIsLoadingChanged(isLoading) {
+      this.loading = isLoading;
+    }
+  }
 };
 </script>
 

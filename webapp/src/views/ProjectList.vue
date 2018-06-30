@@ -35,7 +35,7 @@ import Gitlab from "@/api/gitlab";
 import Modal from "@/components/Modal.vue";
 import Navigation from "@/components/Navigation";
 import Backend from "@/api/backend";
-import Contract from "../api/contract";
+import Contract from "@/api/contract";
 
 export default {
   name: "projectList",
@@ -77,6 +77,8 @@ export default {
       const client = Backend.getClient();
       const contract = new Contract();
       const projectId = this.createProjectModal.id;
+
+      this.$emit("isLoading", true);
       contract
         .deploy(projectId)
         .then(address => {
@@ -84,6 +86,7 @@ export default {
             address: address,
             gitlabId: projectId
           });
+          this.$emit("isLoading", false);
         })
         .then(() => {
           this.$router.push({
@@ -104,8 +107,11 @@ export default {
     },
     updateData: function() {
       const client = Gitlab.getClient();
+
+      this.$emit("isLoading", true);
       client.projects.list().then(projects => {
         this.setProjects(projects);
+        this.$emit("isLoading", false);
       });
     },
     showCreateProjectModal: function(id, name, url) {
@@ -123,6 +129,7 @@ export default {
     openProject: function(id, name, url) {
       const client = Backend.getClient();
 
+      this.$emit("isLoading", true);
       client
         .get("/projects")
         .then(response => {
@@ -137,9 +144,11 @@ export default {
           } else {
             this.showCreateProjectModal(id, name, url);
           }
+          this.$emit("isLoading", false);
         })
-        .catch(function(error) {
+        .catch(error => {
           // TODO error handling
+          this.$emit("isLoading", false);
           alert("Could not load projects from backend: " + error.message);
         });
     },
