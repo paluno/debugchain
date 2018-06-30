@@ -32,13 +32,15 @@ node_modules/
 
 ### Web ###
 
-/webapp/contracts
+webapp/contracts
 
 server/src/main/resources/public/
+
+# vue-cli-service local environment configuration
+webapp/.env*.local
 
 
 
 ### Contracts ###
 
 contracts/build/
-
