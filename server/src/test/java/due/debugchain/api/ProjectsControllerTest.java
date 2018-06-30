@@ -89,7 +89,7 @@ public class ProjectsControllerTest extends IntegrationTest {
         mockMvc.perform(get("/api/projects/999/reviewers")
                 .with(userToken()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", iterableWithSize(2)))
+                .andExpect(jsonPath("$", iterableWithSize(3)))
                 .andExpect(jsonPath("$[0].address", equalTo("0x99861c8068bfe2e0a5137e16d23a648962c79b5c")))
                 .andExpect(jsonPath("$[0].gitlabId", equalTo(676)))
                 .andExpect(jsonPath("$[1].address", equalTo("0x2e9ea27add78cd06c6bfb9bfd9966f726bc273a0")))
