@@ -10,12 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.web3j.protocol.core.RemoteCall;
-import org.web3j.tuples.generated.Tuple11;
+import org.web3j.tuples.generated.Tuple8;
 
 import java.math.BigInteger;
 import java.util.List;
 
 import static java.math.BigInteger.ZERO;
+import static java.math.BigInteger.valueOf;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -48,7 +49,7 @@ public class ContractServiceTest extends IntegrationTest {
     @Test
     public void shouldCacheIssue() {
         long issueId = 1L;
-        BigInteger bigIssueId = BigInteger.valueOf(issueId);
+        BigInteger bigIssueId = valueOf(issueId);
         doReturn(issueCall(bigIssueId)).when(mockContract).getIssue(bigIssueId);
         IssueStruct issueFirst = service.getIssue(address, issueId);
         IssueStruct issueSecond = service.getIssue(address, issueId);
@@ -64,8 +65,8 @@ public class ContractServiceTest extends IntegrationTest {
     public void shouldCacheIssuesSeparately() {
         long issueIdOne = 1L;
         long issueIdTwo = 2L;
-        BigInteger bigIssueIdOne = BigInteger.valueOf(issueIdOne);
-        BigInteger bigIssueIdTwo = BigInteger.valueOf(issueIdTwo);
+        BigInteger bigIssueIdOne = valueOf(issueIdOne);
+        BigInteger bigIssueIdTwo = valueOf(issueIdTwo);
         doReturn(issueCall(bigIssueIdOne)).when(mockContract).getIssue(bigIssueIdOne);
         doReturn(issueCall(bigIssueIdTwo)).when(mockContract).getIssue(bigIssueIdTwo);
         IssueStruct issueOne = service.getIssue(address, issueIdOne);
@@ -79,7 +80,7 @@ public class ContractServiceTest extends IntegrationTest {
     @Test
     public void shouldEvictIssueCacheOnUpdate() {
         long issueId = 1L;
-        BigInteger bigIssueId = BigInteger.valueOf(issueId);
+        BigInteger bigIssueId = valueOf(issueId);
         doReturn(issueCall(bigIssueId)).when(mockContract).getIssue(bigIssueId);
         service.getIssue(address, issueId); // fetch once
         eventPublisher.publishEvent(new IssueUpdateEvent(this, address, issueId));
@@ -87,10 +88,17 @@ public class ContractServiceTest extends IntegrationTest {
         verify(mockContract, times(2)).getIssue(bigIssueId);
     }
 
-    private RemoteCall<Tuple11<BigInteger, BigInteger, String, List<String>, List<Boolean>, Boolean, Boolean, Boolean,
-        Boolean, List<String>, List<BigInteger>>> issueCall(BigInteger issueId) {
-        return new RemoteCall<>(() -> new Tuple11<>(issueId, ZERO, "0x4ad3c9d222043e219901353bf1a0cdbef4570c68", emptyList(), emptyList(), false, false, false,
-            false, emptyList(), emptyList())
+    private RemoteCall<Tuple8<BigInteger, BigInteger, String, List<String>,
+        List<Boolean>, BigInteger, List<String>, List<BigInteger>>> issueCall(BigInteger issueId) {
+        return new RemoteCall<>(() -> new Tuple8<>(
+            issueId,
+            ZERO,
+            "0x4ad3c9d222043e219901353bf1a0cdbef4570c68",
+            emptyList(),
+            emptyList(),
+            IssueStruct.Status.DEFAULT.getCode(),
+            emptyList(),
+            emptyList())
         );
     }
 }

@@ -10,12 +10,12 @@ contract('DebugChain Donation Test', (accounts) => {
     it("should set the donator address", async () => {
         let instance = await DebugChain.deployed();
         let issue = await instance.getIssue.call(1);
-        assert.equal(issue[9][0], accounts[0]);
+        assert.equal(issue[6][0], accounts[0]);
     });
     it("should assign the donator address to the donation value", async () => {
         let instance = await DebugChain.deployed();
         let issue = await instance.getIssue.call(1);
-        assert.equal(web3.fromWei(issue[10][0]).toNumber(), 5);
+        assert.equal(web3.fromWei(issue[7][0]).toNumber(), 5);
     });
     it("should add the issue to the issue lookup table ", async () => {
         let instance = await DebugChain.deployed();

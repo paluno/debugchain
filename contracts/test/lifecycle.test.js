@@ -16,29 +16,30 @@ contract('DebugChain Lifecycle Test', async (accounts) => {
     it("should not be approved by non-maintainers", async () => {
         let instance = await DebugChain.deployed();
         try {
-            await instance.setApproved(1, true, { from: accounts[1] });
+            await instance.setApproved(1, true, [accounts[2]], { from: accounts[1] });
             assert.fail('should have thrown before');
         } catch (error) {
             assertError(error);
         }
     });
-    it("should approve the issue by the maintainer", async () => {
+    it("should approve the issue by the maintainer and set reviewer", async () => {
         let instance = await DebugChain.deployed();
-        await instance.setApproved(1, true, { from: accounts[0] });
+        await instance.setApproved(1, true, [accounts[2]], { from: accounts[0] });
         let issue = await instance.getIssue.call(1);
-        assert.isTrue(issue[5]);
+        assert.equal(issue[5], 1);
+        assert.equal(issue[3][0], accounts[2]);
     });
     it("should set the developer address and lock the issue", async () => {
         let instance = await DebugChain.deployed();
         await instance.setDeveloper(1, { from: accounts[1] });
         let issue = await instance.getIssue.call(1);
+        assert.equal(issue[5], 2);
         assert.equal(issue[2], accounts[1]);
-        assert.isTrue(issue[6]);
     });
     it("should not be marked as developed by non-developers", async () => {
         let instance = await DebugChain.deployed();
         try {
-            await instance.setApproved(1, true, { from: accounts[2] });
+            await instance.setDeveloped(1, true, { from: accounts[2] });
             assert.fail('should have thrown before');
         } catch (error) {
             assertError(error);
@@ -48,7 +49,7 @@ contract('DebugChain Lifecycle Test', async (accounts) => {
         let instance = await DebugChain.deployed();
         await instance.setDeveloped(1, true, { from: accounts[1] });
         let issue = await instance.getIssue.call(1);
-        assert.isTrue(issue[7]);
+        assert.equal(issue[5], 3);
     });
     it("should not set reviewers by non-maintainers", async () => {
         let instance = await DebugChain.deployed();
@@ -84,13 +85,13 @@ contract('DebugChain Lifecycle Test', async (accounts) => {
     it("should not complete the issue when only a subset of maintainers approved changes", async () => {
         let instance = await DebugChain.deployed();
         let issue = await instance.getIssue.call(1);
-        assert.isNotTrue(issue[8]);
+        assert.notEqual(issue[5], 4);
     });
     it("should complete the issue after all the reviewers marked approvement", async () => {
         let instance = await DebugChain.deployed();
         await instance.setReviewed(1, true, { from: accounts[3] });
         let issue = await instance.getIssue.call(1);
-        assert.isTrue(issue[8]);
+        assert.equal(issue[5], 4);
     });
     it("should make the donated funds available for withdrawal to the developer", async () => {
         let instance = await DebugChain.deployed();
