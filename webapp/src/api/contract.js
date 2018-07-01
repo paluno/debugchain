@@ -4,8 +4,12 @@ import byteCode from '../../contracts/___contracts_contracts_DebugChain_sol_Debu
 
 export default class Contract {
 
-    constructor(address) {
-        this.web3 = getWeb3();
+    constructor(address, rpcUrl) {
+        if (rpcUrl) {
+            this.web3 = new Web3(new Web3.providers.HttpProvider(rpcUrl));
+        } else {
+            this.web3 = getWeb3();
+        }
         this.contract = this.web3.eth.contract(abi);
         if (address) {
             this.contract = this.contract.at(address);
