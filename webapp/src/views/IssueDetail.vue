@@ -9,6 +9,7 @@
         <div class="col-auto">
           <button class="btn btn-outline-secondary btn-sm" v-on:click="donateEther">Donate Ether</button>
           <button v-if="lockable" class="btn btn-outline-warning btn-sm" v-on:click="lockIssue">Lock Issue</button>
+          <button v-if="inDevelopment" class="btn btn-outline-primary btn-sm" v-on:click="finishDevelopment">Ready for review</button>
           <button v-if="approvable" class="btn btn-outline-success btn-sm" v-on:click="approveIssue">Approve</button>
         </div>
       </div>
@@ -98,7 +99,8 @@ export default {
     return {
       issue: null,
       approvable: false,
-      lockable: false
+      lockable: false,
+      inDevelopment: false
     };
   },
   created: function() {
@@ -114,11 +116,17 @@ export default {
     lockIssue: function() {
       alert("Hier muss der Metamask-Aufruf für das Locken des Issues rein");
     },
+    finishDevelopment: function() {
+      alert("Hier muss der Metamask-Aufruf für das Markieren des Issues als fertig bearbeitet und ready for review rein");
+    },
     setIssue: function(issue) {
       this.issue = issue;
     },
     setLockable: function() {
       this.lockable = true;
+    },
+    setInDevelopment: function() {
+      this.inDevelopment = true;
     },
     setApprovable: function() {
       this.approvable = true;
@@ -131,20 +139,27 @@ export default {
         gitlab.projects.issues.one(this.projectId, this.issueId),
         gitlab.projects.owned(),
         backend.get("/profile/memberships"),
-        backend.get("/projects/" + this.projectId + "/issues/" + this.issueId)
+        backend.get("/projects/" + this.projectId + "/issues/" + this.issueId),
+        backend.get("/profile")
       ]).then(results => {
         const issue = results[0];
         const projects = results[1];
         const reviewer = results[2].data.reviewer;
         const locked = results[3].data.locked;
+        const developer = results[3].data.developer;
+        const user = results[4].data.address;
 
         this.setIssue(issue);
         if (projects.find(project => project.id == this.projectId)) {
           this.setApprovable();
         }
-        //only show lock issue button if dev is not a reviewer for it himself and not locked already
+        //only show "lock issue" - button if dev is not a reviewer for it himself and not locked already
         if (!reviewer && !locked) {
           this.setLockable();
+        }
+        //only show "mark ready for review" - button if current user is the developer that has locked the issue
+        if (user === developer) {
+          this.setInDevelopment();
         }
         this.$emit("isLoading", false);
       });
