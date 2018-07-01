@@ -8,6 +8,7 @@
         </div>
         <div class="col-auto">
           <button class="btn btn-outline-secondary btn-sm" v-on:click="donateEther">Donate Ether</button>
+          <button v-if="lockable" class="btn btn-outline-warning btn-sm" v-on:click="lockIssue">Lock Issue</button>
           <button v-if="approvable" class="btn btn-outline-success btn-sm" v-on:click="approveIssue">Approve</button>
         </div>
       </div>
@@ -38,6 +39,7 @@
 <script>
 import Navigation from "@/components/Navigation";
 import Gitlab from "@/api/gitlab";
+import Backend from "@/api/backend";
 
 export default {
   name: "IssueDetail",
@@ -95,7 +97,8 @@ export default {
   data: function() {
     return {
       issue: null,
-      approvable: false
+      approvable: false,
+      lockable: false
     };
   },
   created: function() {
@@ -108,26 +111,38 @@ export default {
     approveIssue: function() {
       alert("Hier muss der Metamask-Aufruf für das Approven des Issues rein");
     },
+    lockIssue: function() {
+      alert("Hier muss der Metamask-Aufruf für das Locken des Issues rein");
+    },
     setIssue: function(issue) {
       this.issue = issue;
+    },
+    setLockable: function() {
+      this.lockable = true;
     },
     setApprovable: function() {
       this.approvable = true;
     },
     updateData: function() {
       const gitlab = Gitlab.getClient();
+      const backend = Backend.getClient();
 
       this.$emit("isLoading", true);
       Promise.all([
         gitlab.projects.issues.one(this.projectId, this.issueId),
-        gitlab.projects.owned()
+        gitlab.projects.owned(),
+        backend.get("/profile/memberships")
       ]).then(results => {
         const issue = results[0];
         const projects = results[1];
+        const reviewer = results[2].data.reviewer;
 
         this.setIssue(issue);
         if (projects.find(project => project.id == this.projectId)) {
           this.setApprovable();
+        }
+        if (!reviewer) { //only show lock issue button if dev is not a reviewer for it himself
+          this.setLockable();
         }
         this.$emit("isLoading", false);
       });
