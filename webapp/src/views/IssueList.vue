@@ -1,6 +1,6 @@
 <template>
   <div class="issueList">
-    <Navigation v-bind:projectId="projectId"/>
+    <Navigation v-bind:projectId="projectId" />
     <div class="table">
       <vue-good-table
         :columns="columns"
@@ -16,6 +16,7 @@
 
 <script>
 import Gitlab from "@/api/gitlab";
+import Backend from "@/api/backend";
 import Navigation from "@/components/Navigation";
 
 export default {
@@ -64,22 +65,48 @@ export default {
     this.updateData();
   },
   methods: {
-    setIssues: function(newIssues) {
-      this.rows = newIssues.map(issue => {
+    setIssues: function(gitlabIssues, contractIssues) {
+      this.rows = gitlabIssues.map(gIssue => {
+        const cIssue = contractIssues.find(c => c.id == gIssue.id);
         return {
-          id: issue.id,
-          issue: issue.title,
-          eth: 0,
-          status: "Unknown"
+          id: gIssue.id,
+          issue: gIssue.title,
+          eth: cIssue ? cIssue.donationSum : 0,
+          status: cIssue
+            ? this.getIssueStateFromContractIssue(cIssue)
+            : "Unknown"
         };
       });
     },
+    getIssueStateFromContractIssue: function(issue) {
+      if (issue.approved) {
+        return "Approved";
+      }
+      if (issue.locked) {
+        return "Locked";
+      }
+      if (issue.developed) {
+        return "Developed";
+      }
+      if (issue.completed) {
+        return "Completed";
+      }
+    },
     updateData: function() {
       const gitlab = Gitlab.getClient();
-      
+      const backend = Backend.getClient();
+
       this.$emit("isLoading", true);
-      gitlab.projects.issues.list(this.projectId).then(issues => {
-        this.setIssues(issues);
+      Promise.all([
+        gitlab.projects.issues.list(this.projectId),
+        backend
+          .get("projects/" + this.projectId + "/issues/")
+          .then(result => result.data)
+      ]).then(results => {
+        const issues = results[0];
+        const contractIssues = results[1];
+
+        this.setIssues(issues, contractIssues);
         this.$emit("isLoading", false);
       });
     },
