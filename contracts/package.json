@@ -12,7 +12,7 @@
     "compile-win": "./node_modules/.bin/truffle.cmd compile",
     "migrate-win": "./node_modules/.bin/truffle.cmd migrate",
     "test-win": "./node_modules/.bin/truffle.cmd test",
-    "rpc": "ganache-cli -p 9545 -m 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'"
+    "rpc": "ganache-cli -p 9545 -m \"candy maple cake sugar pudding cream honey rich smooth crumble sweet treat\""
   },
   "devDependencies": {
     "truffle": "^4.1.11",
