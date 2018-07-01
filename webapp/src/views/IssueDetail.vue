@@ -126,23 +126,24 @@ export default {
     updateData: function() {
       const gitlab = Gitlab.getClient();
       const backend = Backend.getClient();
-
       this.$emit("isLoading", true);
       Promise.all([
         gitlab.projects.issues.one(this.projectId, this.issueId),
         gitlab.projects.owned(),
-        backend.get("/profile/memberships")
+        backend.get("/profile/memberships"),
+        backend.get("/projects/" + this.projectId + "/issues/" + this.issueId)
       ]).then(results => {
         const issue = results[0];
         const projects = results[1];
         const reviewer = results[2].data.reviewer;
+        const locked = results[3].data.locked;
 
         this.setIssue(issue);
         if (projects.find(project => project.id == this.projectId)) {
           this.setApprovable();
         }
-        if (!reviewer) { //only show lock issue button if dev is not a reviewer for it himself
-        //TODO check if issue is already locked by another dev
+        //only show lock issue button if dev is not a reviewer for it himself and not locked already
+        if (!reviewer && !locked) {
           this.setLockable();
         }
         this.$emit("isLoading", false);
