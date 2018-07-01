@@ -5,12 +5,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.web3j.protocol.core.RemoteCall;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static due.debugchain.chain.IssueStruct.fromTuple;
 import static java.math.BigInteger.valueOf;
+import static java.util.stream.Collectors.*;
 
 /**
  * Service for contract interaction.
@@ -27,6 +34,16 @@ public class ContractService {
         return fromTuple(send(contract(contractAddress).getIssue(valueOf(issueId))));
     }
 
+    @Cacheable(value = "issuesIdList", key = "#contractAddress")
+    public List<BigInteger> getIssueIdList(String contractAddress) {
+        return send(contract(contractAddress).getIssueLookup());
+    }
+
+    @Cacheable(value = "profileEther", key = "#contractAddress + '-' + #profileAdress")
+    public BigInteger getUserWithdrawals(String contractAddress, String profileAdress) {
+        return send(contract(contractAddress).getPendingWithdrawals(profileAdress));
+    }
+
     /**
      * Listens for issue updates and evicts cache accordingly.
      * <br>
@@ -35,7 +52,11 @@ public class ContractService {
      * @param event event indicating issue update
      */
     @EventListener
-    @CacheEvict(value = "issues", key = "#event.contractAddress + '-' + #event.issueId")
+    @Caching(evict = {
+        @CacheEvict(value = "issues", key = "#event.contractAddress + '-' + #event.issueId"),
+        @CacheEvict(value = "issuesIdList", key = "#event.contractAddress"),
+        @CacheEvict(value = "profileEther", key = "#contractAddress + '-' + #profileAdress")
+    })
     public void evictIssue(IssueUpdateEvent event) {
         log.info(String.format("Cache evicted for issue %s in contract %s", event.getIssueId(), event.getContractAddress()));
         // NOOP

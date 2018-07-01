@@ -2,9 +2,13 @@ package due.debugchain.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import due.debugchain.api.dto.ProjectResource;
+import due.debugchain.api.dto.UserResource;
 import due.debugchain.api.mappers.ProjectMapper;
+import due.debugchain.api.mappers.UserMapper;
 import due.debugchain.persistence.ProjectService;
+import due.debugchain.persistence.UserService;
 import due.debugchain.persistence.entities.ProjectEntity;
+import due.debugchain.persistence.entities.UserEntity;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +34,8 @@ public class ProjectsController implements ProjectsApi {
     private final ProjectService projectService;
 
     private final ProjectMapper projectMapper;
+
+    private final UserMapper userMapper;
 
     private final ObjectMapper objectMapper;
 
@@ -67,4 +74,8 @@ public class ProjectsController implements ProjectsApi {
         return new ResponseEntity<>(BAD_REQUEST);
     }
 
+    public Collection<UserResource> getReviewers(ProjectEntity project) {
+
+        return userMapper.entitiesToResources(projectService.getAllReviewers(project.getGitlabId()));
+    }
 }
