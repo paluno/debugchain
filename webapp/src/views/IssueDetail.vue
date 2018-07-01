@@ -142,6 +142,7 @@ export default {
           this.setApprovable();
         }
         if (!reviewer) { //only show lock issue button if dev is not a reviewer for it himself
+        //TODO check if issue is already locked by another dev
           this.setLockable();
         }
         this.$emit("isLoading", false);
