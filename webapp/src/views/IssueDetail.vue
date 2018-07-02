@@ -1,6 +1,6 @@
 <template>
   <div class="issue_detail">
-    <Navigation v-bind:projectId="projectId" v-bind:issueId="issueId" />
+    <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" v-bind:projectId="projectId" v-bind:issueId="issueId" />
     <div v-if="issue">
       <div class="form-group row">
         <div class="col">
@@ -182,6 +182,10 @@ export default {
   },
   data: function() {
     return {
+      profile: {
+        address: null,
+        pendingWithdrawals: null
+      },
       issue: null,
       chainIssue: null,
       approvable: false
@@ -225,10 +229,10 @@ export default {
         for (let i = 0; i < cIssue.reviewers.length; i++) {
           if (!this.combinedReviews === undefined) {
             this.combinedReviews[i] = {
-            reviewer: cIssue.reviewers[i],
-            value: cIssue.reviewStatus[i]
+              reviewer: cIssue.reviewers[i],
+              value: cIssue.reviewStatus[i]
+            };
           }
-          };
         }
       }
       cIssue.reviewStatus = this.combined;
@@ -258,18 +262,27 @@ export default {
               );
               resolve(); // Resolve auch im Fehlerfall, damit das Promise.all() nicht auch aufs Maul fliegt
             });
-        })
+        }),
+        backend.get("/profile").then(r => r.data)
       ]).then(results => {
         const issue = results[0];
         const projects = results[1];
         const chainIssue = results[2];
+        const profile = results[3];
 
+        this.setProfile(profile);
         this.setIssue(issue, chainIssue);
         if (projects.find(project => project.id == this.projectId)) {
           this.setApprovable();
         }
         this.$emit("isLoading", false);
       });
+    },
+    setProfile: function(newProfile) {
+      this.profile = {
+        address: newProfile.address,
+        pendingWithdrawals: newProfile.pendingWithdrawals
+      };
     }
   }
 };

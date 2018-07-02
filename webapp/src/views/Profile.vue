@@ -2,7 +2,7 @@
   <div id="profile">
     <set-address-modal v-model="showAddressModal" v-on:save="addressModalSaveEvent" />
 
-    <Navigation v-bind:projectId="projectId" />
+    <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" />
     <h1>Profile</h1>
     <div class="form-group row">
       <label class="col-md-3" for="username">Username:</label>
@@ -68,6 +68,10 @@ export default {
   },
   data: function() {
     return {
+      profile: {
+        address: null,
+        pendingWithdrawals: null
+      },
       address: undefined,
       showAddressModal: false
     };
@@ -120,9 +124,16 @@ export default {
       this.$emit("isLoading", true);
       // TODO handle / display errors in component
       backend.get("/profile").then(response => {
-        this.$emit("isLoading", false);
         this.address = response.data.address;
+        this.setProfile(response.data);
+        this.$emit("isLoading", false);
       });
+    },
+    setProfile: function(newProfile) {
+      this.profile = {
+        address: newProfile.address,
+        pendingWithdrawals: newProfile.pendingWithdrawals
+      };
     }
   }
 };

@@ -1,6 +1,6 @@
 <template>
   <div class="issueList">
-    <Navigation v-bind:projectId="projectId" />
+    <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" :projectId="projectId" />
     <div class="table">
       <vue-good-table
         :columns="columns"
@@ -29,6 +29,10 @@ export default {
   },
   data: function() {
     return {
+      profile: {
+        address: null,
+        pendingWithdrawals: null
+      },
       columns: [
         {
           label: "ID",
@@ -99,14 +103,23 @@ export default {
         gitlab.projects.issues.list(this.projectId),
         backend
           .get("projects/" + this.projectId + "/issues/")
-          .then(result => result.data)
+          .then(result => result.data),
+        backend.get("/profile").then(r => r.data)
       ]).then(results => {
         const issues = results[0];
         const contractIssues = results[1];
+        const profile = results[2];
 
         this.setIssues(issues, contractIssues);
+        this.setProfile(profile);
         this.$emit("isLoading", false);
       });
+    },
+    setProfile: function(newProfile) {
+      this.profile = {
+        address: newProfile.address,
+        pendingWithdrawals: newProfile.pendingWithdrawals
+      };
     },
     navigate: function(params) {
       this.$router.push({
