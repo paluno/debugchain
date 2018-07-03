@@ -274,7 +274,7 @@ contract DebugChain {
      */
     function setApproved(uint _id, bool _val, address[] _reviewers) public issueExists(_id) onlyMaintainer {
         require(_reviewers.length > 0);
-
+        // TODO: check if issue is in later status (like completed)
         if (_val) {
             issues[_id].lifecycleStatus = 1;
         } else {
@@ -293,6 +293,7 @@ contract DebugChain {
      * @param _id issue id
      * @param _val locked status to set
      */
+    // TODO remove bool parameter
     function setLocked(uint _id, bool _val) private issueExists(_id) {
         require(issues[_id].lifecycleStatus == 1);
 
@@ -316,6 +317,7 @@ contract DebugChain {
      * @param _id issue id
      * @param _val developed status to set
      */
+    // TODO remove bool parameter
     function setDeveloped(uint _id, bool _val) public issueExists(_id) onlyDeveloper(_id) {
         // only accept developed flag, when issue is locked
         require(issues[_id].lifecycleStatus == 2);

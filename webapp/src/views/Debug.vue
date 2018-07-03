@@ -7,6 +7,14 @@
       Gitlab Project id: <input v-model="contract.projectId">
       <button @click="createDemoContract">Create demo contract</button><br> Created Contract Address: {{contract.address}}
     </div>
+    <div>
+      <button @click="donate">Donate</button>
+      <button @click="approve">Approve</button>
+      <button @click="lock">Lock</button>
+      <button @click="develop">Give to review</button>
+      <button @click="review">Review</button>
+      <button @click="withdraw">Payday</button>
+    </div>
     <hr>
     <h2>UserSession</h2>
     <input type="submit" value="Get current User" v-on:click="getUser" />
@@ -69,7 +77,44 @@ export default {
       client.users.current().then(result => {
         that.userJson = JSON.stringify(result, null, 2);
       });
-    }
+    },
+      donate: function () {
+          const contract = new Contract(this.contract.address);
+          contract.donate(1, 1).then(() => {
+              console.log('Hurray, you donated');
+          })
+      },
+      approve: function () {
+          const contract = new Contract(this.contract.address);
+          // address is the first one from test rpc
+          contract.approve(1, [contract.web3.eth.accounts[0]]).then(() => {
+              console.log('Hurray, you approved');
+          })
+      },
+      lock: function () {
+          const contract = new Contract(this.contract.address);
+          contract.lock(1).then(() => {
+              console.log('Hurray, you locked');
+          })
+      },
+      develop: function () {
+          const contract = new Contract(this.contract.address);
+          contract.develop(1).then(() => {
+              console.log('Hurray, you completed development');
+          })
+      },
+      review: function () {
+          const contract = new Contract(this.contract.address);
+          contract.review(1).then(() => {
+              console.log('Hurray, you reviewed something');
+          })
+      },
+      withdraw: function () {
+          const contract = new Contract(this.contract.address);
+          contract.withdraw().then(() => {
+              console.log('Hurray, you got payed brah');
+          })
+      }
   }
 };
 </script>
