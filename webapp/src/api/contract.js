@@ -18,6 +18,7 @@ export default class Contract {
             if (address) {
                 reject(new Error('Contract already deployed at ' + address));
             }
+            let firstCall = true;
             this.instance.new(
                 projectId,
                 {data: byteCode, from: this.web3.eth.accounts[0]},
@@ -26,12 +27,30 @@ export default class Contract {
                         reject(err);
                     }
                     // callback is called twice, address is only present the second time
-                    if (contract.address) {
+                    if (firstCall) {
+                        firstCall = false;
+                    } else {
                         this.instance = contract;
                         resolve(contract.address);
                     }
                 }
             );
         })
+    }
+
+    donate(issueId, donationValue) {
+        return new Promise((resolve, reject) => {
+            // call the donate function from the deployed contract
+            this.instance.donate(
+                issueId,
+                {from: this.web3.eth.accounts[0], value: this.web3.toWei(donationValue, "ether")},
+                (error) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    resolve();
+                }
+            );
+        });
     }
 }
