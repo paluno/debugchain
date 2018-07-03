@@ -75,7 +75,8 @@
     <div v-else>
       <div class="row">
         <div class="col">
-          <h1>This issue is not yet tracked in the DebugChain</h1>
+          <h2>This issue is not yet tracked in the DebugChain</h2>
+          <p>It will automatically be part of the DebugChain after someone has donated some ether so it. You can do this by clicking the "Donate"-button above!</p>
         </div>
       </div>
     </div>
@@ -183,34 +184,38 @@ export default {
     },
     setIssue: function(issue, chainIssue) {
       this.issue = issue;
-      this.chainIssue = chainIssue;
-      this.chainIssue.donationSum =
-        this.chainIssue.donationSum / 1000000000000000000;
-      this.combinedDonations = [];
-      if (
-        this.chainIssue.donationValues.length == this.chainIssue.donators.length
-      ) {
-        for (let i = 0; i < this.chainIssue.donationValues.length; i++) {
-          this.combinedDonations[i] = {
-            donator: this.chainIssue.donators[i],
-            value: this.chainIssue.donationValues[i] / 1000000000000000000
-          };
+      if (chainIssue !== undefined) {
+        this.chainIssue = chainIssue;
+        this.chainIssue.donationSum =
+          this.chainIssue.donationSum / 1000000000000000000;
+        this.combinedDonations = [];
+        if (
+          this.chainIssue.donationValues.length ==
+          this.chainIssue.donators.length
+        ) {
+          for (let i = 0; i < this.chainIssue.donationValues.length; i++) {
+            this.combinedDonations[i] = {
+              donator: this.chainIssue.donators[i],
+              value: this.chainIssue.donationValues[i] / 1000000000000000000
+            };
+          }
         }
-      }
-      this.combinedReviews = [];
-      if (
-        this.chainIssue.reviewers.length == this.chainIssue.reviewStatus.length
-      ) {
-        for (let i = 0; i < this.chainIssue.reviewers.length; i++) {
-          this.combinedReviews[i] = {
-            reviewer: this.chainIssue.reviewers[i],
-            value: this.chainIssue.reviewStatus[i]
-          };
+        this.combinedReviews = [];
+        if (
+          this.chainIssue.reviewers.length ==
+          this.chainIssue.reviewStatus.length
+        ) {
+          for (let i = 0; i < this.chainIssue.reviewers.length; i++) {
+            this.combinedReviews[i] = {
+              reviewer: this.chainIssue.reviewers[i],
+              value: this.chainIssue.reviewStatus[i]
+            };
+          }
         }
+        console.log(this.chainIssue);
+        this.chainIssue.donationValues = this.combinedDonations;
+        this.chainIssue.reviewStatus = this.combinedReviews;
       }
-      console.log(this.chainIssue);
-      this.chainIssue.donationValues = this.combinedDonations;
-      this.chainIssue.reviewStatus = this.combinedReviews;
     },
     setApprovable: function() {
       this.approvable = true;
@@ -220,12 +225,23 @@ export default {
       const backend = Backend.getClient();
 
       this.$emit("isLoading", true);
+
       Promise.all([
         gitlab.projects.issues.one(this.projectId, this.issueId),
         gitlab.projects.owned(),
-        backend
-          .get("projects/" + this.projectId + "/issues/" + this.issueId)
-          .then(result => result.data)
+        new Promise((resolve, reject) => {
+          backend
+            .get("projects/" + this.projectId + "/issues/" + this.issueId)
+            .then(result => {
+              resolve(result.data);
+            })
+            .catch(error => {
+              console.log(
+                "Could not get issue-details from backend/chain. Maybe this issue is not yet tracked"
+              );
+              resolve(); // Resolve auch im Fehlerfall, damit das Promise.all() nicht auch aufs Maul fliegt
+            });
+        })
       ]).then(results => {
         const issue = results[0];
         const projects = results[1];
