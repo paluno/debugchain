@@ -72,24 +72,22 @@ export default {
           id: gIssue.id,
           issue: gIssue.title,
           eth: cIssue ? cIssue.donationSum : 0,
-          status: cIssue
-            ? this.getIssueStateFromContractIssue(cIssue)
-            : "Unknown"
+          status: cIssue ? this.getIssueStateFromContractIssue(cIssue) : "New"
         };
       });
     },
     getIssueStateFromContractIssue: function(issue) {
-      if (issue.approved) {
-        return "Approved";
-      }
-      if (issue.locked) {
-        return "Locked";
-      }
-      if (issue.developed) {
-        return "Developed";
-      }
-      if (issue.completed) {
-        return "Completed";
+      switch (issue.lifecycleStatus) {
+        case "APPROVED":
+          return "Approved";
+        case "LOCKED":
+          return "Reserved";
+        case "DEVELOPED":
+          return "In development";
+        case "COMPLETED":
+          return "In Review";
+        case "DEFAULT":
+          return "New";
       }
     },
     updateData: function() {

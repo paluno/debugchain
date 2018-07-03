@@ -2,35 +2,119 @@
   <div id="debug">
     <Navigation/>
     <h1>Debug</h1>
+    <h2>Create Test / Demo data</h2>
+    <div>
+      Gitlab Project id: <input v-model="contract.projectId">
+      <button @click="createDemoContract">Create demo contract</button><br> Created Contract Address: {{contract.address}}
+    </div>
+    <div>
+      <button @click="donate">Donate</button>
+      <button @click="approve">Approve</button>
+      <button @click="lock">Lock</button>
+      <button @click="develop">Give to review</button>
+      <button @click="review">Review</button>
+      <button @click="withdraw">Payday</button>
+    </div>
+    <hr>
+    <h2>UserSession</h2>
     <input type="submit" value="Get current User" v-on:click="getUser" />
     <pre>{{userJson}}</pre>
     <hr>
-    <router-link to="/invalid-url">Test invalid url</router-link>
+    <h2>Router</h2>
+    <router-link to="/invalid-url">Test invalid router-link url</router-link>
   </div>
 </template>
 
 <script>
-import gitlab from "@/api/gitlab";
+import Gitlab from "@/api/gitlab";
+import Backend from "@/api/backend";
+import Contract from "@/api/contract";
 import Navigation from "@/components/Navigation";
 
 export default {
-  name: "debug",
+  name: "Debug",
   components: {
     Navigation
   },
   data: function() {
     return {
-      userJson: ""
+      userJson: "",
+      contract: {
+        address: "",
+        projectId: 0
+      }
     };
   },
   methods: {
+    createDemoContract() {
+      const contract = new Contract(null, "http://localhost:9545");
+      const backend = Backend.getClient();
+
+      if (!this.contract.projectId) {
+        alert("Please enter a project id");
+        return;
+      }
+
+      contract
+        .deploy(this.contract.projectId)
+        .then(address => (this.contract.address = address))
+        .then(() => console.log("Deployed contract for project"))
+        .then(() =>
+          backend.post("/projects/", {
+            address: this.contract.address,
+            gitlabId: this.contract.projectId
+          })
+        )
+        .then(() => console.log("Created project in backend"))
+        // TODO create more test data: donate issues, etc
+        .catch(error => {
+          alert("Could not complete demo contract creation.");
+          console.log("Demo creation failed:", error);
+        });
+    },
     getUser: function(event) {
-      const client = gitlab.getClient();
-      const that = this;
-      client.users.current().then(function(result) {
+      const client = Gitlab.getClient();
+      client.users.current().then(result => {
         that.userJson = JSON.stringify(result, null, 2);
       });
-    }
+    },
+      donate: function () {
+          const contract = new Contract(this.contract.address);
+          contract.donate(1, 1).then(() => {
+              console.log('Hurray, you donated');
+          })
+      },
+      approve: function () {
+          const contract = new Contract(this.contract.address);
+          // address is the first one from test rpc
+          contract.approve(1, [contract.web3.eth.accounts[0]]).then(() => {
+              console.log('Hurray, you approved');
+          })
+      },
+      lock: function () {
+          const contract = new Contract(this.contract.address);
+          contract.lock(1).then(() => {
+              console.log('Hurray, you locked');
+          })
+      },
+      develop: function () {
+          const contract = new Contract(this.contract.address);
+          contract.develop(1).then(() => {
+              console.log('Hurray, you completed development');
+          })
+      },
+      review: function () {
+          const contract = new Contract(this.contract.address);
+          contract.review(1).then(() => {
+              console.log('Hurray, you reviewed something');
+          })
+      },
+      withdraw: function () {
+          const contract = new Contract(this.contract.address);
+          contract.withdraw().then(() => {
+              console.log('Hurray, you got payed brah');
+          })
+      }
   }
 };
 </script>
