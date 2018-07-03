@@ -139,28 +139,44 @@ export default {
         gitlab.projects.issues.one(this.projectId, this.issueId),
         gitlab.projects.owned(),
         backend.get("/profile/memberships"),
-        backend.get("/projects/" + this.projectId + "/issues/" + this.issueId),
+        backend
+          .get("/projects/" + this.projectId + "/issues/" + this.issueId)
+          .catch(error => {
+            // TODO fix response code in backend to 404
+            if (error.response.status != 500) throw error;
+          }),
         backend.get("/profile")
       ]).then(results => {
         const issue = results[0];
         const projects = results[1];
-        const reviewer = results[2].data.reviewer;
-        const locked = results[3].data.locked;
-        const developer = results[3].data.developer;
-        const user = results[4].data.address;
+        const memberships = results[2];
+        const contractIssue = results[3];
+        const profile = results[4];
+
+        const reviewer = memberships.data.reviewer;
+        const user = profile.data.address;
 
         this.setIssue(issue);
         if (projects.find(project => project.id == this.projectId)) {
           this.setApprovable();
         }
-        //only show "lock issue" - button if dev is not a reviewer for it himself and not locked already
-        if (!reviewer && !locked) {
-          this.setLockable();
+
+        // show contract actions if issue is available in contract/backend (i.e. has been donated to)
+        if (contractIssue) {
+          const locked = contractIssue.data.locked;
+          const developer = contractIssue.data.developer;
+
+          //only show "lock issue" - button if dev is not a reviewer for it himself and not locked already
+          if (!reviewer && !locked) {
+            this.setLockable();
+          }
+
+          //only show "mark ready for review" - button if current user is the developer that has locked the issue
+          if (user === developer) {
+            this.setInDevelopment();
+          }
         }
-        //only show "mark ready for review" - button if current user is the developer that has locked the issue
-        if (user === developer) {
-          this.setInDevelopment();
-        }
+        
         this.$emit("isLoading", false);
       });
     }
