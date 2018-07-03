@@ -9,8 +9,10 @@
         <div class="col-auto">
           <button class="btn btn-outline-secondary btn-sm" v-on:click="donateEther">Donate Ether</button>
           <button v-if="lockable" class="btn btn-outline-warning btn-sm" v-on:click="lockIssue">Lock Issue</button>
-          <button v-if="inDevelopment" class="btn btn-outline-primary btn-sm" v-on:click="finishDevelopment">Ready for review</button>
+          <button v-if="inDevelopment" class="btn btn-outline-primary btn-sm" v-on:click="finishDevelopment">Ready for Review</button>
           <button v-if="approvable" class="btn btn-outline-success btn-sm" v-on:click="approveIssue">Approve</button>
+          <button v-if="reviewable" class="btn btn-outline-primary btn-sm" v-on:click="finishReview">Finish Review</button>
+          <button v-if="withdrawable" class="btn btn-outline-success btn-sm" v-on:click="withdraw">Withdraw</button>
         </div>
       </div>
       <div class="row">
@@ -100,7 +102,9 @@ export default {
       issue: null,
       approvable: false,
       lockable: false,
-      inDevelopment: false
+      inDevelopment: false,
+      reviewable: false,
+      withdrawable: false,
     };
   },
   created: function() {
@@ -109,27 +113,61 @@ export default {
   methods: {
     donateEther: function() {
       alert("Hier muss der Metamask-Aufruf für das Donaten rein");
+      // Donate Ether -> Show Approve button
+      this.setApprovable(); //TODO Nur einmalig
     },
     approveIssue: function() {
       alert("Hier muss der Metamask-Aufruf für das Approven des Issues rein");
+      // Approve Issue -> Show Lock button
+      this.setLockable();
     },
     lockIssue: function() {
       alert("Hier muss der Metamask-Aufruf für das Locken des Issues rein");
+      // Lock Issue -> Show Ready for Review button
+      this.setInDevelopment();
     },
     finishDevelopment: function() {
       alert("Hier muss der Metamask-Aufruf für das Markieren des Issues als fertig bearbeitet und ready for review rein");
+      // Finish Development -> Show Review button
+      this.setReviewable();
+    },
+    finishReview: function() {
+      alert("Hier muss der Metamask-Aufruf für das Finishen des Reviews rein");
+      // Finish Review -> Show Withdraw Button
+      this.setWithdrawable(); //TODO Überprüfen, ob alle Reviewer bestätigt haben
+    },
+    withdraw: function() {
+      alert("Hier muss der Metamask-Aufruf für das Withdrawen des Geldes rein");
+      // Withdraw Money -> Disable all buttons
+      this.reviewable = false;
     },
     setIssue: function(issue) {
       this.issue = issue;
     },
+    setApprovable: function() {
+      // Show Approve button
+      this.approvable = true;
+    },
     setLockable: function() {
+      // Disable Approve button and show Lock button
+      this.approvable = false;
       this.lockable = true;
     },
     setInDevelopment: function() {
+      // Disable Lock button and show Ready for Review button
+      this.lockable = false;
       this.inDevelopment = true;
     },
-    setApprovable: function() {
-      this.approvable = true;
+    setReviewable: function() {
+      // Disable Ready for Review button and show Review button
+      this.inDevelopment = false;
+      this.reviewable = true;
+    },
+    setWithdrawable: function() {
+      //this.donatable = false TODO Könnte das Sinn machen?
+      // Disable Review button and show Withdraw button
+      this.reviewable = false;
+      this.withdrawable = true;
     },
     updateData: function() {
       const gitlab = Gitlab.getClient();
@@ -156,14 +194,15 @@ export default {
         const membership = results[2];
         const contractIssue = results[3];
         const profile = results[4];
-
+        //const reviewer = null; 
         const reviewer = membership.reviewer;
         const user = profile.address;
 
         this.setIssue(issue);
 
         if (ownedProjects.find(project => project.id == this.projectId)) {
-          this.setApprovable();
+          // TODO: set appovable if user == maintainer
+          //this.setApprovable();
         }
 
         // show contract actions if issue is available in contract/backend (i.e. has been donated to)
