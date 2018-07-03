@@ -32,12 +32,53 @@
         </div>
       </div>
     </div>
+    <hr>
+    <div v-if="chainIssue">
+      <div class="row">
+        <div class="col">
+          <span>{{chainIssue.developer}}</span>
+          <label>is the current developer</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <span>{{chainIssue.lifecycleStatus}}</span>
+          <label>Status</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <span>Bounty is {{chainIssue.donationSum}} Ether</span>
+        </div>
+      </div>
+      <div v-for="donator in chainIssue.donators" :key="donator" class="row">
+        <div class="col">
+          <span>{{donator}} is a donator</span>
+        </div>
+      </div>
+      <div v-for="donation in chainIssue.donationValues" :key="donation" class="row">
+        <div class="col">
+          <span>{{donation}} Ether was donated</span>
+        </div>
+      </div>
+      <div v-for="reviewer in chainIssue.reviewers" :key="reviewer" class="row">
+        <div class="col">
+          <span>{{reviewer}} is a reviewer</span>
+        </div>
+      </div>
+      <div v-for="status in chainIssue.reviewStatus" :key="status" class="row">
+        <div class="col">
+          <span>{{status}} is status of x-review</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import Navigation from "@/components/Navigation";
 import Gitlab from "@/api/gitlab";
+import Backend from "@/api/backend";
 
 export default {
   name: "IssueDetail",
@@ -95,6 +136,7 @@ export default {
   data: function() {
     return {
       issue: null,
+      chainIssue: null,
       approvable: false
     };
   },
@@ -108,29 +150,56 @@ export default {
     approveIssue: function() {
       alert("Hier muss der Metamask-Aufruf für das Approven des Issues rein");
     },
-    setIssue: function(issue) {
+    setIssue: function(issue, chainIssue) {
       this.issue = issue;
+      this.chainIssue = chainIssue;
+      this.chainIssue.lifecycleStatus = this.getIssueStateFromContractIssue(
+        this.chainIssue
+      );
+      console.log(chainIssue);
+      console.log(chainIssue.donators);
+      console.log(chainIssue.donationValues);
+      console.log(chainIssue.reviewers);
     },
     setApprovable: function() {
       this.approvable = true;
     },
     updateData: function() {
       const gitlab = Gitlab.getClient();
+      const backend = Backend.getClient();
 
       this.$emit("isLoading", true);
       Promise.all([
         gitlab.projects.issues.one(this.projectId, this.issueId),
-        gitlab.projects.owned()
+        gitlab.projects.owned(),
+        backend
+          .get("projects/" + this.projectId + "/issues/" + this.issueId)
+          .then(result => result.data)
       ]).then(results => {
         const issue = results[0];
         const projects = results[1];
+        const chainIssue = results[2];
 
-        this.setIssue(issue);
+        this.setIssue(issue, chainIssue);
         if (projects.find(project => project.id == this.projectId)) {
           this.setApprovable();
         }
         this.$emit("isLoading", false);
       });
+    },
+    getIssueStateFromContractIssue: function(chainIssue) {
+      switch (chainIssue.lifecycleStatus) {
+        case "APPROVED":
+          return "Approved";
+        case "LOCKED":
+          return "Reserved";
+        case "DEVELOPED":
+          return "In development";
+        case "COMPLETED":
+          return "In Review";
+        case "DEFAULT":
+          return "New";
+      }
     }
   }
 };
