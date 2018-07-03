@@ -2,6 +2,8 @@ import getWeb3 from "./getWeb3"
 import abi from '../../contracts/___contracts_contracts_DebugChain_sol_DebugChain.abi';
 import byteCode from '../../contracts/___contracts_contracts_DebugChain_sol_DebugChain.bin';
 
+const DEFAULT_GAS = 5000000;
+
 export default class Contract {
 
     constructor(address) {
@@ -21,7 +23,7 @@ export default class Contract {
             let firstCall = true;
             this.instance.new(
                 projectId,
-                {data: byteCode, from: this.web3.eth.accounts[0]},
+                {data: byteCode, from: this.web3.eth.accounts[0], gas: DEFAULT_GAS},
                 (err, contract) => {
                     if (err) {
                         reject(err);
@@ -40,10 +42,9 @@ export default class Contract {
 
     donate(issueId, donationValue) {
         return new Promise((resolve, reject) => {
-            // call the donate function from the deployed contract
             this.instance.donate(
                 issueId,
-                {from: this.web3.eth.accounts[0], value: this.web3.toWei(donationValue, "ether")},
+                {from: this.web3.eth.accounts[0], value: this.web3.toWei(donationValue, "ether"), gas: DEFAULT_GAS},
                 (error) => {
                     if (error) {
                         reject(error);
@@ -53,4 +54,23 @@ export default class Contract {
             );
         });
     }
+
+    approve(issueId, reviewers) {
+        return new Promise((resolve, reject) => {
+            this.instance.setApproved(
+                issueId,
+                true, // TODO: this will probably be removed
+                reviewers,
+                {from: this.web3.eth.accounts[0], gas: DEFAULT_GAS},
+                (error) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    resolve();
+                }
+            );
+        });
+    }
+
+
 }

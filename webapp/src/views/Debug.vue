@@ -7,6 +7,10 @@
       Gitlab Project id: <input v-model="contract.projectId">
       <button @click="createDemoContract">Create demo contract</button><br> Created Contract Address: {{contract.address}}
     </div>
+    <div>
+      <button @click="donate">Donate</button>
+      <button @click="approve">Approve</button>
+    </div>
     <hr>
     <h2>UserSession</h2>
     <input type="submit" value="Get current User" v-on:click="getUser" />
@@ -69,7 +73,19 @@ export default {
       client.users.current().then(result => {
         that.userJson = JSON.stringify(result, null, 2);
       });
-    }
+    },
+      donate: function () {
+          const contract = new Contract(this.contract.address);
+          contract.donate(1, 0.0001).then(() => {
+              console.log('Hurray, you donated');
+          })
+      },
+      approve: function () {
+          const contract = new Contract(this.contract.address);
+          contract.approve(1, ['0x627306090abab3a6e1400e9345bc60c78a8bef57']).then(() => {
+              console.log('Hurray, you approved');
+          })
+      }
   }
 };
 </script>
