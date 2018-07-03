@@ -4,6 +4,14 @@ import byteCode from '../../contracts/___contracts_contracts_DebugChain_sol_Debu
 
 const DEFAULT_GAS = 5000000;
 
+// callback provider for ugly web3.js method signature
+const handleCallback = (resolve, reject) => (err, result) => {
+    if (err) {
+        reject(err);
+    }
+    resolve(result);
+};
+
 export default class Contract {
 
     constructor(address) {
@@ -45,12 +53,7 @@ export default class Contract {
             this.instance.donate(
                 issueId,
                 {from: this.web3.eth.accounts[0], value: this.web3.toWei(donationValue, "ether"), gas: DEFAULT_GAS},
-                (error) => {
-                    if (error) {
-                        reject(error);
-                    }
-                    resolve();
-                }
+                handleCallback(resolve, reject)
             );
         });
     }
@@ -59,15 +62,54 @@ export default class Contract {
         return new Promise((resolve, reject) => {
             this.instance.setApproved(
                 issueId,
-                true, // TODO: this will probably be removed
+                true, // TODO: this will be removed
                 reviewers,
                 {from: this.web3.eth.accounts[0], gas: DEFAULT_GAS},
-                (error) => {
-                    if (error) {
-                        reject(error);
-                    }
-                    resolve();
-                }
+                handleCallback(resolve, reject)
+            );
+        });
+    }
+
+    lock(issueId) {
+        return new Promise((resolve, reject) => {
+            this.instance.setDeveloper(
+                issueId,
+                {from: this.web3.eth.accounts[0], gas: DEFAULT_GAS},
+                handleCallback(resolve, reject)
+            );
+        });
+    }
+
+    develop(issueId) {
+        return new Promise((resolve, reject) => {
+            this.instance.setDeveloped(
+                issueId,
+                true, // TODO: this will be removed
+                {from: this.web3.eth.accounts[0], gas: DEFAULT_GAS},
+                handleCallback(resolve, reject)
+            );
+        });
+    }
+
+    review(issueId, accepted) {
+        if (accepted === undefined) {
+            accepted = true;
+        }
+        return new Promise((resolve, reject) => {
+            this.instance.setReviewed(
+                issueId,
+                accepted,
+                {from: this.web3.eth.accounts[0], gas: DEFAULT_GAS},
+                handleCallback(resolve, reject)
+            );
+        });
+    }
+
+    withdraw() {
+        return new Promise((resolve, reject) => {
+            this.instance.withdraw(
+                {from: this.web3.eth.accounts[0], gas: DEFAULT_GAS},
+                handleCallback(resolve, reject)
             );
         });
     }

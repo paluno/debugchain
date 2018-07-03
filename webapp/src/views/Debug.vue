@@ -10,6 +10,10 @@
     <div>
       <button @click="donate">Donate</button>
       <button @click="approve">Approve</button>
+      <button @click="lock">Lock</button>
+      <button @click="develop">Give to review</button>
+      <button @click="review">Review</button>
+      <button @click="withdraw">Payday</button>
     </div>
     <hr>
     <h2>UserSession</h2>
@@ -76,14 +80,39 @@ export default {
     },
       donate: function () {
           const contract = new Contract(this.contract.address);
-          contract.donate(1, 0.0001).then(() => {
+          contract.donate(1, 1).then(() => {
               console.log('Hurray, you donated');
           })
       },
       approve: function () {
           const contract = new Contract(this.contract.address);
-          contract.approve(1, ['0x627306090abab3a6e1400e9345bc60c78a8bef57']).then(() => {
+          // address is the first one from test rpc
+          contract.approve(1, [contract.web3.eth.accounts[0]]).then(() => {
               console.log('Hurray, you approved');
+          })
+      },
+      lock: function () {
+          const contract = new Contract(this.contract.address);
+          contract.lock(1).then(() => {
+              console.log('Hurray, you locked');
+          })
+      },
+      develop: function () {
+          const contract = new Contract(this.contract.address);
+          contract.develop(1).then(() => {
+              console.log('Hurray, you completed development');
+          })
+      },
+      review: function () {
+          const contract = new Contract(this.contract.address);
+          contract.review(1).then(() => {
+              console.log('Hurray, you reviewed something');
+          })
+      },
+      withdraw: function () {
+          const contract = new Contract(this.contract.address);
+          contract.withdraw().then(() => {
+              console.log('Hurray, you got payed brah');
           })
       }
   }
