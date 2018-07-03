@@ -36,39 +36,46 @@
     <div v-if="chainIssue">
       <div class="row">
         <div class="col">
-          <span>{{chainIssue.developer}}</span>
-          <label>is the current developer</label>
+          <h2>Issue-Chain-Detail</h2>
         </div>
       </div>
       <div class="row">
         <div class="col">
-          <span>{{chainIssue.lifecycleStatus}}</span>
-          <label>Status</label>
+          <span :class="chainBadgeState">{{chainIssue.lifecycleStatus}}</span>
+          <span>
+            <b>{{chainIssue.developer}}</b>
+            is listed as developer
+          </span>
         </div>
       </div>
+      <hr>
       <div class="row">
         <div class="col">
-          <span>Bounty is {{chainIssue.donationSum}} Ether</span>
+          <h4>{{chainIssue.donationSum}} Ether is the current bounty</h4>
         </div>
       </div>
-      <div v-for="donator in chainIssue.donators" :key="donator" class="row">
+      <div v-for="donation in chainIssue.donationValues" :key="donation.donator" class="row">
         <div class="col">
-          <span>{{donator}} is a donator</span>
+          <span>{{donation.donator}} has donated {{donation.value}} Ether </span>
         </div>
       </div>
-      <div v-for="donation in chainIssue.donationValues" :key="donation" class="row">
+      <hr>
+      <div class="row">
         <div class="col">
-          <span>{{donation}} Ether was donated</span>
+          <h4>Review-Overview</h4>
         </div>
       </div>
-      <div v-for="reviewer in chainIssue.reviewers" :key="reviewer" class="row">
+      <div v-for="review in chainIssue.reviewStatus" :key="review.reviewer" class="row">
         <div class="col">
-          <span>{{reviewer}} is a reviewer</span>
+          <span v-if="review.value">{{review.reviewer}} has reviewed this issue</span>
+          <span v-else>{{review.reviewer}} has not yet reviewed this issue</span>
         </div>
       </div>
-      <div v-for="status in chainIssue.reviewStatus" :key="status" class="row">
+    </div>
+    <div v-else>
+      <div class="row">
         <div class="col">
-          <span>{{status}} is status of x-review</span>
+          <h1>This issue is not yet tracked in the DebugChain</h1>
         </div>
       </div>
     </div>
@@ -131,6 +138,30 @@ export default {
         }
       }
       return "badge badge-secondary";
+    },
+    chainBadgeState: function() {
+      if (this.chainIssue != null) {
+        switch (this.chainIssue.lifecycleStatus) {
+          case "DEFAULT": // Default = New
+            return "badge badge-success";
+            break;
+          case "APPROVED":
+            return "badge badge-info";
+            break;
+          case "LOCKED":
+            return "badge badge-primary";
+            break;
+          case "DEVELOPED":
+            return "badge badge-warning";
+            break;
+          case "COMPLETED":
+            return "badge badge-light";
+            break;
+          default:
+            return "badge badge-secondary";
+        }
+      }
+      return "badge badge-secondary";
     }
   },
   data: function() {
@@ -153,13 +184,33 @@ export default {
     setIssue: function(issue, chainIssue) {
       this.issue = issue;
       this.chainIssue = chainIssue;
-      this.chainIssue.lifecycleStatus = this.getIssueStateFromContractIssue(
-        this.chainIssue
-      );
-      console.log(chainIssue);
-      console.log(chainIssue.donators);
-      console.log(chainIssue.donationValues);
-      console.log(chainIssue.reviewers);
+      this.chainIssue.donationSum =
+        this.chainIssue.donationSum / 1000000000000000000;
+      this.combinedDonations = [];
+      if (
+        this.chainIssue.donationValues.length == this.chainIssue.donators.length
+      ) {
+        for (let i = 0; i < this.chainIssue.donationValues.length; i++) {
+          this.combinedDonations[i] = {
+            donator: this.chainIssue.donators[i],
+            value: this.chainIssue.donationValues[i] / 1000000000000000000
+          };
+        }
+      }
+      this.combinedReviews = [];
+      if (
+        this.chainIssue.reviewers.length == this.chainIssue.reviewStatus.length
+      ) {
+        for (let i = 0; i < this.chainIssue.reviewers.length; i++) {
+          this.combinedReviews[i] = {
+            reviewer: this.chainIssue.reviewers[i],
+            value: this.chainIssue.reviewStatus[i]
+          };
+        }
+      }
+      console.log(this.chainIssue);
+      this.chainIssue.donationValues = this.combinedDonations;
+      this.chainIssue.reviewStatus = this.combinedReviews;
     },
     setApprovable: function() {
       this.approvable = true;
@@ -186,20 +237,6 @@ export default {
         }
         this.$emit("isLoading", false);
       });
-    },
-    getIssueStateFromContractIssue: function(chainIssue) {
-      switch (chainIssue.lifecycleStatus) {
-        case "APPROVED":
-          return "Approved";
-        case "LOCKED":
-          return "Reserved";
-        case "DEVELOPED":
-          return "In development";
-        case "COMPLETED":
-          return "In Review";
-        case "DEFAULT":
-          return "New";
-      }
     }
   }
 };
