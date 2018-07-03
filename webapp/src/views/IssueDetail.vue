@@ -138,33 +138,38 @@ export default {
       Promise.all([
         gitlab.projects.issues.one(this.projectId, this.issueId),
         gitlab.projects.owned(),
-        backend.get("/profile/memberships"),
+        backend
+          .get("/profile/memberships")
+          .then(r => r.data)
+          .then(data => data.find(m => m.projectGitlabId == this.projectId)),
         backend
           .get("/projects/" + this.projectId + "/issues/" + this.issueId)
+          .then(r => r.data)
           .catch(error => {
             // TODO fix response code in backend to 404
             if (error.response.status != 500) throw error;
           }),
-        backend.get("/profile")
+        backend.get("/profile").then(r => r.data)
       ]).then(results => {
         const issue = results[0];
-        const projects = results[1];
-        const memberships = results[2];
+        const ownedProjects = results[1];
+        const membership = results[2];
         const contractIssue = results[3];
         const profile = results[4];
 
-        const reviewer = memberships.data.reviewer;
-        const user = profile.data.address;
+        const reviewer = membership.reviewer;
+        const user = profile.address;
 
         this.setIssue(issue);
-        if (projects.find(project => project.id == this.projectId)) {
+
+        if (ownedProjects.find(project => project.id == this.projectId)) {
           this.setApprovable();
         }
 
         // show contract actions if issue is available in contract/backend (i.e. has been donated to)
         if (contractIssue) {
-          const locked = contractIssue.data.locked;
-          const developer = contractIssue.data.developer;
+          const locked = contractIssue.locked;
+          const developer = contractIssue.developer;
 
           //only show "lock issue" - button if dev is not a reviewer for it himself and not locked already
           if (!reviewer && !locked) {
@@ -176,7 +181,7 @@ export default {
             this.setInDevelopment();
           }
         }
-        
+
         this.$emit("isLoading", false);
       });
     }
