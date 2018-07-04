@@ -41,7 +41,7 @@
       </div>
       <div class="row">
         <div class="col">
-          <span :class="chainBadgeState">{{chainIssue.lifecycleStatus}}</span>
+          <span :class="chainBadgeState">{{readableLifecycle}}</span>
           <span>
             <b>{{chainIssue.developer}}</b>
             is listed as developer
@@ -60,15 +60,17 @@
         </div>
       </div>
       <hr>
-      <div class="row">
-        <div class="col">
-          <h4>Review-Overview</h4>
+      <div v-if="chainIssue.reviewStatus.length > 0">
+        <div class="row">
+          <div class="col">
+            <h4>Review-Overview</h4>
+          </div>
         </div>
-      </div>
-      <div v-for="review in chainIssue.reviewStatus" :key="review.reviewer" class="row">
-        <div class="col">
-          <span v-if="review.value">{{review.reviewer}} has reviewed this issue</span>
-          <span v-else>{{review.reviewer}} has not yet reviewed this issue</span>
+        <div v-for="review in chainIssue.reviewStatus" :key="review.reviewer" class="row">
+          <div class="col">
+            <span v-if="review.value">{{review.reviewer}} has reviewed this issue</span>
+            <span v-else>{{review.reviewer}} has not yet reviewed this issue</span>
+          </div>
         </div>
       </div>
     </div>
@@ -145,24 +147,37 @@ export default {
         switch (this.chainIssue.lifecycleStatus) {
           case "DEFAULT": // Default = New
             return "badge badge-success";
-            break;
           case "APPROVED":
             return "badge badge-info";
-            break;
           case "LOCKED":
             return "badge badge-primary";
-            break;
           case "DEVELOPED":
             return "badge badge-warning";
-            break;
           case "COMPLETED":
             return "badge badge-light";
-            break;
           default:
             return "badge badge-secondary";
         }
       }
       return "badge badge-secondary";
+    },
+    readableLifecycle: function() {
+      if (this.chainIssue != null) {
+        switch (this.chainIssue.lifecycleStatus) {
+          case "APPROVED":
+            return "Approved";
+          case "LOCKED":
+            return "In Development";
+          case "DEVELOPED":
+            return "In Review";
+          case "COMPLETED":
+            return "Completed";
+          case "DEFAULT":
+            return "New";
+          default:
+            return "New";
+        }
+      }
     }
   },
   data: function() {
@@ -186,36 +201,36 @@ export default {
       this.issue = issue;
       if (chainIssue !== undefined) {
         this.chainIssue = chainIssue;
-        this.chainIssue.donationSum =
-          this.chainIssue.donationSum / 1000000000000000000;
-        this.combinedDonations = [];
-        if (
-          this.chainIssue.donationValues.length ==
-          this.chainIssue.donators.length
-        ) {
-          for (let i = 0; i < this.chainIssue.donationValues.length; i++) {
-            this.combinedDonations[i] = {
-              donator: this.chainIssue.donators[i],
-              value: this.chainIssue.donationValues[i] / 1000000000000000000
-            };
-          }
-        }
-        this.combinedReviews = [];
-        if (
-          this.chainIssue.reviewers.length ==
-          this.chainIssue.reviewStatus.length
-        ) {
-          for (let i = 0; i < this.chainIssue.reviewers.length; i++) {
-            this.combinedReviews[i] = {
-              reviewer: this.chainIssue.reviewers[i],
-              value: this.chainIssue.reviewStatus[i]
-            };
-          }
-        }
-        console.log(this.chainIssue);
-        this.chainIssue.donationValues = this.combinedDonations;
-        this.chainIssue.reviewStatus = this.combinedReviews;
+        this.combineDonations(this.chainIssue);
+        this.combineReviews(this.chainIssue);
       }
+    },
+    combineDonations(cIssue) {
+      cIssue.donationSum = cIssue.donationSum / 1000000000000000000;
+      this.combined = [];
+      if (cIssue.donationValues.length == cIssue.donators.length) {
+        for (let i = 0; i < cIssue.donationValues.length; i++) {
+          this.combined[i] = {
+            donator: cIssue.donators[i],
+            value: cIssue.donationValues[i] / 1000000000000000000
+          };
+        }
+      }
+      cIssue.donationValues = this.combined;
+      cIssue.donators = undefined; // Remove donators since donators are now merged in donationValues
+    },
+    combineReviews(cIssue) {
+      this.combined = [];
+      if (cIssue.reviewers.length == cIssue.reviewStatus.length) {
+        for (let i = 0; i < cIssue.reviewers.length; i++) {
+          this.combinedReviews[i] = {
+            reviewer: cIssue.reviewers[i],
+            value: cIssue.reviewStatus[i]
+          };
+        }
+      }
+      cIssue.reviewStatus = this.combined;
+      cIssue.reviewers = undefined; // Remove reviewers since reviewers are now merged in reviewStatus
     },
     setApprovable: function() {
       this.approvable = true;
