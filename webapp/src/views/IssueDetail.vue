@@ -1,6 +1,28 @@
 <template>
   <div class="issue_detail">
     <Navigation v-bind:projectId="projectId" v-bind:issueId="issueId" />
+
+    <Modal v-model="approveModal.show" title="Create Project">
+      <p>
+        Please assign at least one reviewer in order to approve this issue.
+        The reviewers will be responsible for reviewing the proposed solution for this issue.
+      </p>
+      <div class="row">
+        <label class="col">Pick reviewers (CTRL+Click to choose multiple)</label>
+      </div>
+      <div class="row">
+        <select class="col custom-select" multiple>
+          <option value="1">One</option>
+          <option value="2">Two</option>
+          <option value="3">Three</option>
+        </select>
+      </div>
+      <template slot="footer">
+        <button type="button" class="btn btn-primary" @click="approveIssue">Approve</button>
+        <button type="button" class="btn btn-secondary" @click="closeApproveModal">Close</button>
+      </template>
+    </Modal>
+
     <div v-if="issue">
       <div class="form-group row">
         <div class="col">
@@ -8,7 +30,7 @@
         </div>
         <div class="col-auto">
           <button class="btn btn-outline-secondary btn-sm" v-on:click="donateEther">Donate Ether</button>
-          <button v-if="approvable" class="btn btn-outline-success btn-sm" v-on:click="approveIssue">Approve</button>
+          <button v-if="approvable" class="btn btn-outline-success btn-sm" v-on:click="openApproveModal">Approve</button>
         </div>
       </div>
       <div class="row">
@@ -37,11 +59,15 @@
 
 <script>
 import Navigation from "@/components/Navigation";
+import Modal from "@/components/Modal.vue";
 import Gitlab from "@/api/gitlab";
+import Backend from "@/api/backend";
+import Contract from "@/api/contract";
 
 export default {
   name: "IssueDetail",
   components: {
+    Modal,
     Navigation
   },
   props: {
@@ -94,19 +120,30 @@ export default {
   },
   data: function() {
     return {
+      approveModal: {
+        show: false
+      },
       issue: null,
       approvable: false
     };
   },
   created: function() {
     this.updateData();
+    const contract = new Contract(null, "http://localhost:9545");
+    const backend = Backend.getClient();
+    backend.get("/projects/" + this.projectId).then(result => {
+      this.contractAdress = result.address;
+    });
   },
   methods: {
     donateEther: function() {
       alert("Hier muss der Metamask-Aufruf für das Donaten rein");
     },
     approveIssue: function() {
-      alert("Hier muss der Metamask-Aufruf für das Approven des Issues rein");
+      const contract = new Contract(this.contractAdress);
+      contract.approve(this.issueId, reviewers).then(() => {
+        alert("Hurray, you approved");
+      });
     },
     setIssue: function(issue) {
       this.issue = issue;
@@ -131,6 +168,12 @@ export default {
         }
         this.$emit("isLoading", false);
       });
+    },
+    openApproveModal: function() {
+      this.approveModal.show = true;
+    },
+    closeApproveModal: function() {
+      this.approveModal.show = false;
     }
   }
 };
