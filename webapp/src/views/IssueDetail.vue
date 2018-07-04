@@ -13,11 +13,7 @@
       </div>
       <div class="row">
         <select class="col custom-select" v-model="approveModal.selectedReviewers" multiple>
-          <!--<option v-for="reviewer in possibleReviewers" :key="reviewer.address" value="reviewer.address">{{reviewer.username}}</option>-->
-          <option value="0x627306090abab3a6e1400e9345bc60c78a8bef57">0x627306090abab3a6e1400e9345bc60c78a8bef57</option>
-          <option value="0xf17f52151ebef6c7334fad080c5704d77216b732">0xf17f52151ebef6c7334fad080c5704d77216b732</option>
-          <option value="0xc5fdf4076b8f3a5357c5e395ab970b5b54098fef">0xc5fdf4076b8f3a5357c5e395ab970b5b54098fef</option>
-          <option value="0x821aea9a577a9b44299b9c15c88cf3087f3b5544">0x821aea9a577a9b44299b9c15c88cf3087f3b5544</option>
+          <option v-for="reviewer in possibleReviewers" :key="reviewer.address" v-bind:value="reviewer.address">{{reviewer.username}} - {{reviewer.address}}</option>
         </select>
       </div>
       <template slot="footer">
@@ -142,9 +138,12 @@ export default {
     },
     approveIssue: function() {
       const contract = new Contract(this.contractAddress);
+      console.log(this.approveModal.selectedReviewers);
+      this.$emit("isLoading", true);
       contract
         .approve(this.issueId, this.approveModal.selectedReviewers)
         .then(() => {
+          this.$emit("isLoading", false);
           this.closeApproveModal();
           this.updateData();
         });
@@ -157,8 +156,8 @@ export default {
     },
     setPossibleReviewers: function(possibleReviewers, projectMembers) {
       this.possibleReviewers = possibleReviewers.map(reviewer => {
-        for (let i = 0; i < this.projectMembers.length; i++) {
-          const member = this.projectMembers[i];
+        for (let i = 0; i < projectMembers.length; i++) {
+          const member = projectMembers[i];
           if (reviewer.gitlabId == member.id) {
             return {
               address: reviewer.address,

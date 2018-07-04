@@ -20,7 +20,7 @@
         <span>{{profile.address}}</span>
       </div>
     </div>
-    <div class="form-group row">
+    <div v-if="profile.address" class="form-group row">
       <div class="col-md-3">Reviewer-State:</div>
       <div class="col-md-9">
         <div class="form-check" v-for="membership in projectMemberships" :key="membership.projectGitlabId">
@@ -28,6 +28,12 @@
           <label class="form-check-label" v-bind:for="membership.projectGitlabId">I want to be a reviewer for Project: {{membership.projectname}}</label>
         </div>
         <button class="btn btn-outline-secondary btn-sm" @click="saveMembership">Save Reviewer-State</button>
+      </div>
+    </div>
+    <div v-else class="form-group row">
+      <div class="col-md-3">Reviewer-State:</div>
+      <div class="col-md-9">
+        <p>You need to add a ethereum-address in order to manage your reviewer-settings!</p>
       </div>
     </div>
     <hr class="my-4">
@@ -164,8 +170,8 @@ export default {
       const backend = Backend.getClient();
       this.$emit("isLoading", true);
       backend.post("/profile/memberships", preparedMemberships).then(result => {
-        console.log(result);
         this.$emit("isLoading", false);
+        this.updateData();
       });
     },
     updateData: function() {
