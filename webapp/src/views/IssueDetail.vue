@@ -2,19 +2,22 @@
   <div class="issue_detail">
     <Navigation v-bind:projectId="projectId" v-bind:issueId="issueId" />
 
-    <Modal v-model="approveModal.show" title="Create Project">
+    <Modal v-model="approveModal.show" title="Assign Reviewers">
       <p>
         Please assign at least one reviewer in order to approve this issue.
         The reviewers will be responsible for reviewing the proposed solution for this issue.
       </p>
+      <p> AKTUELL NOCH DUMMY DATEN!!</p>
       <div class="row">
         <label class="col">Pick reviewers (CTRL+Click to choose multiple)</label>
       </div>
       <div class="row">
-        <select class="col custom-select" multiple>
-          <option value="1">One</option>
-          <option value="2">Two</option>
-          <option value="3">Three</option>
+        <select class="col custom-select" v-model="approveModal.selectedReviewers" multiple>
+          <!--<option v-for="reviewer in possibleReviewers" :key="reviewer.address" value="reviewer.address">{{reviewer.username}}</option>-->
+          <option value="0x627306090abab3a6e1400e9345bc60c78a8bef57">0x627306090abab3a6e1400e9345bc60c78a8bef57</option>
+          <option value="0xf17f52151ebef6c7334fad080c5704d77216b732">0xf17f52151ebef6c7334fad080c5704d77216b732</option>
+          <option value="0xc5fdf4076b8f3a5357c5e395ab970b5b54098fef">0xc5fdf4076b8f3a5357c5e395ab970b5b54098fef</option>
+          <option value="0x821aea9a577a9b44299b9c15c88cf3087f3b5544">0x821aea9a577a9b44299b9c15c88cf3087f3b5544</option>
         </select>
       </div>
       <template slot="footer">
@@ -121,49 +124,81 @@ export default {
   data: function() {
     return {
       approveModal: {
-        show: false
+        show: false,
+        selectedReviewers: []
       },
       issue: null,
+      contractAddress: null,
+      possibleReviewers: null,
       approvable: false
     };
   },
   created: function() {
     this.updateData();
-    const contract = new Contract(null, "http://localhost:9545");
-    const backend = Backend.getClient();
-    backend.get("/projects/" + this.projectId).then(result => {
-      this.contractAdress = result.address;
-    });
   },
   methods: {
     donateEther: function() {
       alert("Hier muss der Metamask-Aufruf für das Donaten rein");
     },
     approveIssue: function() {
-      const contract = new Contract(this.contractAdress);
-      contract.approve(this.issueId, reviewers).then(() => {
-        alert("Hurray, you approved");
-      });
+      const contract = new Contract(this.contractAddress);
+      contract
+        .approve(this.issueId, this.approveModal.selectedReviewers)
+        .then(() => {
+          this.closeApproveModal();
+          this.updateData();
+        });
     },
     setIssue: function(issue) {
       this.issue = issue;
+    },
+    setContractAddress: function(contractAddress) {
+      this.contractAddress = contractAddress;
+    },
+    setPossibleReviewers: function(possibleReviewers, projectMembers) {
+      this.possibleReviewers = possibleReviewers.map(reviewer => {
+        for (member in projectMembers) {
+          if (reviewer.gitlabId == member.id) {
+            return {
+              address: reviewer.address,
+              gitlabId: reviewer.gitlabId,
+              username: member.username
+            };
+          }
+        }
+      });
     },
     setApprovable: function() {
       this.approvable = true;
     },
     updateData: function() {
       const gitlab = Gitlab.getClient();
+      const backend = Backend.getClient();
 
       this.$emit("isLoading", true);
       Promise.all([
         gitlab.projects.issues.one(this.projectId, this.issueId),
-        gitlab.projects.owned()
+        gitlab.projects.owned(),
+        gitlab.projects.members.list(this.projectId),
+        backend.get("/projects/" + this.projectId).then(result => {
+          return result.data;
+        }),
+        backend
+          .get("/projects/" + this.projectId + "/reviewers")
+          .then(result => {
+            return result.data;
+          })
       ]).then(results => {
         const issue = results[0];
-        const projects = results[1];
+        const ownedProjects = results[1];
+        const projectMembers = results[2];
+        const currentProject = results[3];
+        const possibleReviewers = results[4];
 
         this.setIssue(issue);
-        if (projects.find(project => project.id == this.projectId)) {
+        this.setContractAddress(currentProject.address);
+        this.setPossibleReviewers(possibleReviewers, projectMembers);
+        if (ownedProjects.find(project => project.id == this.projectId)) {
           this.setApprovable();
         }
         this.$emit("isLoading", false);
