@@ -157,7 +157,8 @@ export default {
     },
     setPossibleReviewers: function(possibleReviewers, projectMembers) {
       this.possibleReviewers = possibleReviewers.map(reviewer => {
-        for (member in projectMembers) {
+        for (let i = 0; i < this.projectMembers.length; i++) {
+          const member = this.projectMembers[i];
           if (reviewer.gitlabId == member.id) {
             return {
               address: reviewer.address,
