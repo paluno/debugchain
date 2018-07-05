@@ -69,13 +69,12 @@
 
           <Modal v-model="finishReviewModal.show" title="Finish Review">
             <p>
-              Give your review feedback for isssue "{{issue.title}}":
+              Give your review feedback for issue "{{issue.title}}":
             </p>
 
             <template slot="footer">
-              <!--TODO: handle finishReviewModal.accepted = true (onclick Accept) /false (onclick Reject) -->
-              <button type="button" class="btn btn-primary" @click="finishReview">Accept</button>
-              <button type="button" class="btn btn-primary" @click="finishReview">Reject</button>
+              <button type="button" class="btn btn-primary" @click="finishReview(true)">Accept</button>
+              <button type="button" class="btn btn-danger" @click="finishReview(false)">Reject</button>
               <button type="button" class="btn btn-secondary" @click="closeFinishReviewModal">Cancel</button>
             </template>
           </Modal>
@@ -222,8 +221,7 @@ export default {
         show: false
       },
       finishReviewModal: {
-        show: false,
-        accepted: false
+        show: false
       }
     };
   },
@@ -273,13 +271,12 @@ export default {
         .then(() => this.closeFinishDevelopmentModal())
         .then(() => this.updateData());
     },
-    finishReview: function() {
-      const accepted = this.finishReviewModal.accepted; // TODO get user input from finishReviewModal
+    finishReview: function(isAccepted) {
       const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
       contract
-        .review(issueId, accepted)
+        .review(issueId, isAccepted)
         .then(() => this.closeFinishReviewModal())
         .then(() => this.updateData());
     },
