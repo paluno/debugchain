@@ -5,11 +5,12 @@
       <div class="form-group row">
         <div class="col">
           <h1>{{issue.title}}</h1>
+          <button @click="createContract">Create Contract</button><br> Created Contract Address: {{contract.address}}
         </div>
         <div class="col-auto">
-          <button class="btn btn-outline-secondary btn-sm" v-on:click="donateEther">Donate Ether</button>
+          <button v-if="donatable" class="btn btn-outline-secondary btn-sm" v-on:click="donateEther">Donate Ether</button>
           <button v-if="lockable" class="btn btn-outline-warning btn-sm" v-on:click="lockIssue">Lock Issue</button>
-          <button v-if="inDevelopment" class="btn btn-outline-primary btn-sm" v-on:click="finishDevelopment">Ready for Review</button>
+          <button v-if="inDevelopment" class="btn btn-outline-primary btn-sm" v-on:click="finishDevelopment">Finish Development</button>
           <button v-if="approvable" class="btn btn-outline-success btn-sm" v-on:click="approveIssue">Approve</button>
           <button v-if="reviewable" class="btn btn-outline-primary btn-sm" v-on:click="finishReview">Finish Review</button>
           <button v-if="withdrawable" class="btn btn-outline-success btn-sm" v-on:click="withdraw">Withdraw</button>
@@ -43,6 +44,8 @@
 import Navigation from "@/components/Navigation";
 import Gitlab from "@/api/gitlab";
 import Backend from "@/api/backend";
+
+var donated = false;
 
 export default {
   name: "IssueDetail",
@@ -100,6 +103,7 @@ export default {
   data: function() {
     return {
       issue: null,
+      donatable: true, 
       approvable: false,
       lockable: false,
       inDevelopment: false,
@@ -111,35 +115,80 @@ export default {
     this.updateData();
   },
   methods: {
+    createContract() {
+      const contract = new Contract(null, "http://localhost:9545");
+      const backend = Backend.getClient();
+
+      if (!projectId) {
+        alert("Please enter a project id");
+        return;
+      }
+
+      contract
+        .deploy(projectId)
+        .then(address => (this.contract.address = address))
+        .then(() => console.log("Deployed contract for project"))
+        .then(() =>
+          backend.post("/projects/", {
+            address: this.contract.address,
+            gitlabId: this.contract.projectId
+          })
+        )
+        .then(() => console.log("Created project in backend"))
+        // TODO create more test data: donate issues, etc
+        .catch(error => {
+          alert("Could not complete demo contract creation.");
+          console.log("Demo creation failed:", error);
+        });
+    },
     donateEther: function() {
-      alert("Hier muss der Metamask-Aufruf für das Donaten rein");
-      // Donate Ether -> Show Approve button
-      this.setApprovable(); //TODO Nur einmalig
+      // const donation = this.donateEtherModal.donation; // TODO Add field?
+      contract.donate(issueId, 1).then(() => { // TODO Add donation variable
+          console.log('Hurray, you donated');
+      })
+      // Donate Ether -> Show Approve button (only once)
+      if(!donated) {
+        this.setApprovable();
+        donated = true;
+      }
     },
     approveIssue: function() {
-      alert("Hier muss der Metamask-Aufruf für das Approven des Issues rein");
+      // address is the first one from test rpc
+      contract.approve(issueId, [contract.web3.eth.accounts[0]]).then(() => { // TODO Add reviewer variable
+          console.log('Hurray, you approved');
+      })
       // Approve Issue -> Show Lock button
       this.setLockable();
     },
     lockIssue: function() {
-      alert("Hier muss der Metamask-Aufruf für das Locken des Issues rein");
+      contract.lock(issueId).then(() => {
+          console.log('Hurray, you locked');
+      })
       // Lock Issue -> Show Ready for Review button
       this.setInDevelopment();
     },
     finishDevelopment: function() {
-      alert("Hier muss der Metamask-Aufruf für das Markieren des Issues als fertig bearbeitet und ready for review rein");
+      contract.develop(issueId).then(() => {
+          console.log('Hurray, you completed development');
+      })
       // Finish Development -> Show Review button
       this.setReviewable();
     },
     finishReview: function() {
-      alert("Hier muss der Metamask-Aufruf für das Finishen des Reviews rein");
+      const accepted = true; //TODO Check if all reviewers have accepted the solution
+      contract.review(issueId, accepted).then(() => {
+          console.log('Hurray, you reviewed something');
+      })
       // Finish Review -> Show Withdraw Button
-      this.setWithdrawable(); //TODO Überprüfen, ob alle Reviewer bestätigt haben
+      this.setWithdrawable();
     },
     withdraw: function() {
-      alert("Hier muss der Metamask-Aufruf für das Withdrawen des Geldes rein");
+      contract.withdraw().then(() => {
+          console.log('Hurray, you got payed brah');
+      })
       // Withdraw Money -> Disable all buttons
-      this.reviewable = false;
+      this.donatable = false;
+      this.withdrawable = false;
     },
     setIssue: function(issue) {
       this.issue = issue;
@@ -164,7 +213,7 @@ export default {
       this.reviewable = true;
     },
     setWithdrawable: function() {
-      //this.donatable = false TODO Könnte das Sinn machen?
+      //this.donatable = false; //TODO Macht das Sinn?
       // Disable Review button and show Withdraw button
       this.reviewable = false;
       this.withdrawable = true;
@@ -194,14 +243,14 @@ export default {
         const membership = results[2];
         const contractIssue = results[3];
         const profile = results[4];
-        //const reviewer = null; 
-        const reviewer = membership.reviewer;
+        const reviewer = null;
+        //const reviewer = membership.reviewer; // TODO 
         const user = profile.address;
 
         this.setIssue(issue);
 
         if (ownedProjects.find(project => project.id == this.projectId)) {
-          // TODO: set appovable if user == maintainer
+          // TODO set appovable if user == maintainer
           //this.setApprovable();
         }
 
@@ -215,7 +264,7 @@ export default {
             this.setLockable();
           }
 
-          //only show "mark ready for review" - button if current user is the developer that has locked the issue
+          //only show "finish Development" - button if current user is the developer that has locked the issue
           if (user === developer) {
             this.setInDevelopment();
           }
