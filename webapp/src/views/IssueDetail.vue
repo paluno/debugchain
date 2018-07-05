@@ -5,14 +5,81 @@
       <div class="form-group row">
         <div class="col">
           <h1>{{issue.title}}</h1>
-          <button @click="createContract">Create Contract</button><br> Created Contract Address: {{contract.address}}
         </div>
         <div class="col-auto">
           <button v-if="donatable" class="btn btn-outline-secondary btn-sm" v-on:click="donateEther">Donate Ether</button>
-          <button v-if="lockable" class="btn btn-outline-warning btn-sm" v-on:click="lockIssue">Lock Issue</button>
-          <button v-if="inDevelopment" class="btn btn-outline-primary btn-sm" v-on:click="finishDevelopment">Finish Development</button>
-          <button v-if="approvable" class="btn btn-outline-success btn-sm" v-on:click="approveIssue">Approve</button>
-          <button v-if="reviewable" class="btn btn-outline-primary btn-sm" v-on:click="finishReview">Finish Review</button>
+
+          <Modal v-model="donateEtherModal.show" title="Donate Ether">
+            <p>
+              How many Ether do you want to donate for this Isssue?
+            </p>
+            <div class="row">
+              <label class="col-sm-3">Donation: </label>
+              <input class="col" type="number" placeholder="Enter your donation" v-model="donateEtherModal.donation"/>
+              <label class="col-sm-3"> Ether </label>
+              <!--TODO check the validity of the input-->
+            </div>
+            
+            <template slot="footer">
+              <button type="button" class="btn btn-primary" @click="donateEther">Save</button>
+              <button type="button" class="btn btn-secondary" @click="closeDonateEtherModal">Close</button>
+            </template>
+          </Modal>
+
+          <button v-if="lockable" class="btn btn-outline-warning btn-sm" v-on:click="showLockIssueModal">Lock Issue</button>
+          
+          <Modal v-model="lockIssueModal.show" title="Lock Issue">
+            <p>
+              Do you really want to lock the Isssue: {{issue.title}}?
+            </p>
+            
+            <template slot="footer">
+              <button type="button" class="btn btn-primary" @click="lockIssue">Yes</button>
+              <button type="button" class="btn btn-secondary" @click="closeLockIssueModal">No</button>
+            </template>
+          </Modal>
+
+          <button v-if="inDevelopment" class="btn btn-outline-primary btn-sm" v-on:click="showFinishDevelopmentModal">Finish Development</button>
+          
+          <Modal v-model="finishDevelopmentModal.show" title="Finish Developpment">
+            <p>
+              Do you really want to finish the development of isssue: {{issue.title}}?
+            </p>
+            
+            <template slot="footer">
+              <button type="button" class="btn btn-primary" @click="finishDevelopment">Yes</button>
+              <button type="button" class="btn btn-secondary" @click="closeFinishDevelopmentModal">No</button>
+            </template>
+          </Modal>
+          
+          <button v-if="approvable" class="btn btn-outline-success btn-sm" v-on:click="showApproveIssueModal">Approve</button>
+
+          <Modal v-model="approveIssueModal.show" title="Approve Issue">
+            <p>
+              Do you really want to approve the Isssue: {{issue.title}}?
+            </p>
+            
+            <template slot="footer">
+              <button type="button" class="btn btn-primary" @click="approveIssue">Yes</button>
+              <button type="button" class="btn btn-secondary" @click="closeApproveIssueModal">No</button>
+            </template>
+          </Modal>
+          
+          <button v-if="reviewable" class="btn btn-outline-primary btn-sm" v-on:click="showFinishReviewModal">Finish Review</button>
+          
+          <Modal v-model="finishReviewModal.show" title="Finish Review">
+            <p>
+              Give your review feedback for isssue: {{issue.title}}
+            </p>
+            
+            <template slot="footer">
+              <!--TODO: handle finishReviewModal.accepted = true (onclick Accept) /false (onclick Reject) -->
+              <button type="button" class="btn btn-primary" @click="finishReview">Accept</button>
+              <button type="button" class="btn btn-primary" @click="finishReview">Reject</button>
+              <button type="button" class="btn btn-secondary" @click="closeFinishReviewModal">Cancel</button>
+            </template>
+          </Modal>
+
           <button v-if="withdrawable" class="btn btn-outline-success btn-sm" v-on:click="withdraw">Withdraw</button>
         </div>
       </div>
@@ -103,89 +170,108 @@ export default {
   data: function() {
     return {
       issue: null,
-      donatable: true, 
+      donatable: true,
       approvable: false,
       lockable: false,
       inDevelopment: false,
       reviewable: false,
       withdrawable: false,
+      donateEtherModal: {
+        donation: 0,
+        show: false
+      },
+      approveIssueModal: {
+        show: false
+      },
+      lockIssueModal: {
+        show: false
+      },
+      finishDevelopmentModal: {
+        show: false
+      },
+      finishReviewModal: {
+        show: false,
+        accepted: false
+      }
     };
   },
   created: function() {
     this.updateData();
   },
   methods: {
-    createContract() {
-      const contract = new Contract(null, "http://localhost:9545");
-      const backend = Backend.getClient();
-
-      if (!projectId) {
-        alert("Please enter a project id");
-        return;
-      }
-
-      contract
-        .deploy(projectId)
-        .then(address => (this.contract.address = address))
-        .then(() => console.log("Deployed contract for project"))
-        .then(() =>
-          backend.post("/projects/", {
-            address: this.contract.address,
-            gitlabId: this.contract.projectId
-          })
-        )
-        .then(() => console.log("Created project in backend"))
-        // TODO create more test data: donate issues, etc
-        .catch(error => {
-          alert("Could not complete demo contract creation.");
-          console.log("Demo creation failed:", error);
-        });
-    },
     donateEther: function() {
-      // const donation = this.donateEtherModal.donation; // TODO Add field?
-      contract.donate(issueId, 1).then(() => { // TODO Add donation variable
-          console.log('Hurray, you donated');
-      })
-      // Donate Ether -> Show Approve button (only once)
-      if(!donated) {
-        this.setApprovable();
-        donated = true;
-      }
+      const donation = this.donateEtherModal.donation;
+      const client = Backend.getClient();
+      const issueId = this.issueId;
+      client.get("/projects/" + this.projectId).then(response => {
+        const contractAdress = response.data.address;
+        const contract = new Contract(contractAdress);
+        contract.donate(issueId, donation).then(() => {
+          this.setApprovable();
+          this.closeDonateEtherModal();
+        });
+      });
     },
     approveIssue: function() {
-      // address is the first one from test rpc
-      contract.approve(issueId, [contract.web3.eth.accounts[0]]).then(() => { // TODO Add reviewer variable
-          console.log('Hurray, you approved');
-      })
-      // Approve Issue -> Show Lock button
-      this.setLockable();
+      const client = Backend.getClient();
+      const issueId = this.issueId;
+      client.get("/projects/" + this.projectId).then(response => {
+        const contractAdress = response.data.address;
+        const contract = new Contract(contractAdress);
+        // TODO: get selected reviewers
+        //const reviewers = this.approveIssueModal.reviewers;
+        const reviewers = [
+          "0x2341998aeb343",
+          "0x2341998aeb340",
+          "0x2341998aeb345"
+        ]; // Dummy reviewers addresses
+        contract.approve(issueId, reviewers).then(() => {
+          this.setLockable();
+          this.closeApproveIssueModal();
+        });
+      });
     },
     lockIssue: function() {
-      contract.lock(issueId).then(() => {
-          console.log('Hurray, you locked');
-      })
-      // Lock Issue -> Show Ready for Review button
-      this.setInDevelopment();
+      const client = Backend.getClient();
+      const issueId = this.issueId;
+      client.get("/projects/" + this.projectId).then(response => {
+        const contractAdress = response.data.address;
+        const contract = new Contract(contractAdress);
+        contract.lock(issueId).then(() => {
+          this.setInDevelopment();
+          this.closeLockIssueModal();
+        });
+      });
     },
     finishDevelopment: function() {
-      contract.develop(issueId).then(() => {
-          console.log('Hurray, you completed development');
-      })
-      // Finish Development -> Show Review button
-      this.setReviewable();
+      const client = Backend.getClient();
+      const issueId = this.issueId;
+      client.get("/projects/" + this.projectId).then(response => {
+        const contractAdress = response.data.address;
+        const contract = new Contract(contractAdress);
+        contract.develop(issueId).then(() => {
+          this.setReviewable();
+          this.closeFinishDevelopmentModal();
+        });
+      });
     },
     finishReview: function() {
-      const accepted = true; //TODO Check if all reviewers have accepted the solution
-      contract.review(issueId, accepted).then(() => {
-          console.log('Hurray, you reviewed something');
-      })
-      // Finish Review -> Show Withdraw Button
-      this.setWithdrawable();
+      const accepted = this.finishReviewModal.accepted; // TODO get user input from finishReviewModal
+      const client = Backend.getClient();
+      const issueId = this.issueId;
+      client.get("/projects/" + this.projectId).then(response => {
+        const contractAdress = response.data.address;
+        const contract = new Contract(contractAdress);
+        contract.review(issueId, accepted).then(() => {
+          this.setWithdrawable();
+          this.closeFinishReviewModal();
+        });
+      });
     },
     withdraw: function() {
       contract.withdraw().then(() => {
-          console.log('Hurray, you got payed brah');
-      })
+        // TODO show alert message
+      });
       // Withdraw Money -> Disable all buttons
       this.donatable = false;
       this.withdrawable = false;
@@ -195,6 +281,7 @@ export default {
     },
     setApprovable: function() {
       // Show Approve button
+      // TODO set appovable if user == maintainer and donations on this issue not empty
       this.approvable = true;
     },
     setLockable: function() {
@@ -244,14 +331,13 @@ export default {
         const contractIssue = results[3];
         const profile = results[4];
         const reviewer = null;
-        //const reviewer = membership.reviewer; // TODO 
+        //const reviewer = membership.reviewer; // TODO
         const user = profile.address;
 
         this.setIssue(issue);
 
         if (ownedProjects.find(project => project.id == this.projectId)) {
-          // TODO set appovable if user == maintainer
-          //this.setApprovable();
+          this.setApprovable();
         }
 
         // show contract actions if issue is available in contract/backend (i.e. has been donated to)
@@ -272,7 +358,40 @@ export default {
 
         this.$emit("isLoading", false);
       });
+    },
+    showDonateEtherModal: function() {
+      this.donateEtherModal.show = true;
+    },
+    closeDonateEtherModal: function() {
+      this.donateEtherModal.show = false;
+      this.donateEtherModal.donation = 0;
+    },
+    showApproveIssueModal: function() {
+      this.approveIssueModal.show = true;
+      this.approveIssueModal.reviewers = [];
+    },
+    closeApproveIssueModal: function() {
+      this.approveIssueModal.show = false;
+    },
+    showLockIssueModal: function() {
+      this.lockIssueModal.show = true;
+    },
+    closeLockIssueModal: function() {
+      this.lockIssueModal.show = false;
+    },
+    showFinishDevelopmentModal: function() {
+      this.finishDevelopmentModal.show = true;
+    },
+    closeFinishDevelopmentModal: function() {
+      this.finishDevelopmentModal.show = false;
+    },
+     showFinishReviewModal: function() {
+      this.finishReviewModal.show = true;
+    },
+    closeFinishReviewModal: function() {
+      this.finishReviewModal.show = false;
     }
+
   }
 };
 </script>
