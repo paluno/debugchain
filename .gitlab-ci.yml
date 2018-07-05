@@ -42,5 +42,5 @@ docker-build:
     - docker login -u "$dockerHubId" -p "$dockerHubPwd" docker.io
     - docker push $CONTAINER_RELEASE_IMAGE
   only:
-    - DEB-109-vm
+    - master
 
