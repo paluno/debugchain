@@ -111,10 +111,7 @@ import Navigation from "@/components/Navigation";
 import Modal from "@/components/Modal.vue";
 import Gitlab from "@/api/gitlab";
 import Backend from "@/api/backend";
-<<<<<<< HEAD
 import Contract from "@/api/contract";
-=======
->>>>>>> 05c390d545906af9d89e7f56cd87f96b7acaa110
 
 export default {
   name: "IssueDetail",
@@ -214,12 +211,9 @@ export default {
         selectedReviewers: []
       },
       issue: null,
-<<<<<<< HEAD
       contractAddress: null,
       possibleReviewers: null,
-=======
       chainIssue: null,
->>>>>>> 05c390d545906af9d89e7f56cd87f96b7acaa110
       approvable: false
     };
   },
@@ -308,7 +302,6 @@ export default {
       Promise.all([
         gitlab.projects.issues.one(this.projectId, this.issueId),
         gitlab.projects.owned(),
-<<<<<<< HEAD
         gitlab.projects.members.list(this.projectId),
         backend.get("/projects/" + this.projectId).then(result => {
           return result.data;
@@ -317,20 +310,8 @@ export default {
           .get("/projects/" + this.projectId + "/reviewers")
           .then(result => {
             return result.data;
-          })
-      ]).then(results => {
-        const issue = results[0];
-        const ownedProjects = results[1];
-        const projectMembers = results[2];
-        const currentProject = results[3];
-        const possibleReviewers = results[4];
-
-        this.setIssue(issue);
-        this.setContractAddress(currentProject.address);
-        this.setPossibleReviewers(possibleReviewers, projectMembers);
-        if (ownedProjects.find(project => project.id == this.projectId)) {
-=======
-        new Promise((resolve, reject) => {
+          }),
+          new Promise((resolve, reject) => {
           backend
             .get("projects/" + this.projectId + "/issues/" + this.issueId)
             .then(result => {
@@ -345,12 +326,17 @@ export default {
         })
       ]).then(results => {
         const issue = results[0];
-        const projects = results[1];
-        const chainIssue = results[2];
+        const ownedProjects = results[1];
+        const projectMembers = results[2];
+        const currentProject = results[3];
+        const possibleReviewers = results[4];
+        const chainIssue = results[5];
 
-        this.setIssue(issue, chainIssue);
-        if (projects.find(project => project.id == this.projectId)) {
->>>>>>> 05c390d545906af9d89e7f56cd87f96b7acaa110
+        this.setIssue(issue);
+        this.setContractAddress(currentProject.address);
+        this.setPossibleReviewers(possibleReviewers, projectMembers);
+        if (ownedProjects.find(project => project.id == this.projectId)) {
+
           this.setApprovable();
         }
         this.$emit("isLoading", false);
