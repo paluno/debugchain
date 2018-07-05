@@ -207,11 +207,10 @@ export default {
       const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
-      contract.donate(issueId, donation).then(() => {
-        // TODO (for all functions) use reactive properties and just call updateData again
-        this.setApprovable();
-        this.closeDonateEtherModal();
-      });
+      contract
+        .donate(issueId, donation)
+        .then(() => this.closeDonateEtherModal())
+        .then(() => this.updateData());
     },
     approveIssue: function() {
       const client = Backend.getClient();
@@ -224,38 +223,38 @@ export default {
         "0x2341998aeb340",
         "0x2341998aeb345"
       ]; // Dummy reviewers addresses
-      contract.approve(issueId, reviewers).then(() => {
-        this.setLockable();
-        this.closeApproveIssueModal();
-      });
+      contract
+        .approve(issueId, reviewers)
+        .then(() => this.closeApproveIssueModal())
+        .then(() => this.updateData());
     },
     lockIssue: function() {
       const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
-      contract.lock(issueId).then(() => {
-        this.setInDevelopment();
-        this.closeLockIssueModal();
-      });
+      contract
+        .lock(issueId)
+        .then(() => this.closeLockIssueModal())
+        .then(() => this.updateData());
     },
     finishDevelopment: function() {
       const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
-      contract.develop(issueId).then(() => {
-        this.setReviewable();
-        this.closeFinishDevelopmentModal();
-      });
+      contract
+        .develop(issueId)
+        .then(() => this.closeFinishDevelopmentModal())
+        .then(() => this.updateData());
     },
     finishReview: function() {
       const accepted = this.finishReviewModal.accepted; // TODO get user input from finishReviewModal
       const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
-      contract.review(issueId, accepted).then(() => {
-        this.setWithdrawable();
-        this.closeFinishReviewModal();
-      });
+      contract
+        .review(issueId, accepted)
+        .then(() => this.closeFinishReviewModal())
+        .then(() => this.updateData());
     },
     withdraw: function() {
       contract.withdraw().then(() => {
