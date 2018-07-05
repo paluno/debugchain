@@ -1,16 +1,16 @@
 const SETTINGS = {
     oauthConfig: {
         clientId: process.env.VUE_APP_OAUTH_CLIENT_ID,
-        accessTokenUri: "http://localhost:80/oauth/token",
-        authorizationUri: "http://localhost:80/oauth/authorize",
-        redirectUri: "http://localhost:9000/login",
+        accessTokenUri: process.env.VUE_APP_OAUTH_TOKEN_URI,
+        authorizationUri: process.env.VUE_APP_OAUTH_AUTH_URI,
+        redirectUri: process.env.VUE_APP_OAUTH_REDIRECT_URI,
         scopes: ["api"]
     },
     rpc: {
         useHttpProviderUrl: process.env.VUE_APP_WEB3_USE_HTTPPROVIDER_URL
     },
     gitlabConnection: {
-        url: "http://localhost",
+        url: process.env.VUE_APP_GITLAB_URI,
     }
 };
 
