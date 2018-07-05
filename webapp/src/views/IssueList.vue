@@ -81,11 +81,11 @@ export default {
         case "APPROVED":
           return "Approved";
         case "LOCKED":
-          return "Reserved";
+          return "In Development";
         case "DEVELOPED":
-          return "In development";
-        case "COMPLETED":
           return "In Review";
+        case "COMPLETED":
+          return "Completed";
         case "DEFAULT":
           return "New";
       }
