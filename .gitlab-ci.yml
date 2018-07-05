@@ -8,7 +8,7 @@ stages:
 
 variables:
   DOCKER_DRIVER: overlay
-  CONTAINER_RELEASE_IMAGE: snseadam/debugchain
+  CONTAINER_RELEASE_IMAGE: snseadam/debugchain:latest
 
 before_script:
   - docker login -u "$dockerHubId" -p "$dockerHubPwd" index.docker.io
