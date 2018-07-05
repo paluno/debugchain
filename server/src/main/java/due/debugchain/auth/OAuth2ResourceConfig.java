@@ -27,6 +27,8 @@ public class OAuth2ResourceConfig extends ResourceServerConfigurerAdapter {
         http
             .csrf().disable()
             .httpBasic().disable()
+            .headers().frameOptions().sameOrigin()
+            .and()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .authorizeRequests()

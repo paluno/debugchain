@@ -82,12 +82,12 @@ export default {
       contract
         .deploy(projectId)
         .then(address => {
-          client.post("/projects/", {
+          return client.post("/projects/", {
             address: address,
             gitlabId: projectId
           });
-          this.$emit("isLoading", false);
         })
+        .then(() => this.$emit("isLoading", false))
         .then(() => {
           this.$router.push({
             name: "issueList",
