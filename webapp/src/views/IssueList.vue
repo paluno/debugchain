@@ -2,13 +2,7 @@
   <div class="issueList">
     <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" :projectId="projectId" />
     <div class="table">
-      <vue-good-table
-        :columns="columns"
-        :rows="rows"
-        :pagination-options="{ enabled: true, perPage: 5}"
-        :search-options="{ enabled: true}"
-        styleClass="vgt-table striped bordered"
-        @on-row-click="navigate"> 
+      <vue-good-table :columns="columns" :rows="rows" :pagination-options="{ enabled: true, perPage: 5}" :search-options="{ enabled: true}" styleClass="vgt-table striped bordered" @on-row-click="navigate">
       </vue-good-table>
     </div>
   </div>
@@ -104,7 +98,16 @@ export default {
         backend
           .get("projects/" + this.projectId + "/issues/")
           .then(result => result.data),
-        backend.get("/profile/withdrawals/" + this.projectId).then(r => r.data)
+        backend
+          .get("/profile/withdrawals/" + this.projectId)
+          .then(r => r.data)
+          .catch(error => {
+            // see deb-159
+            console.log(
+              '"/profile/withdrawals/:id" failed: ignoring response as workaround.'
+            );
+            return null;
+          })
       ]).then(results => {
         const issues = results[0];
         const contractIssues = results[1];
@@ -116,10 +119,12 @@ export default {
       });
     },
     setProfile: function(newProfile) {
-      this.profile = {
-        address: newProfile.address,
-        pendingWithdrawals: newProfile.pendingWithdrawals
-      };
+      if (newProfile) {
+        this.profile = {
+          address: newProfile.address,
+          pendingWithdrawals: newProfile.pendingWithdrawals
+        };
+      }
     },
     navigate: function(params) {
       this.$router.push({

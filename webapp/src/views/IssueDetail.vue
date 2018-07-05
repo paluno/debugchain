@@ -263,7 +263,15 @@ export default {
               resolve(); // Resolve auch im Fehlerfall, damit das Promise.all() nicht auch aufs Maul fliegt
             });
         }),
-        backend.get("/profile/withdrawals/" + this.projectId).then(r => r.data)
+        backend
+          .get("/profile/withdrawals/" + this.projectId)
+          .then(r => r.data)
+          .catch(error => {
+            // see deb-159
+            console.log(
+              '"/profile/withdrawals/:id" failed: ignoring response as workaround.'
+            );
+          })
       ]).then(results => {
         const issue = results[0];
         const projects = results[1];
@@ -279,10 +287,12 @@ export default {
       });
     },
     setProfile: function(newProfile) {
-      this.profile = {
-        address: newProfile.address,
-        pendingWithdrawals: newProfile.pendingWithdrawals
-      };
+      if (newProfile) {
+        this.profile = {
+          address: newProfile.address,
+          pendingWithdrawals: newProfile.pendingWithdrawals
+        };
+      }
     }
   }
 };
