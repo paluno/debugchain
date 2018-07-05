@@ -4,16 +4,19 @@
     <h1>Debug</h1>
     <h2>Create Test / Demo data</h2>
     <div>
-      Gitlab Project id: <input v-model="contract.projectId">
-      <button @click="createDemoContract">Create demo contract</button><br> Created Contract Address: {{contract.address}}
+      Gitlab Project id: <input v-model="contract.projectId"><br>
+      <button @click="createContract">Deploy &amp; Create in Backend</button>
+      <button @click="createDemoContract">Create demo contract with sample data</button><br> Contract Address: <input v-model="contract.address">
     </div>
     <div>
-      <button @click="donate">Donate</button>
-      <button @click="approve">Approve</button>
-      <button @click="lock">Lock</button>
-      <button @click="develop">Give to review</button>
-      <button @click="review">Review</button>
-      <button @click="withdraw">Payday</button>
+      Issue id: <input v-model="contract.issueId"><br>
+      <button @click="donate">Donate (0.005 ETH)</button><br>
+      <button @click="approve">Approve</button><br>
+      <button @click="lock">Lock</button><br>
+      <button @click="develop">Give to review</button><br>
+      <button @click="reviewAccept">Review accept</button><br>
+      <button @click="reviewDecline">Review decline</button><br>
+      <button @click="withdraw">Payday</button><br>
     </div>
     <hr>
     <h2>Router</h2>
@@ -36,7 +39,8 @@ export default {
     return {
       contract: {
         address: "",
-        projectId: 0
+        projectId: null,
+        issueId: null
       }
     };
   },
@@ -67,41 +71,103 @@ export default {
           console.log("Demo creation failed:", error);
         });
     },
+    createContract: function() {
+      const contract = new Contract(null, "http://localhost:9545");
+      const backend = Backend.getClient();
+
+      contract
+        .deploy(this.contract.projectId)
+        .then(address => (this.contract.address = address))
+        .then(() => console.log("Deployed contract for project"))
+        .then(() => {
+          return backend.post("/projects/", {
+            address: this.contract.address,
+            gitlabId: this.contract.projectId
+          });
+        })
+        .then(() => console.log("Created project in backend"));
+    },
+    getContract: function() {
+      if (!this.contract.address || this.contract.address.length === 0) {
+        alert("Please enter a contract address");
+        return;
+      }
+      return new Contract(this.contract.address);
+    },
     donate: function() {
-      const contract = new Contract(this.contract.address);
-      contract.donate(1, 1).then(() => {
-        console.log("Hurray, you donated");
+      if (!this.contract.issueId) {
+        alert("Please enter an issue id");
+        return;
+      }
+      const contract = this.getContract();
+      contract.donate(this.contract.issueId, 0.005).then(() => {
+        console.log("0.005 ETH donated to issue " + this.contract.issueId);
       });
     },
     approve: function() {
-      const contract = new Contract(this.contract.address);
+      if (!this.contract.issueId) {
+        alert("Please enter an issue id");
+        return;
+      }
+      const contract = this.getContract();
       // address is the first one from test rpc
-      contract.approve(1, [contract.web3.eth.accounts[0]]).then(() => {
-        console.log("Hurray, you approved");
+      // TODO add input for address
+      const reviewers = [contract.web3.eth.accounts[0]];
+      contract.approve(this.contract.issueId, reviewers).then(() => {
+        console.log(
+          "issue " +
+            this.contract.issueId +
+            " approved with reviewers: " +
+            JSON.stringify(reviewers)
+        );
       });
     },
     lock: function() {
-      const contract = new Contract(this.contract.address);
-      contract.lock(1).then(() => {
-        console.log("Hurray, you locked");
+      if (!this.contract.issueId) {
+        alert("Please enter an issue id");
+        return;
+      }
+      const contract = this.getContract();
+      contract.lock(this.contract.issueId).then(() => {
+        console.log("issue " + this.contract.issueId + " locked.");
       });
     },
     develop: function() {
-      const contract = new Contract(this.contract.address);
-      contract.develop(1).then(() => {
-        console.log("Hurray, you completed development");
+      if (!this.contract.issueId) {
+        alert("Please enter an issue id");
+        return;
+      }
+      const contract = this.getContract();
+      contract.develop(this.contract.issueId).then(() => {
+        console.log(
+          "issue " + this.contract.issueId + " development completed"
+        );
       });
     },
-    review: function() {
-      const contract = new Contract(this.contract.address);
-      contract.review(1).then(() => {
-        console.log("Hurray, you reviewed something");
+    reviewAccept: function() {
+      this.review(true);
+    },
+    reviewDecline: function() {
+      this.review(false);
+    },
+    review: function(val) {
+      if (!this.contract.issueId) {
+        alert("Please enter an issue id");
+        return;
+      }
+      const contract = this.getContract();
+      contract.review(this.contract.issueId, val).then(() => {
+        console.log("issue " + this.contract.issueId + " reviewed: " + val);
       });
     },
     withdraw: function() {
-      const contract = new Contract(this.contract.address);
+      if (!this.contract.issueId) {
+        alert("Please enter an issue id");
+        return;
+      }
+      const contract = this.getContract();
       contract.withdraw().then(() => {
-        console.log("Hurray, you got payed brah");
+        console.log("withdrawn ether");
       });
     }
   }
