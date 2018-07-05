@@ -16,10 +16,6 @@
       <button @click="withdraw">Payday</button>
     </div>
     <hr>
-    <h2>UserSession</h2>
-    <input type="submit" value="Get current User" v-on:click="getUser" />
-    <pre>{{userJson}}</pre>
-    <hr>
     <h2>Router</h2>
     <router-link to="/invalid-url">Test invalid router-link url</router-link>
   </div>
@@ -38,7 +34,6 @@ export default {
   },
   data: function() {
     return {
-      userJson: "",
       contract: {
         address: "",
         projectId: 0
@@ -47,13 +42,13 @@ export default {
   },
   methods: {
     createDemoContract() {
-      const contract = new Contract(null, "http://localhost:9545");
-      const backend = Backend.getClient();
-
       if (!this.contract.projectId) {
         alert("Please enter a project id");
         return;
       }
+
+      const contract = new Contract(null, "http://localhost:9545");
+      const backend = Backend.getClient();
 
       contract
         .deploy(this.contract.projectId)
@@ -72,49 +67,43 @@ export default {
           console.log("Demo creation failed:", error);
         });
     },
-    getUser: function(event) {
-      const client = Gitlab.getClient();
-      client.users.current().then(result => {
-        that.userJson = JSON.stringify(result, null, 2);
+    donate: function() {
+      const contract = new Contract(this.contract.address);
+      contract.donate(1, 1).then(() => {
+        console.log("Hurray, you donated");
       });
     },
-      donate: function () {
-          const contract = new Contract(this.contract.address);
-          contract.donate(1, 1).then(() => {
-              console.log('Hurray, you donated');
-          })
-      },
-      approve: function () {
-          const contract = new Contract(this.contract.address);
-          // address is the first one from test rpc
-          contract.approve(1, [contract.web3.eth.accounts[0]]).then(() => {
-              console.log('Hurray, you approved');
-          })
-      },
-      lock: function () {
-          const contract = new Contract(this.contract.address);
-          contract.lock(1).then(() => {
-              console.log('Hurray, you locked');
-          })
-      },
-      develop: function () {
-          const contract = new Contract(this.contract.address);
-          contract.develop(1).then(() => {
-              console.log('Hurray, you completed development');
-          })
-      },
-      review: function () {
-          const contract = new Contract(this.contract.address);
-          contract.review(1).then(() => {
-              console.log('Hurray, you reviewed something');
-          })
-      },
-      withdraw: function () {
-          const contract = new Contract(this.contract.address);
-          contract.withdraw().then(() => {
-              console.log('Hurray, you got payed brah');
-          })
-      }
+    approve: function() {
+      const contract = new Contract(this.contract.address);
+      // address is the first one from test rpc
+      contract.approve(1, [contract.web3.eth.accounts[0]]).then(() => {
+        console.log("Hurray, you approved");
+      });
+    },
+    lock: function() {
+      const contract = new Contract(this.contract.address);
+      contract.lock(1).then(() => {
+        console.log("Hurray, you locked");
+      });
+    },
+    develop: function() {
+      const contract = new Contract(this.contract.address);
+      contract.develop(1).then(() => {
+        console.log("Hurray, you completed development");
+      });
+    },
+    review: function() {
+      const contract = new Contract(this.contract.address);
+      contract.review(1).then(() => {
+        console.log("Hurray, you reviewed something");
+      });
+    },
+    withdraw: function() {
+      const contract = new Contract(this.contract.address);
+      contract.withdraw().then(() => {
+        console.log("Hurray, you got payed brah");
+      });
+    }
   }
 };
 </script>
