@@ -4,8 +4,7 @@
 
     <Modal v-model="approveModal.show" title="Assign Reviewers">
       <p>
-        Please assign at least one reviewer in order to approve this issue.
-        The reviewers will be responsible for reviewing the proposed solution for this issue.
+        Please assign at least one reviewer in order to approve this issue. The reviewers will be responsible for reviewing the proposed solution for this issue.
       </p>
       <p> AKTUELL NOCH DUMMY DATEN!!</p>
       <div class="row">
@@ -264,10 +263,10 @@ export default {
         for (let i = 0; i < cIssue.reviewers.length; i++) {
           if (!this.combinedReviews === undefined) {
             this.combinedReviews[i] = {
-            reviewer: cIssue.reviewers[i],
-            value: cIssue.reviewStatus[i]
+              reviewer: cIssue.reviewers[i],
+              value: cIssue.reviewStatus[i]
+            };
           }
-          };
         }
       }
       cIssue.reviewStatus = this.combined;
@@ -311,19 +310,14 @@ export default {
           .then(result => {
             return result.data;
           }),
-          new Promise((resolve, reject) => {
-          backend
-            .get("projects/" + this.projectId + "/issues/" + this.issueId)
-            .then(result => {
-              resolve(result.data);
-            })
-            .catch(error => {
-              console.log(
-                "Could not get issue-details from backend/chain. Maybe this issue is not yet tracked"
-              );
-              resolve(); // Resolve auch im Fehlerfall, damit das Promise.all() nicht auch aufs Maul fliegt
-            });
-        })
+        backend
+          .get("projects/" + this.projectId + "/issues/" + this.issueId)
+          .then(r => r.data)
+          .catch(error => {
+            console.log(
+              "Could not get issue-details from backend/chain. Maybe this issue is not yet tracked"
+            ); // Resolve auch im Fehlerfall, damit das Promise.all() nicht auch aufs Maul fliegt
+          })
       ]).then(results => {
         const issue = results[0];
         const ownedProjects = results[1];
@@ -336,7 +330,6 @@ export default {
         this.setContractAddress(currentProject.address);
         this.setPossibleReviewers(possibleReviewers, projectMembers);
         if (ownedProjects.find(project => project.id == this.projectId)) {
-
           this.setApprovable();
         }
         this.$emit("isLoading", false);
