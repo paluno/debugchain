@@ -294,7 +294,7 @@ export default {
       this.withdrawable = true;
     },
     setContractAddress: function(address) {
-      this.setContractAddress = address;
+      this.contractAddress = address;
     },
     updateData: function() {
       const gitlab = Gitlab.getClient();
@@ -315,7 +315,7 @@ export default {
             if (error.response.status != 500) throw error;
           }),
         backend.get("/profile").then(r => r.data),
-        bakcend.get("/projects/" + this.projectId).then(r => r.data)
+        backend.get("/projects/" + this.projectId).then(r => r.data)
       ]).then(results => {
         const issue = results[0];
         const ownedProjects = results[1];
