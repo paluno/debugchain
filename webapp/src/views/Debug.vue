@@ -51,21 +51,14 @@ export default {
         return;
       }
 
-      const contract = new Contract(null, "http://localhost:9545");
-      const backend = Backend.getClient();
-
-      contract
-        .deploy(this.contract.projectId)
-        .then(address => (this.contract.address = address))
-        .then(() => console.log("Deployed contract for project"))
-        .then(() =>
-          backend.post("/projects/", {
-            address: this.contract.address,
-            gitlabId: this.contract.projectId
-          })
-        )
-        .then(() => console.log("Created project in backend"))
-        // TODO create more test data: donate issues, etc
+      this.createContract()
+        .then(() => (this.contract.issueId = 1))
+        .then(() => this.donate())
+        .then(() => this.approve())
+        .then(() => this.lock())
+        .then(() => this.contract.issueId = 2)
+        .then(() => this.donate())
+        .then(() => this.donate())
         .catch(error => {
           alert("Could not complete demo contract creation.");
           console.log("Demo creation failed:", error);
@@ -75,7 +68,7 @@ export default {
       const contract = new Contract(null, "http://localhost:9545");
       const backend = Backend.getClient();
 
-      contract
+      return contract
         .deploy(this.contract.projectId)
         .then(address => (this.contract.address = address))
         .then(() => console.log("Deployed contract for project"))
@@ -100,7 +93,7 @@ export default {
         return;
       }
       const contract = this.getContract();
-      contract.donate(this.contract.issueId, 0.005).then(() => {
+      return contract.donate(this.contract.issueId, 0.005).then(() => {
         console.log("0.005 ETH donated to issue " + this.contract.issueId);
       });
     },
@@ -113,7 +106,7 @@ export default {
       // address is the first one from test rpc
       // TODO add input for address
       const reviewers = [contract.web3.eth.accounts[0]];
-      contract.approve(this.contract.issueId, reviewers).then(() => {
+      return contract.approve(this.contract.issueId, reviewers).then(() => {
         console.log(
           "issue " +
             this.contract.issueId +
@@ -128,7 +121,7 @@ export default {
         return;
       }
       const contract = this.getContract();
-      contract.lock(this.contract.issueId).then(() => {
+      return contract.lock(this.contract.issueId).then(() => {
         console.log("issue " + this.contract.issueId + " locked.");
       });
     },
@@ -138,7 +131,7 @@ export default {
         return;
       }
       const contract = this.getContract();
-      contract.develop(this.contract.issueId).then(() => {
+      return contract.develop(this.contract.issueId).then(() => {
         console.log(
           "issue " + this.contract.issueId + " development completed"
         );
@@ -156,7 +149,7 @@ export default {
         return;
       }
       const contract = this.getContract();
-      contract.review(this.contract.issueId, val).then(() => {
+      return contract.review(this.contract.issueId, val).then(() => {
         console.log("issue " + this.contract.issueId + " reviewed: " + val);
       });
     },
@@ -166,7 +159,7 @@ export default {
         return;
       }
       const contract = this.getContract();
-      contract.withdraw().then(() => {
+      return contract.withdraw().then(() => {
         console.log("withdrawn ether");
       });
     }
