@@ -8,10 +8,10 @@ stages:
 
 variables:
   DOCKER_DRIVER: overlay
-  CONTAINER_RELEASE_IMAGE: git.uni-due.de:6666/debug-chain/debug-chain/sever-app:latest
+  CONTAINER_RELEASE_IMAGE: snseadam/debugchain/sever-app:latest
 
 before_script:
-  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  - docker login -u "$dockerHubId" -p "$dockerHubPwd" index.docker.io
 
 maven-build:
   image: openjdk:8-jdk
