@@ -11,10 +11,10 @@
 
           <Modal v-model="donateEtherModal.show" title="Donate Ether">
             <p>
-              How many Ether do you want to donate for this Isssue?
+              How much Ether do you want to donate on this Issue?
             </p>
             <div class="row">
-              <label class="col-sm-3">Donation: </label>
+              <label class="col-sm-3">Donation:</label>
               <input class="col" type="number" placeholder="Enter your donation" v-model="donateEtherModal.donation"/>
               <label class="col-sm-3"> Ether </label>
               <!--TODO check the validity of the input-->
@@ -26,11 +26,24 @@
             </template>
           </Modal>
 
+          <button v-if="approvable" class="btn btn-outline-success btn-sm" v-on:click="showApproveIssueModal">Approve</button>
+
+          <Modal v-model="approveIssueModal.show" title="Approve Issue">
+            <p>
+              Do you really want to approve Issue "{{issue.title}}"?
+            </p>
+            
+            <template slot="footer">
+              <button type="button" class="btn btn-primary" @click="approveIssue">Yes</button>
+              <button type="button" class="btn btn-secondary" @click="closeApproveIssueModal">No</button>
+            </template>
+          </Modal>
+
           <button v-if="lockable" class="btn btn-outline-warning btn-sm" v-on:click="showLockIssueModal">Lock Issue</button>
           
           <Modal v-model="lockIssueModal.show" title="Lock Issue">
             <p>
-              Do you really want to lock the Isssue: {{issue.title}}?
+              Do you really want to lock Issue "{{issue.title}}"?
             </p>
             
             <template slot="footer">
@@ -41,9 +54,9 @@
 
           <button v-if="inDevelopment" class="btn btn-outline-primary btn-sm" v-on:click="showFinishDevelopmentModal">Finish Development</button>
           
-          <Modal v-model="finishDevelopmentModal.show" title="Finish Developpment">
+          <Modal v-model="finishDevelopmentModal.show" title="Finish Development">
             <p>
-              Do you really want to finish the development of isssue: {{issue.title}}?
+              Do you really want to finish the development of Issue "{{issue.title}}"?
             </p>
             
             <template slot="footer">
@@ -52,24 +65,11 @@
             </template>
           </Modal>
           
-          <button v-if="approvable" class="btn btn-outline-success btn-sm" v-on:click="showApproveIssueModal">Approve</button>
-
-          <Modal v-model="approveIssueModal.show" title="Approve Issue">
-            <p>
-              Do you really want to approve the Isssue: {{issue.title}}?
-            </p>
-            
-            <template slot="footer">
-              <button type="button" class="btn btn-primary" @click="approveIssue">Yes</button>
-              <button type="button" class="btn btn-secondary" @click="closeApproveIssueModal">No</button>
-            </template>
-          </Modal>
-          
           <button v-if="reviewable" class="btn btn-outline-primary btn-sm" v-on:click="showFinishReviewModal">Finish Review</button>
           
           <Modal v-model="finishReviewModal.show" title="Finish Review">
             <p>
-              Give your review feedback for isssue: {{issue.title}}
+              Give your review feedback for isssue "{{issue.title}}":
             </p>
             
             <template slot="footer">
@@ -109,14 +109,14 @@
 
 <script>
 import Navigation from "@/components/Navigation";
+import Modal from "@/components/Modal.vue";
 import Gitlab from "@/api/gitlab";
 import Backend from "@/api/backend";
-
-var donated = false;
 
 export default {
   name: "IssueDetail",
   components: {
+    Modal,
     Navigation
   },
   props: {
@@ -170,6 +170,7 @@ export default {
   data: function() {
     return {
       issue: null,
+      donated: false,
       donatable: true,
       approvable: false,
       lockable: false,
@@ -391,7 +392,6 @@ export default {
     closeFinishReviewModal: function() {
       this.finishReviewModal.show = false;
     }
-
   }
 };
 </script>
