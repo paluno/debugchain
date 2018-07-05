@@ -6,10 +6,12 @@ const SETTINGS = {
         redirectUri: "http://localhost:9000/login",
         scopes: ["api"]
     },
+    rpc: {
+        useHttpProviderUrl: process.env.VUE_APP_WEB3_USE_HTTPPROVIDER_URL
+    },
     gitlabConnection: {
         url: "http://localhost",
     }
-
 };
 
 export default SETTINGS;
