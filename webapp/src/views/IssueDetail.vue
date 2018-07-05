@@ -326,7 +326,7 @@ export default {
         const possibleReviewers = results[4];
         const chainIssue = results[5];
 
-        this.setIssue(issue);
+        this.setIssue(issue, chainIssue);
         this.setContractAddress(currentProject.address);
         this.setPossibleReviewers(possibleReviewers, projectMembers);
         if (ownedProjects.find(project => project.id == this.projectId)) {
