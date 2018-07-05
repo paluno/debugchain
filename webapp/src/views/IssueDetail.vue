@@ -223,7 +223,7 @@ export default {
       this.combined = [];
       if (cIssue.reviewers.length == cIssue.reviewStatus.length) {
         for (let i = 0; i < cIssue.reviewers.length; i++) {
-          if (!this.combineReviews === undefined) {
+          if (!this.combinedReviews === undefined) {
             this.combinedReviews[i] = {
             reviewer: cIssue.reviewers[i],
             value: cIssue.reviewStatus[i]
