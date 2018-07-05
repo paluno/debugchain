@@ -248,9 +248,7 @@ export default {
       // TODO: get selected reviewers
       //const reviewers = this.approveIssueModal.reviewers;
       const reviewers = [
-        "0x2341998aeb343",
-        "0x2341998aeb340",
-        "0x2341998aeb345"
+        contract.web3.eth.accounts[0]
       ]; // Dummy reviewers addresses
       contract
         .approve(issueId, reviewers)
