@@ -41,6 +41,11 @@ public abstract class IntegrationTest {
 
     protected static Long USER_ID = 676L;
 
+    // private key from ganache-cli using mnemonic:
+    // 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'
+    protected static final String PRIVATE_KEY = "c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3";
+    protected static final String PUBLIC_KEY = "0x627306090abab3a6e1400e9345bc60c78a8bef57";
+
     @Autowired
     private RestTemplate restTemplate;
 
@@ -54,8 +59,6 @@ public abstract class IntegrationTest {
     private WebApplicationContext context;
 
     protected MockMvc mockMvc;
-
-    protected String contractAddress;
 
     private MockRestServiceServer server;
 
@@ -100,17 +103,18 @@ public abstract class IntegrationTest {
         }
     }
 
+    protected DebugChain deployContract() throws Exception {
+        return deployContract(999L);
+    }
+
     // helper method for setting up contract for integration testing
-    // TODO use in setup or will we mock the contract all the time?
-    private void setupContract() throws Exception {
-        Credentials credentials = Credentials.create("c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3");
+    protected DebugChain deployContract(long projectId) throws Exception {
+        Credentials credentials = Credentials.create(PRIVATE_KEY);
         // deploy contract
-        DebugChain contract = DebugChain
-            .deploy(web3j, credentials, GAS_PRICE, GAS_LIMIT, BigInteger.valueOf(999L))
-            .send();
-        contractAddress = contract.getContractAddress();
-        // create issue
-        contract.createIssue(BigInteger.valueOf(1L))
+        return DebugChain
+            .deploy(web3j, credentials, GAS_PRICE, GAS_LIMIT, BigInteger.valueOf(projectId))
             .send();
     }
+
+
 }

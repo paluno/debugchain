@@ -6,12 +6,15 @@
 package due.debugchain.api;
 
 import due.debugchain.api.dto.ProjectResource;
+import due.debugchain.api.dto.UserResource;
+import due.debugchain.persistence.entities.ProjectEntity;
 import io.swagger.annotations.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Collection;
 import java.util.List;
 
 @Api(value = "${server.restPath}/projects", description = "the projects API")
@@ -46,4 +49,8 @@ public interface ProjectsApi {
         method = RequestMethod.GET)
     ResponseEntity<List<ProjectResource>> getProjects(@ApiParam(value = "A searchterm for searching and filtering the projects") @Valid @RequestParam(value = "searchterm", required = false) String searchterm);
 
+    @RequestMapping(value = "/projects/{projectId}/reviewers",
+            produces = { MediaType.APPLICATION_JSON_VALUE },
+            method = RequestMethod.GET)
+    public Collection<UserResource> getReviewers(ProjectEntity project);
 }

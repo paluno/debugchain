@@ -5,8 +5,11 @@ import due.debugchain.api.dto.MembershipResource;
 import due.debugchain.api.dto.UserResource;
 import due.debugchain.api.mappers.MembershipMapper;
 import due.debugchain.api.mappers.UserMapper;
+import due.debugchain.chain.ContractService;
+import due.debugchain.persistence.ProjectService;
 import due.debugchain.persistence.UserService;
 import due.debugchain.persistence.entities.MembershipEntity;
+import due.debugchain.persistence.entities.ProjectEntity;
 import due.debugchain.persistence.entities.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.util.Assert;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.web3j.abi.datatypes.Address;
 
 import javax.validation.Valid;
+import java.math.BigInteger;
 import java.util.Collection;
 
 @RestController
@@ -25,6 +29,10 @@ public class ProfileController {
 
     private final UserService userService;
 
+    private final ProjectService projectService;
+
+    private final ContractService contractService;
+
     private final UserMapper userMapper;
 
     private final MembershipMapper membershipMapper;
@@ -33,6 +41,22 @@ public class ProfileController {
     public UserResource saveProfile(@RequestBody @Valid AddressResource addressResource, UserEntity currentUser) {
         currentUser.setAddress(new Address(addressResource.getAddress()));
         return userMapper.entityToResource(userService.updateUser(currentUser));
+    }
+
+    @GetMapping
+    public UserResource getProfile(UserEntity currentUser) {
+        return userMapper.entityToResource(currentUser);
+    }
+
+    @GetMapping("/withdrawals/{projectId}")
+    public UserResource getProfileWithdrawals(UserEntity currentUser, ProjectEntity project) {
+
+        long withdrawals = contractService.getUserWithdrawals(project.getAddress(), currentUser.getAddress().toString()).longValue();
+
+        UserResource userResource = userMapper.entityToResource(currentUser);
+        userResource.setPendingWithdrawals(withdrawals);
+
+        return userResource;
     }
 
     @PostMapping("/memberships")

@@ -5,13 +5,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.web3j.protocol.core.RemoteCall;
-import org.web3j.tuples.generated.Tuple4;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static due.debugchain.chain.IssueStruct.fromTuple;
+import static java.math.BigInteger.valueOf;
+import static java.util.stream.Collectors.*;
 
 /**
  * Service for contract interaction.
@@ -23,10 +29,19 @@ public class ContractService {
 
     private final ContractProvider provider;
 
-    // TODO: return domain object instead of tuple?
-    @Cacheable(value = "issuesCache", key = "#contractAddress + '-' + #issueId")
-    public Tuple4<BigInteger, BigInteger, List<String>, Boolean> getIssue(String contractAddress, Long issueId) {
-        return send(contract(contractAddress).getIssue(BigInteger.valueOf(issueId)));
+    @Cacheable(value = "issues", key = "#contractAddress + '-' + #issueId")
+    public IssueStruct getIssue(String contractAddress, Long issueId) {
+        return fromTuple(send(contract(contractAddress).getIssue(valueOf(issueId))));
+    }
+
+    @Cacheable(value = "issuesIdList", key = "#contractAddress")
+    public List<BigInteger> getIssueIdList(String contractAddress) {
+        return send(contract(contractAddress).getIssueLookup());
+    }
+
+    @Cacheable(value = "profileEther", key = "#contractAddress + '-' + #profileAdress")
+    public BigInteger getUserWithdrawals(String contractAddress, String profileAdress) {
+        return send(contract(contractAddress).getPendingWithdrawals(profileAdress));
     }
 
     /**
@@ -37,7 +52,11 @@ public class ContractService {
      * @param event event indicating issue update
      */
     @EventListener
-    @CacheEvict(value = "issuesCache", key = "#event.contractAddress + '-' + #event.issueId")
+    @Caching(evict = {
+        @CacheEvict(value = "issues", key = "#event.contractAddress + '-' + #event.issueId"),
+        @CacheEvict(value = "issuesIdList", key = "#event.contractAddress"),
+        @CacheEvict(value = "profileEther", key = "#contractAddress + '-' + #profileAdress")
+    })
     public void evictIssue(IssueUpdateEvent event) {
         log.info(String.format("Cache evicted for issue %s in contract %s", event.getIssueId(), event.getContractAddress()));
         // NOOP

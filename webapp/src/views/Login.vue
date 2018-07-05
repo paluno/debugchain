@@ -1,8 +1,14 @@
 <template>
-  <div>
-    <Navigation v-if="session.loggedIn"/>
-    <h1>{{ computedToken }}</h1>
-    <input type="submit" value="Login" v-on:click="loginViaGitlab" />
+  <div v-if="!session.loggedIn">
+    <div class="row">
+      <div class="col text-center">
+        <h1>Login</h1>
+        <p>
+          You are not authenticated. Please login using your Gitlab-Account.
+        </p>
+        <button class="btn btn-outline-secondary btn-sm" v-on:click="loginViaGitlab">Gitlab Login</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -10,59 +16,48 @@
 <script>
 import { GitlabOAuth, UserSession } from "@/auth";
 import Storage from "@/webStorage";
-import Navigation from "@/components/Navigation";
 
 export default {
   name: "login",
-  components: {
-    Navigation
-  },
-  computed: {
-    computedToken: function() {
-      if (this.session.accessToken != null) {
-        return "Token: " + this.session.accessToken;
-      } else {
-        return "No token";
-      }
-    }
-  },
   data: function() {
     return {
       session: UserSession.state
     };
   },
-  created: function() {
-    if (this.session.loggedIn) {
-      // User is already authenticated. Perform redirect, if requested
-      this.performRedirect();
+  beforeRouteEnter: function(to, from, next) {
+    var redirect = null;
+    if (to.query.hasOwnProperty("redirect")) {
+      // get redirect from query
+      redirect = to.query.redirect;
+    }
+    if (!redirect) {
+      // get redirect from storage (redirect coming from gitlab)
+      redirect = Storage.getLoginRedirect();
+      Storage.setLoginRedirect(null);
+    }
+    if (!redirect) {
+      // default: redirect to home
+      redirect = "/";
+    }
+
+    if (window.location.href.includes("access_token")) {
+      // if #access_token exists, set token, then redirect
+      GitlabOAuth.token.getToken(window.location.href).then(token => {
+        UserSession.login(token.accessToken);
+        next(redirect);
+      });
+    } else if (UserSession.state.loggedIn) {
+      // if already logged in, redirect
+      next(redirect);
     } else {
-      // if #access_token exists, set token, then redirect, if requested
-      const that = this;
-      if (window.location.href.includes("access_token")) {
-        GitlabOAuth.token.getToken(window.location.href).then(function(token) {
-          UserSession.login(token.accessToken);
-          that.performRedirect();
-        });
-      }
+      // not logged in and no access_token > no action / show login
+      next();
     }
   },
   methods: {
     loginViaGitlab: function(event) {
       Storage.setLoginRedirect(this.$route.query.redirect);
       window.location.href = GitlabOAuth.token.getUri();
-    },
-    performRedirect: function() {
-      if (this.$route.query.hasOwnProperty("redirect")) {
-        this.$router.push(this.$router.query.redirect);
-        return;
-      }
-      const redirect = Storage.getLoginRedirect();
-      if (redirect != null) {
-        this.$router.push(redirect);
-        
-        Storage.setLoginRedirect(null);
-
-      }
     }
   }
 };
