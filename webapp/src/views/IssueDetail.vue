@@ -15,11 +15,11 @@
             </p>
             <div class="row">
               <label class="col-sm-3">Donation:</label>
-              <input class="col" type="number" placeholder="Enter your donation" v-model="donateEtherModal.donation"/>
+              <input class="col" type="number" placeholder="Enter your donation" v-model="donateEtherModal.donation" />
               <label class="col-sm-3"> Ether </label>
               <!--TODO check the validity of the input-->
             </div>
-            
+
             <template slot="footer">
               <button type="button" class="btn btn-primary" @click="donateEther">Save</button>
               <button type="button" class="btn btn-secondary" @click="closeDonateEtherModal">Close</button>
@@ -32,7 +32,7 @@
             <p>
               Do you really want to approve Issue "{{issue.title}}"?
             </p>
-            
+
             <template slot="footer">
               <button type="button" class="btn btn-primary" @click="approveIssue">Yes</button>
               <button type="button" class="btn btn-secondary" @click="closeApproveIssueModal">No</button>
@@ -40,12 +40,12 @@
           </Modal>
 
           <button v-if="lockable" class="btn btn-outline-warning btn-sm" v-on:click="showLockIssueModal">Lock Issue</button>
-          
+
           <Modal v-model="lockIssueModal.show" title="Lock Issue">
             <p>
               Do you really want to lock Issue "{{issue.title}}"?
             </p>
-            
+
             <template slot="footer">
               <button type="button" class="btn btn-primary" @click="lockIssue">Yes</button>
               <button type="button" class="btn btn-secondary" @click="closeLockIssueModal">No</button>
@@ -53,25 +53,25 @@
           </Modal>
 
           <button v-if="inDevelopment" class="btn btn-outline-primary btn-sm" v-on:click="showFinishDevelopmentModal">Finish Development</button>
-          
+
           <Modal v-model="finishDevelopmentModal.show" title="Finish Development">
             <p>
               Do you really want to finish the development of Issue "{{issue.title}}"?
             </p>
-            
+
             <template slot="footer">
               <button type="button" class="btn btn-primary" @click="finishDevelopment">Yes</button>
               <button type="button" class="btn btn-secondary" @click="closeFinishDevelopmentModal">No</button>
             </template>
           </Modal>
-          
+
           <button v-if="reviewable" class="btn btn-outline-primary btn-sm" v-on:click="showFinishReviewModal">Finish Review</button>
-          
+
           <Modal v-model="finishReviewModal.show" title="Finish Review">
             <p>
               Give your review feedback for isssue "{{issue.title}}":
             </p>
-            
+
             <template slot="footer">
               <!--TODO: handle finishReviewModal.accepted = true (onclick Accept) /false (onclick Reject) -->
               <button type="button" class="btn btn-primary" @click="finishReview">Accept</button>
@@ -171,7 +171,7 @@ export default {
   data: function() {
     return {
       issue: null,
-      donated: false,
+      // TODO implement as reactive computed properties
       donatable: true,
       approvable: false,
       lockable: false,
@@ -205,10 +205,12 @@ export default {
       const donation = this.donateEtherModal.donation;
       const client = Backend.getClient();
       const issueId = this.issueId;
+      // TODO load contract address once in updateData
       client.get("/projects/" + this.projectId).then(response => {
         const contractAdress = response.data.address;
         const contract = new Contract(contractAdress);
         contract.donate(issueId, donation).then(() => {
+          // TODO (for all functions) use reactive properties and just call updateData again
           this.setApprovable();
           this.closeDonateEtherModal();
         });
@@ -336,6 +338,8 @@ export default {
         //const reviewer = membership.reviewer; // TODO
         const user = profile.address;
 
+        // TODO set loaded data directly as properties and use reactive properties
+
         this.setIssue(issue);
 
         if (ownedProjects.find(project => project.id == this.projectId)) {
@@ -387,7 +391,7 @@ export default {
     closeFinishDevelopmentModal: function() {
       this.finishDevelopmentModal.show = false;
     },
-     showFinishReviewModal: function() {
+    showFinishReviewModal: function() {
       this.finishReviewModal.show = true;
     },
     closeFinishReviewModal: function() {
