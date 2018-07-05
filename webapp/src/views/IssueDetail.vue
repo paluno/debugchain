@@ -79,8 +79,6 @@
               <button type="button" class="btn btn-secondary" @click="closeFinishReviewModal">Cancel</button>
             </template>
           </Modal>
-
-          <button v-if="withdrawable" class="btn btn-outline-success btn-sm" v-on:click="withdraw">Withdraw</button>
         </div>
       </div>
       <div class="row">
@@ -215,7 +213,6 @@ export default {
       lockable: false,
       inDevelopment: false,
       reviewable: false,
-      withdrawable: false,
       donateEtherModal: {
         donation: 0,
         show: false
@@ -293,14 +290,6 @@ export default {
         .then(() => this.closeFinishReviewModal())
         .then(() => this.updateData());
     },
-    withdraw: function() {
-      contract.withdraw().then(() => {
-        // TODO show alert message
-      });
-      // Withdraw Money -> Disable all buttons
-      this.donatable = false;
-      this.withdrawable = false;
-    },
     setIssue: function(issue) {
       this.issue = issue;
     },
@@ -323,12 +312,6 @@ export default {
       // Disable Ready for Review button and show Review button
       this.inDevelopment = false;
       this.reviewable = true;
-    },
-    setWithdrawable: function() {
-      //this.donatable = false; //TODO Macht das Sinn?
-      // Disable Review button and show Withdraw button
-      this.reviewable = false;
-      this.withdrawable = true;
     },
     setContractAddress: function(address) {
       this.contractAddress = address;
