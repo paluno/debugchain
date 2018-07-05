@@ -245,9 +245,7 @@ export default {
       const contract = new Contract(this.contractAddress);
       // TODO: get selected reviewers
       //const reviewers = this.approveIssueModal.reviewers;
-      const reviewers = [
-        contract.web3.eth.accounts[0]
-      ]; // Dummy reviewers addresses
+      const reviewers = [contract.web3.eth.accounts[0]]; // Dummy reviewers addresses
       contract
         .approve(issueId, reviewers)
         .then(() => this.closeApproveIssueModal())
@@ -315,24 +313,24 @@ export default {
           }),
         backend.get("/profile").then(r => r.data),
         backend.get("/projects/" + this.projectId).then(r => r.data)
-      ]).then(results => {
-        const issue = results[0];
-        const ownedProjects = results[1];
-        const membership = results[2];
-        const contractIssue = results[3];
-        const profile = results[4];
-        const project = results[5];
+      ])
+        .then(results => {
+          const issue = results[0];
+          const ownedProjects = results[1];
+          const membership = results[2];
+          const contractIssue = results[3];
+          const profile = results[4];
+          const project = results[5];
 
-        this.setIssue(issue);
-        this.setContractAddress(project.address);
-        this.setContractIssue(contractIssue);
-        this.setUserAddress(profile.address);
-        if (ownedProjects.find(project => project.id == this.projectId)) {
-          this.setIsMaintainer(true);
-        }
-
-        this.$emit("isLoading", false);
-      });
+          this.setIssue(issue);
+          this.setContractAddress(project.address);
+          this.setContractIssue(contractIssue);
+          this.setUserAddress(profile.address);
+          if (ownedProjects.find(project => project.id == this.projectId)) {
+            this.setIsMaintainer(true);
+          }
+        })
+        .finally(() => this.$emit("isLoading", false));
     },
     showDonateEtherModal: function() {
       this.donateEtherModal.show = true;
