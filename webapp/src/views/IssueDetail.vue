@@ -207,12 +207,7 @@ export default {
       contractAddress: null,
       isMaintainer: false,
       userAddress: null,
-      // TODO implement as reactive computed properties
-      donatable: true,
-      approvable: false,
-      lockable: false,
-      inDevelopment: false,
-      reviewable: false,
+
       donateEtherModal: {
         donation: 0,
         show: false
@@ -293,26 +288,6 @@ export default {
     setIssue: function(issue) {
       this.issue = issue;
     },
-    setApprovable: function() {
-      // Show Approve button
-      // TODO set appovable if user == maintainer and donations on this issue not empty
-      this.approvable = true;
-    },
-    setLockable: function() {
-      // Disable Approve button and show Lock button
-      this.approvable = false;
-      this.lockable = true;
-    },
-    setInDevelopment: function() {
-      // Disable Lock button and show Ready for Review button
-      this.lockable = false;
-      this.inDevelopment = true;
-    },
-    setReviewable: function() {
-      // Disable Ready for Review button and show Review button
-      this.inDevelopment = false;
-      this.reviewable = true;
-    },
     setContractAddress: function(address) {
       this.contractAddress = address;
     },
@@ -352,10 +327,6 @@ export default {
         const contractIssue = results[3];
         const profile = results[4];
         const project = results[5];
-        const reviewer = null;
-        //const reviewer = membership.reviewer; // TODO
-
-        // TODO set loaded data directly as properties and use reactive properties
 
         this.setIssue(issue);
         this.setContractAddress(project.address);
@@ -363,23 +334,6 @@ export default {
         this.setUserAddress(profile.address);
         if (ownedProjects.find(project => project.id == this.projectId)) {
           this.setIsMaintainer(true);
-          this.setApprovable();
-        }
-
-        // show contract actions if issue is available in contract/backend (i.e. has been donated to)
-        if (contractIssue) {
-          const locked = contractIssue.locked;
-          const developer = contractIssue.developer;
-
-          //only show "lock issue" - button if dev is not a reviewer for it himself and not locked already
-          if (!reviewer && !locked) {
-            this.setLockable();
-          }
-
-          //only show "finish Development" - button if current user is the developer that has locked the issue
-          if (user === developer) {
-            this.setInDevelopment();
-          }
         }
 
         this.$emit("isLoading", false);
