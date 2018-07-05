@@ -25,7 +25,7 @@
       <div class="col-md-9">
         <div class="form-check" v-for="membership in projectMemberships" :key="membership.projectGitlabId">
           <input class="form-check-input" v-model="membership.isReviewer" v-bind:id="membership.projectGitlabId" type="checkbox" />
-          <label class="form-check-label" v-bind:for="membership.projectGitlabId">I want to be a reviewer for Project: {{membership.projectname}}</label>
+          <label class="form-check-label" v-bind:for="membership.projectGitlabId">I want to be a reviewer for Project: {{membership.projectGitlabId}}</label>
         </div>
         <button class="btn btn-outline-secondary btn-sm" @click="saveMembership">Save Reviewer-State</button>
       </div>
@@ -127,32 +127,33 @@ export default {
       this.profile = profile;
     },
     setProjectMemberships: function(projects, memberships) {
+      //TODO: get project names from gitlab call to display behind checkboxes instead of just ID
       if (memberships.length > 0) {
         this.projectMemberships = projects.map(project => {
           for (let i = 0; i < memberships.length; i++) {
             const membership = memberships[i];
-            if (membership.projectGitlabId == project.id) {
+            if (membership.projectGitlabId == project.gitlabId) {
               return {
-                projectGitlabId: project.id,
+                projectGitlabId: project.gitlabId,
                 userGitlabId: membership.userGitlabId,
-                projectname: project.name,
+                projectaddress: project.address,
                 isReviewer: membership.reviewer
               };
             }
           }
           return {
-            projectGitlabId: project.id,
+            projectGitlabId: project.gitlabId,
             userGitlabId: this.profile.gitlabId,
-            projectname: project.name,
+            projectaddress: project.address,
             isReviewer: false
           };
         });
       } else {
         this.projectMemberships = projects.map(project => {
           return {
-            projectGitlabId: project.id,
+            projectGitlabId: project.gitlabId,
             userGitlabId: this.profile.gitlabId,
-            projectname: project.name,
+            projectaddress: project.address,
             isReviewer: false
           };
         });
@@ -175,13 +176,14 @@ export default {
       });
     },
     updateData: function() {
-      const gitlab = Gitlab.getClient();
       const backend = Backend.getClient();
 
       this.$emit("isLoading", true);
       // TODO handle / display errors in component
       Promise.all([
-        gitlab.projects.list(),
+        backend.get("/projects").then(response => {
+          return response.data;
+        }),
         backend.get("/profile").then(response => {
           return response.data;
         }),
