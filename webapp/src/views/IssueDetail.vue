@@ -1,6 +1,26 @@
 <template>
   <div class="issue_detail">
     <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" v-bind:projectId="projectId" v-bind:issueId="issueId" />
+
+    <Modal v-model="approveModal.show" title="Assign Reviewers">
+      <p>
+        Please assign at least one reviewer in order to approve this issue. The reviewers will be responsible for reviewing the proposed solution for this issue.
+      </p>
+      <p> AKTUELL NOCH DUMMY DATEN!!</p>
+      <div class="row">
+        <label class="col">Pick reviewers (CTRL+Click to choose multiple)</label>
+      </div>
+      <div class="row">
+        <select class="col custom-select" v-model="approveModal.selectedReviewers" multiple>
+          <option v-for="reviewer in possibleReviewers" :key="reviewer.address" v-bind:value="reviewer.address">{{reviewer.username}} - {{reviewer.address}}</option>
+        </select>
+      </div>
+      <template slot="footer">
+        <button type="button" class="btn btn-primary" @click="approveIssue">Approve</button>
+        <button type="button" class="btn btn-secondary" @click="closeApproveModal">Close</button>
+      </template>
+    </Modal>
+
     <div v-if="issue">
       <div class="form-group row">
         <div class="col">
@@ -8,7 +28,7 @@
         </div>
         <div class="col-auto">
           <button class="btn btn-outline-secondary btn-sm" v-on:click="donateEther">Donate Ether</button>
-          <button v-if="approvable" class="btn btn-outline-success btn-sm" v-on:click="approveIssue">Approve</button>
+          <button v-if="approvable" class="btn btn-outline-success btn-sm" v-on:click="openApproveModal">Approve</button>
         </div>
       </div>
       <div class="row">
@@ -87,12 +107,15 @@
 
 <script>
 import Navigation from "@/components/Navigation";
+import Modal from "@/components/Modal.vue";
 import Gitlab from "@/api/gitlab";
 import Backend from "@/api/backend";
+import Contract from "@/api/contract";
 
 export default {
   name: "IssueDetail",
   components: {
+    Modal,
     Navigation
   },
   props: {
@@ -186,7 +209,13 @@ export default {
         address: null,
         pendingWithdrawals: null
       },
+      approveModal: {
+        show: false,
+        selectedReviewers: []
+      },
       issue: null,
+      contractAddress: null,
+      possibleReviewers: null,
       chainIssue: null,
       approvable: false
     };
@@ -199,7 +228,16 @@ export default {
       alert("Hier muss der Metamask-Aufruf für das Donaten rein");
     },
     approveIssue: function() {
-      alert("Hier muss der Metamask-Aufruf für das Approven des Issues rein");
+      const contract = new Contract(this.contractAddress);
+      console.log(this.approveModal.selectedReviewers);
+      this.$emit("isLoading", true);
+      contract
+        .approve(this.issueId, this.approveModal.selectedReviewers)
+        .then(() => {
+          this.$emit("isLoading", false);
+          this.closeApproveModal();
+          this.updateData();
+        });
     },
     setIssue: function(issue, chainIssue) {
       this.issue = issue;
@@ -238,6 +276,23 @@ export default {
       cIssue.reviewStatus = this.combined;
       cIssue.reviewers = undefined; // Remove reviewers since reviewers are now merged in reviewStatus
     },
+    setContractAddress: function(contractAddress) {
+      this.contractAddress = contractAddress;
+    },
+    setPossibleReviewers: function(possibleReviewers, projectMembers) {
+      this.possibleReviewers = possibleReviewers.map(reviewer => {
+        for (let i = 0; i < projectMembers.length; i++) {
+          const member = projectMembers[i];
+          if (reviewer.gitlabId == member.id) {
+            return {
+              address: reviewer.address,
+              gitlabId: reviewer.gitlabId,
+              username: member.username
+            };
+          }
+        }
+      });
+    },
     setApprovable: function() {
       this.approvable = true;
     },
@@ -250,19 +305,23 @@ export default {
       Promise.all([
         gitlab.projects.issues.one(this.projectId, this.issueId),
         gitlab.projects.owned(),
-        new Promise((resolve, reject) => {
-          backend
-            .get("projects/" + this.projectId + "/issues/" + this.issueId)
-            .then(result => {
-              resolve(result.data);
-            })
-            .catch(error => {
-              console.log(
-                "Could not get issue-details from backend/chain. Maybe this issue is not yet tracked"
-              );
-              resolve(); // Resolve auch im Fehlerfall, damit das Promise.all() nicht auch aufs Maul fliegt
-            });
+        gitlab.projects.members.list(this.projectId),
+        backend.get("/projects/" + this.projectId).then(result => {
+          return result.data;
         }),
+        backend
+          .get("/projects/" + this.projectId + "/reviewers")
+          .then(result => {
+            return result.data;
+          }),
+        backend
+          .get("projects/" + this.projectId + "/issues/" + this.issueId)
+          .then(r => r.data)
+          .catch(error => {
+            console.log(
+              "Could not get issue-details from backend/chain. Maybe this issue is not yet tracked"
+            ); // Resolve auch im Fehlerfall, damit das Promise.all() nicht auch aufs Maul fliegt
+          }),
         backend
           .get("/profile/withdrawals/" + this.projectId)
           .then(r => r.data)
@@ -274,13 +333,18 @@ export default {
           })
       ]).then(results => {
         const issue = results[0];
-        const projects = results[1];
-        const chainIssue = results[2];
-        const profile = results[3];
+        const ownedProjects = results[1];
+        const projectMembers = results[2];
+        const currentProject = results[3];
+        const possibleReviewers = results[4];
+        const chainIssue = results[5];
+        const profile = results[6];
 
         this.setProfile(profile);
         this.setIssue(issue, chainIssue);
-        if (projects.find(project => project.id == this.projectId)) {
+        this.setContractAddress(currentProject.address);
+        this.setPossibleReviewers(possibleReviewers, projectMembers);
+        if (ownedProjects.find(project => project.id == this.projectId)) {
           this.setApprovable();
         }
         this.$emit("isLoading", false);
@@ -293,6 +357,12 @@ export default {
           pendingWithdrawals: newProfile.pendingWithdrawals
         };
       }
+    },
+    openApproveModal: function() {
+      this.approveModal.show = true;
+    },
+    closeApproveModal: function() {
+      this.approveModal.show = false;
     }
   }
 };
