@@ -7,7 +7,7 @@
           <h1>{{issue.title}}</h1>
         </div>
         <div class="col-auto">
-          <button v-if="donatable" class="btn btn-outline-secondary btn-sm" v-on:click="donateEther">Donate Ether</button>
+          <button v-if="donatable" class="btn btn-outline-secondary btn-sm" v-on:click="showDonateEtherModal">Donate Ether</button>
 
           <Modal v-model="donateEtherModal.show" title="Donate Ether">
             <p>
@@ -112,6 +112,7 @@ import Navigation from "@/components/Navigation";
 import Modal from "@/components/Modal.vue";
 import Gitlab from "@/api/gitlab";
 import Backend from "@/api/backend";
+import Contract from "@/api/contract";
 
 export default {
   name: "IssueDetail",
