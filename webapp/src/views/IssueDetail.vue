@@ -223,9 +223,11 @@ export default {
       this.combined = [];
       if (cIssue.reviewers.length == cIssue.reviewStatus.length) {
         for (let i = 0; i < cIssue.reviewers.length; i++) {
-          this.combinedReviews[i] = {
+          if (!this.combineReviews === undefined) {
+            this.combinedReviews[i] = {
             reviewer: cIssue.reviewers[i],
             value: cIssue.reviewStatus[i]
+          }
           };
         }
       }
