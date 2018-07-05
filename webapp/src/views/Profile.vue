@@ -2,7 +2,7 @@
   <div v-if="profile" id="profile">
     <set-address-modal v-model="showAddressModal" v-on:save="addressModalSaveEvent" />
 
-    <Navigation v-bind:projectId="projectId" />
+    <Navigation :address="profile.address" />
     <h1>Profile</h1>
     <div class="form-group row">
       <label class="col-md-3" for="username">Username:</label>
@@ -71,9 +71,6 @@ import Navigation from "@/components/Navigation";
 
 export default {
   name: "profile",
-  props: {
-    projectId: String
-  },
   data: function() {
     return {
       profile: null,

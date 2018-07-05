@@ -1,14 +1,8 @@
 <template>
   <div class="issueList">
-    <Navigation v-bind:projectId="projectId" />
+    <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" :projectId="projectId" />
     <div class="table">
-      <vue-good-table
-        :columns="columns"
-        :rows="rows"
-        :pagination-options="{ enabled: true, perPage: 5}"
-        :search-options="{ enabled: true}"
-        styleClass="vgt-table striped bordered"
-        @on-row-click="navigate"> 
+      <vue-good-table :columns="columns" :rows="rows" :pagination-options="{ enabled: true, perPage: 5}" :search-options="{ enabled: true}" styleClass="vgt-table striped bordered" @on-row-click="navigate">
       </vue-good-table>
     </div>
   </div>
@@ -29,6 +23,10 @@ export default {
   },
   data: function() {
     return {
+      profile: {
+        address: null,
+        pendingWithdrawals: null
+      },
       columns: [
         {
           label: "ID",
@@ -99,14 +97,34 @@ export default {
         gitlab.projects.issues.list(this.projectId),
         backend
           .get("projects/" + this.projectId + "/issues/")
-          .then(result => result.data)
+          .then(result => result.data),
+        backend
+          .get("/profile/withdrawals/" + this.projectId)
+          .then(r => r.data)
+          .catch(error => {
+            // see deb-159
+            console.log(
+              '"/profile/withdrawals/:id" failed: ignoring response as workaround.'
+            );
+            return null;
+          })
       ]).then(results => {
         const issues = results[0];
         const contractIssues = results[1];
+        const profile = results[2];
 
         this.setIssues(issues, contractIssues);
+        this.setProfile(profile);
         this.$emit("isLoading", false);
       });
+    },
+    setProfile: function(newProfile) {
+      if (newProfile) {
+        this.profile = {
+          address: newProfile.address,
+          pendingWithdrawals: newProfile.pendingWithdrawals
+        };
+      }
     },
     navigate: function(params) {
       this.$router.push({

@@ -1,6 +1,6 @@
 <template>
   <div class="issue_detail">
-    <Navigation v-bind:projectId="projectId" v-bind:issueId="issueId" />
+    <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" v-bind:projectId="projectId" v-bind:issueId="issueId" />
 
     <Modal v-model="approveModal.show" title="Assign Reviewers">
       <p>
@@ -205,6 +205,10 @@ export default {
   },
   data: function() {
     return {
+      profile: {
+        address: null,
+        pendingWithdrawals: null
+      },
       approveModal: {
         show: false,
         selectedReviewers: []
@@ -317,6 +321,15 @@ export default {
             console.log(
               "Could not get issue-details from backend/chain. Maybe this issue is not yet tracked"
             ); // Resolve auch im Fehlerfall, damit das Promise.all() nicht auch aufs Maul fliegt
+          }),
+        backend
+          .get("/profile/withdrawals/" + this.projectId)
+          .then(r => r.data)
+          .catch(error => {
+            // see deb-159
+            console.log(
+              '"/profile/withdrawals/:id" failed: ignoring response as workaround.'
+            );
           })
       ]).then(results => {
         const issue = results[0];
@@ -325,7 +338,9 @@ export default {
         const currentProject = results[3];
         const possibleReviewers = results[4];
         const chainIssue = results[5];
+        const profile = results[6];
 
+        this.setProfile(profile);
         this.setIssue(issue, chainIssue);
         this.setContractAddress(currentProject.address);
         this.setPossibleReviewers(possibleReviewers, projectMembers);
@@ -334,6 +349,14 @@ export default {
         }
         this.$emit("isLoading", false);
       });
+    },
+    setProfile: function(newProfile) {
+      if (newProfile) {
+        this.profile = {
+          address: newProfile.address,
+          pendingWithdrawals: newProfile.pendingWithdrawals
+        };
+      }
     },
     openApproveModal: function() {
       this.approveModal.show = true;
