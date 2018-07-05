@@ -104,7 +104,7 @@ export default {
         backend
           .get("projects/" + this.projectId + "/issues/")
           .then(result => result.data),
-        backend.get("/profile").then(r => r.data)
+        backend.get("/profile/withdrawals/" + this.projectId).then(r => r.data)
       ]).then(results => {
         const issues = results[0];
         const contractIssues = results[1];

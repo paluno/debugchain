@@ -1,6 +1,6 @@
 <template>
   <div class="projectsetup">
-    <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" />
+    <Navigation :address="profile.address" />
 
     <vue-good-table :columns="columns" :rows="gitlabProjects" :pagination-options="{ enabled: true, perPage: 10}" :search-options="{ enabled: true}" styleClass="vgt-table striped bordered" @on-row-click="onRowClick">
     </vue-good-table>
@@ -46,8 +46,7 @@ export default {
   data: function() {
     return {
       profile: {
-        address: null,
-        pendingWithdrawals: null
+        address: null
       },
       createProjectModal: {
         show: false,
@@ -111,8 +110,7 @@ export default {
     },
     setProfile: function(newProfile) {
       this.profile = {
-        address: newProfile.address,
-        pendingWithdrawals: newProfile.pendingWithdrawals
+        address: newProfile.address
       };
     },
     updateData: function() {
@@ -122,7 +120,7 @@ export default {
       this.$emit("isLoading", true);
       Promise.all([
         gitlab.projects.list(),
-        backend.get("/profile").then(result => result.data)
+        backend.get("/profile/").then(result => result.data)
       ])
         .then(results => {
           this.setProjects(results[0]);

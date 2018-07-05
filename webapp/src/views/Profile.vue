@@ -2,7 +2,7 @@
   <div id="profile">
     <set-address-modal v-model="showAddressModal" v-on:save="addressModalSaveEvent" />
 
-    <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" />
+    <Navigation :address="profile.address" />
     <h1>Profile</h1>
     <div class="form-group row">
       <label class="col-md-3" for="username">Username:</label>
@@ -63,14 +63,10 @@ import Navigation from "@/components/Navigation";
 
 export default {
   name: "profile",
-  props: {
-    projectId: String
-  },
   data: function() {
     return {
       profile: {
-        address: null,
-        pendingWithdrawals: null
+        address: null
       },
       address: undefined,
       showAddressModal: false
@@ -131,8 +127,7 @@ export default {
     },
     setProfile: function(newProfile) {
       this.profile = {
-        address: newProfile.address,
-        pendingWithdrawals: newProfile.pendingWithdrawals
+        address: newProfile.address
       };
     }
   }

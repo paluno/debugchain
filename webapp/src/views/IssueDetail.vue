@@ -263,7 +263,7 @@ export default {
               resolve(); // Resolve auch im Fehlerfall, damit das Promise.all() nicht auch aufs Maul fliegt
             });
         }),
-        backend.get("/profile").then(r => r.data)
+        backend.get("/profile/withdrawals/" + this.projectId).then(r => r.data)
       ]).then(results => {
         const issue = results[0];
         const projects = results[1];
