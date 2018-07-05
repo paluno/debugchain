@@ -1,5 +1,5 @@
 <template>
-  <div id="profile">
+  <div v-if="profile" id="profile">
     <set-address-modal v-model="showAddressModal" v-on:save="addressModalSaveEvent" />
 
     <Navigation v-bind:projectId="projectId" />
@@ -12,21 +12,28 @@
     </div>
     <div class="form-group row">
       <label class="col-md-3" for="address">Ethereum Address:</label>
-      <div v-if="address === null" class="col-md-9">
+      <div v-if="profile.address === null" class="col-md-9">
         <span>No address has been set.</span>
         <button class="btn btn-outline-secondary btn-sm" @click="showAddressModal = true">Set address</button>
       </div>
       <div v-else class="col-md-9">
-        <span>{{address}}</span>
+        <span>{{profile.address}}</span>
       </div>
     </div>
-    <div class="form-group row">
-      <div class="col-md-3">Reviewer:</div>
+    <div v-if="profile.address" class="form-group row">
+      <div class="col-md-3">Reviewer-State:</div>
       <div class="col-md-9">
-        <div class="form-check">
-          <input class="form-check-input" id="isReviewer" type="checkbox" />
-          <label class="form-check-label" for="isReviewer">You are not available as reviewer.</label>
+        <div class="form-check" v-for="membership in projectMemberships" :key="membership.projectGitlabId">
+          <input class="form-check-input" v-model="membership.isReviewer" v-bind:id="membership.projectGitlabId" type="checkbox" />
+          <label class="form-check-label" v-bind:for="membership.projectGitlabId">I want to be a reviewer for Project: {{membership.projectGitlabId}}</label>
         </div>
+        <button class="btn btn-outline-secondary btn-sm" @click="saveMembership">Save Reviewer-State</button>
+      </div>
+    </div>
+    <div v-else class="form-group row">
+      <div class="col-md-3">Reviewer-State:</div>
+      <div class="col-md-9">
+        <p>You need to add a ethereum-address in order to manage your reviewer-settings!</p>
       </div>
     </div>
     <hr class="my-4">
@@ -59,6 +66,7 @@
 import Modal from "@/components/Modal";
 import SetAddressModal from "@/components/modals/SetAddressModal";
 import Backend from "@/api/backend";
+import Gitlab from "@/api/gitlab";
 import Navigation from "@/components/Navigation";
 
 export default {
@@ -68,7 +76,8 @@ export default {
   },
   data: function() {
     return {
-      address: undefined,
+      profile: null,
+      projectMemberships: [],
       showAddressModal: false
     };
   },
@@ -114,14 +123,81 @@ export default {
           console.log(error);
         });
     },
+    setProfile: function(profile) {
+      this.profile = profile;
+    },
+    setProjectMemberships: function(projects, memberships) {
+      //TODO: get project names from gitlab call to display behind checkboxes instead of just ID
+      if (memberships.length > 0) {
+        this.projectMemberships = projects.map(project => {
+          for (let i = 0; i < memberships.length; i++) {
+            const membership = memberships[i];
+            if (membership.projectGitlabId == project.gitlabId) {
+              return {
+                projectGitlabId: project.gitlabId,
+                userGitlabId: membership.userGitlabId,
+                projectaddress: project.address,
+                isReviewer: membership.reviewer
+              };
+            }
+          }
+          return {
+            projectGitlabId: project.gitlabId,
+            userGitlabId: this.profile.gitlabId,
+            projectaddress: project.address,
+            isReviewer: false
+          };
+        });
+      } else {
+        this.projectMemberships = projects.map(project => {
+          return {
+            projectGitlabId: project.gitlabId,
+            userGitlabId: this.profile.gitlabId,
+            projectaddress: project.address,
+            isReviewer: false
+          };
+        });
+      }
+    },
+    saveMembership: function() {
+      let preparedMemberships = this.projectMemberships.map(membership => {
+        return {
+          projectGitlabId: membership.projectGitlabId,
+          userGitlabId: membership.userGitlabId,
+          reviewer: membership.isReviewer
+        };
+      });
+
+      const backend = Backend.getClient();
+      this.$emit("isLoading", true);
+      backend.post("/profile/memberships", preparedMemberships).then(result => {
+        this.$emit("isLoading", false);
+        this.updateData();
+      });
+    },
     updateData: function() {
       const backend = Backend.getClient();
 
       this.$emit("isLoading", true);
       // TODO handle / display errors in component
-      backend.get("/profile").then(response => {
+      Promise.all([
+        backend.get("/projects").then(response => {
+          return response.data;
+        }),
+        backend.get("/profile").then(response => {
+          return response.data;
+        }),
+        backend.get("/profile/memberships").then(response => {
+          return response.data;
+        })
+      ]).then(results => {
+        const projects = results[0];
+        const profile = results[1];
+        const memberships = results[2];
+
+        this.setProfile(profile);
+        this.setProjectMemberships(projects, memberships);
         this.$emit("isLoading", false);
-        this.address = response.data.address;
       });
     }
   }
