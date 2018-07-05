@@ -7,7 +7,7 @@
           <h1>{{issue.title}}</h1>
         </div>
         <div class="col-auto">
-          <button v-if="donatable" class="btn btn-outline-secondary btn-sm" v-on:click="showDonateEtherModal">Donate Ether</button>
+          <button v-if="canDonate" class="btn btn-outline-secondary btn-sm" v-on:click="showDonateEtherModal">Donate Ether</button>
 
           <Modal v-model="donateEtherModal.show" title="Donate Ether">
             <p>
@@ -26,7 +26,7 @@
             </template>
           </Modal>
 
-          <button v-if="approvable" class="btn btn-outline-success btn-sm" v-on:click="showApproveIssueModal">Approve</button>
+          <button v-if="canApprove" class="btn btn-outline-success btn-sm" v-on:click="showApproveIssueModal">Approve</button>
 
           <Modal v-model="approveIssueModal.show" title="Approve Issue">
             <p>
@@ -39,7 +39,7 @@
             </template>
           </Modal>
 
-          <button v-if="lockable" class="btn btn-outline-warning btn-sm" v-on:click="showLockIssueModal">Lock Issue</button>
+          <button v-if="canLock" class="btn btn-outline-warning btn-sm" v-on:click="showLockIssueModal">Lock Issue</button>
 
           <Modal v-model="lockIssueModal.show" title="Lock Issue">
             <p>
@@ -52,7 +52,7 @@
             </template>
           </Modal>
 
-          <button v-if="inDevelopment" class="btn btn-outline-primary btn-sm" v-on:click="showFinishDevelopmentModal">Finish Development</button>
+          <button v-if="canFinishDevelopment" class="btn btn-outline-primary btn-sm" v-on:click="showFinishDevelopmentModal">Finish Development</button>
 
           <Modal v-model="finishDevelopmentModal.show" title="Finish Development">
             <p>
@@ -65,7 +65,7 @@
             </template>
           </Modal>
 
-          <button v-if="reviewable" class="btn btn-outline-primary btn-sm" v-on:click="showFinishReviewModal">Finish Review</button>
+          <button v-if="canReview" class="btn btn-outline-primary btn-sm" v-on:click="showFinishReviewModal">Finish Review</button>
 
           <Modal v-model="finishReviewModal.show" title="Finish Review">
             <p>
@@ -166,12 +166,49 @@ export default {
         }
       }
       return "badge badge-secondary";
+    },
+    canDonate: function() {
+      // TODO disable for completed issues?
+      return true;
+    },
+    canApprove: function() {
+      return (
+        this.isMaintainer &&
+        this.contractIssue &&
+        this.contractIssue.lifecycleStatus == "DEFAULT"
+      );
+    },
+    canLock: function() {
+      return (
+        this.contractIssue &&
+        // TODO load address
+        // this.contractIssue.reviewers.includes(this.profile.address) &&
+        this.contractIssue.lifecycleStatus == "APPROVED"
+      );
+    },
+    canFinishDevelopment: function() {
+      return (
+        this.contractIssue &&
+        this.contractIssue.lifecycleStatus == "LOCKED" &&
+        this.userAddress == this.contractIssue.developer
+      );
+    },
+    canReview: function() {
+      return (
+        this.contractIssue &&
+        this.contractIssue.lifecycleStatus == "DEVELOPED" &&
+        this.contractIssue.reviewers.includes(this.userAddress)
+        // TODO check contractIssue.reviewStatus? Should reviewer be able to change status anytime?
+      );
     }
   },
   data: function() {
     return {
       issue: null,
+      contractIssue: null,
       contractAddress: null,
+      isMaintainer: false,
+      userAddress: null,
       // TODO implement as reactive computed properties
       donatable: true,
       approvable: false,
@@ -296,6 +333,15 @@ export default {
     setContractAddress: function(address) {
       this.contractAddress = address;
     },
+    setContractIssue: function(issue) {
+      this.contractIssue = issue;
+    },
+    setIsMaintainer: function(val) {
+      this.isMaintainer = val;
+    },
+    setUserAddress: function(address) {
+      this.userAddress = address;
+    },
     updateData: function() {
       const gitlab = Gitlab.getClient();
       const backend = Backend.getClient();
@@ -325,14 +371,15 @@ export default {
         const project = results[5];
         const reviewer = null;
         //const reviewer = membership.reviewer; // TODO
-        const user = profile.address;
 
         // TODO set loaded data directly as properties and use reactive properties
 
         this.setIssue(issue);
         this.setContractAddress(project.address);
-
+        this.setContractIssue(contractIssue);
+        this.setUserAddress(profile.address);
         if (ownedProjects.find(project => project.id == this.projectId)) {
+          this.setIsMaintainer(true);
           this.setApprovable();
         }
 
