@@ -8,10 +8,7 @@ stages:
 
 variables:
   DOCKER_DRIVER: overlay
-  CONTAINER_RELEASE_IMAGE: docker.io/snseadam/debugchain:latest
-
-before_script:
-  - docker login -u "$dockerHubId" -p "$dockerHubPwd" index.docker.io
+  CONTAINER_RELEASE_IMAGE: snseadam/debugchain
 
 maven-build:
   image: openjdk:8-jdk
@@ -42,6 +39,7 @@ docker-build:
   stage: package
   script:
     - docker build -t $CONTAINER_RELEASE_IMAGE ./server
+    - docker login -u "$dockerHubId" -p "$dockerHubPwd" docker.io
     - docker push $CONTAINER_RELEASE_IMAGE
   only:
     - DEB-109-vm
