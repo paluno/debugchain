@@ -171,6 +171,7 @@ export default {
   data: function() {
     return {
       issue: null,
+      contractAddress: null,
       // TODO implement as reactive computed properties
       donatable: true,
       approvable: false,
@@ -205,71 +206,55 @@ export default {
       const donation = this.donateEtherModal.donation;
       const client = Backend.getClient();
       const issueId = this.issueId;
-      // TODO load contract address once in updateData
-      client.get("/projects/" + this.projectId).then(response => {
-        const contractAdress = response.data.address;
-        const contract = new Contract(contractAdress);
-        contract.donate(issueId, donation).then(() => {
-          // TODO (for all functions) use reactive properties and just call updateData again
-          this.setApprovable();
-          this.closeDonateEtherModal();
-        });
+      const contract = new Contract(this.contractAddress);
+      contract.donate(issueId, donation).then(() => {
+        // TODO (for all functions) use reactive properties and just call updateData again
+        this.setApprovable();
+        this.closeDonateEtherModal();
       });
     },
     approveIssue: function() {
       const client = Backend.getClient();
       const issueId = this.issueId;
-      client.get("/projects/" + this.projectId).then(response => {
-        const contractAdress = response.data.address;
-        const contract = new Contract(contractAdress);
-        // TODO: get selected reviewers
-        //const reviewers = this.approveIssueModal.reviewers;
-        const reviewers = [
-          "0x2341998aeb343",
-          "0x2341998aeb340",
-          "0x2341998aeb345"
-        ]; // Dummy reviewers addresses
-        contract.approve(issueId, reviewers).then(() => {
-          this.setLockable();
-          this.closeApproveIssueModal();
-        });
+      const contract = new Contract(this.contractAddress);
+      // TODO: get selected reviewers
+      //const reviewers = this.approveIssueModal.reviewers;
+      const reviewers = [
+        "0x2341998aeb343",
+        "0x2341998aeb340",
+        "0x2341998aeb345"
+      ]; // Dummy reviewers addresses
+      contract.approve(issueId, reviewers).then(() => {
+        this.setLockable();
+        this.closeApproveIssueModal();
       });
     },
     lockIssue: function() {
       const client = Backend.getClient();
       const issueId = this.issueId;
-      client.get("/projects/" + this.projectId).then(response => {
-        const contractAdress = response.data.address;
-        const contract = new Contract(contractAdress);
-        contract.lock(issueId).then(() => {
-          this.setInDevelopment();
-          this.closeLockIssueModal();
-        });
+      const contract = new Contract(this.contractAddress);
+      contract.lock(issueId).then(() => {
+        this.setInDevelopment();
+        this.closeLockIssueModal();
       });
     },
     finishDevelopment: function() {
       const client = Backend.getClient();
       const issueId = this.issueId;
-      client.get("/projects/" + this.projectId).then(response => {
-        const contractAdress = response.data.address;
-        const contract = new Contract(contractAdress);
-        contract.develop(issueId).then(() => {
-          this.setReviewable();
-          this.closeFinishDevelopmentModal();
-        });
+      const contract = new Contract(this.contractAddress);
+      contract.develop(issueId).then(() => {
+        this.setReviewable();
+        this.closeFinishDevelopmentModal();
       });
     },
     finishReview: function() {
       const accepted = this.finishReviewModal.accepted; // TODO get user input from finishReviewModal
       const client = Backend.getClient();
       const issueId = this.issueId;
-      client.get("/projects/" + this.projectId).then(response => {
-        const contractAdress = response.data.address;
-        const contract = new Contract(contractAdress);
-        contract.review(issueId, accepted).then(() => {
-          this.setWithdrawable();
-          this.closeFinishReviewModal();
-        });
+      const contract = new Contract(this.contractAddress);
+      contract.review(issueId, accepted).then(() => {
+        this.setWithdrawable();
+        this.closeFinishReviewModal();
       });
     },
     withdraw: function() {
@@ -309,6 +294,9 @@ export default {
       this.reviewable = false;
       this.withdrawable = true;
     },
+    setContractAddress: function(address) {
+      this.setContractAddress = address;
+    },
     updateData: function() {
       const gitlab = Gitlab.getClient();
       const backend = Backend.getClient();
@@ -327,13 +315,15 @@ export default {
             // TODO fix response code in backend to 404
             if (error.response.status != 500) throw error;
           }),
-        backend.get("/profile").then(r => r.data)
+        backend.get("/profile").then(r => r.data),
+        bakcend.get("/projects/" + this.projectId).then(r => r.data)
       ]).then(results => {
         const issue = results[0];
         const ownedProjects = results[1];
         const membership = results[2];
         const contractIssue = results[3];
         const profile = results[4];
+        const project = results[5];
         const reviewer = null;
         //const reviewer = membership.reviewer; // TODO
         const user = profile.address;
@@ -341,6 +331,7 @@ export default {
         // TODO set loaded data directly as properties and use reactive properties
 
         this.setIssue(issue);
+        this.setContractAddress(project.address);
 
         if (ownedProjects.find(project => project.id == this.projectId)) {
           this.setApprovable();
