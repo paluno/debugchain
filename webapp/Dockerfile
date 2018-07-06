@@ -12,7 +12,7 @@ COPY nginx.conf /etc/nginx/nginx.conf
 # Remove default website
 RUN rm -rf /usr/share/nginx/html/*
 # Copy website artifacts
-ARG DIST_DIR=dist
+ARG DIST_DIR=target
 COPY ${DIST_DIR} /usr/share/nginx/html
 # Make sure nginx has all permissions
 RUN chown -R nginx:nginx /usr/share/nginx
