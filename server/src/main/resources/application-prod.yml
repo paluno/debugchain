@@ -1,4 +1,4 @@
-web3j.client-address: "http://localhost:9545"
+web3j.client-address: "http://debugchain.k202.de:9545"
 server:
     port: 8080
     restPath: /api
@@ -12,4 +12,4 @@ spring:
         config: classpath:ehcache.xml
 oauth2:
     gitlab:
-        userEndpoint: http://localhost/api/v4/user
+        userEndpoint: http://debugchain.k202.de/api/v4/user
