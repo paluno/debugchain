@@ -468,6 +468,8 @@ export default {
             // TODO fix response code in backend to 404
             if (error.response.status != 500) throw error;
           }),
+        // TODO currently duplicate profile call, needed as workaround for deb-159
+        backend.get("/profile").then(r => r.data),
         backend.get("/projects/" + this.projectId).then(r => r.data),
         backend
           .get("/profile/withdrawals/" + this.projectId)
@@ -487,6 +489,7 @@ export default {
           const contractIssue = results[4];
           const profile = results[5];
           const project = results[6];
+          const profileWithdrawals = results[7];
 
           this.setIssue(issue, contractIssue);
           if (ownedProjects.find(project => project.id == this.projectId)) {
@@ -495,12 +498,14 @@ export default {
           this.setUserAddress(profile.address);
           this.setPossibleReviewers(possibleReviewers, projectMembers);
           this.setContractIssue(contractIssue);
-          this.setProfile(profile);
+          this.setProfileForNavigation(profileWithdrawals);
           this.setContractAddress(project.address);
         })
         .finally(() => this.$emit("isLoading", false));
     },
-    setProfile: function(newProfile) {
+    // TODO merge this with normal profile
+    // currently not possible, due to deb-159
+    setProfileForNavigation: function(newProfile) {
       if (newProfile) {
         this.profile = {
           address: newProfile.address,
