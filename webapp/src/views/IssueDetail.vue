@@ -2,33 +2,91 @@
   <div class="issue_detail">
     <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" v-bind:projectId="projectId" v-bind:issueId="issueId" />
 
-    <Modal v-model="approveModal.show" title="Assign Reviewers">
-      <p>
-        Please assign at least one reviewer in order to approve this issue. The reviewers will be responsible for reviewing the proposed solution for this issue.
-      </p>
-      <p> AKTUELL NOCH DUMMY DATEN!!</p>
-      <div class="row">
-        <label class="col">Pick reviewers (CTRL+Click to choose multiple)</label>
-      </div>
-      <div class="row">
-        <select class="col custom-select" v-model="approveModal.selectedReviewers" multiple>
-          <option v-for="reviewer in possibleReviewers" :key="reviewer.address" v-bind:value="reviewer.address">{{reviewer.username}} - {{reviewer.address}}</option>
-        </select>
-      </div>
-      <template slot="footer">
-        <button type="button" class="btn btn-primary" @click="approveIssue">Approve</button>
-        <button type="button" class="btn btn-secondary" @click="closeApproveModal">Close</button>
-      </template>
-    </Modal>
-
     <div v-if="issue">
       <div class="form-group row">
         <div class="col">
           <h1>{{issue.title}}</h1>
         </div>
         <div class="col-auto">
-          <button class="btn btn-outline-secondary btn-sm" v-on:click="donateEther">Donate Ether</button>
-          <button v-if="approvable" class="btn btn-outline-success btn-sm" v-on:click="openApproveModal">Approve</button>
+          <button v-if="canDonate" class="btn btn-outline-secondary btn-sm" v-on:click="showDonateEtherModal">Donate Ether</button>
+
+          <Modal v-model="donateEtherModal.show" title="Donate Ether">
+            <p>
+              How much Ether do you want to donate on this Issue?
+            </p>
+            <div class="row">
+              <label class="col-sm-3">Donation:</label>
+              <input class="col" type="number" placeholder="Enter your donation" v-model="donateEtherModal.donation" />
+              <label class="col-sm-3"> Ether </label>
+              <!--TODO check the validity of the input-->
+            </div>
+
+            <template slot="footer">
+              <button type="button" class="btn btn-primary" @click="donateEther">Save</button>
+              <button type="button" class="btn btn-secondary" @click="closeDonateEtherModal">Close</button>
+            </template>
+          </Modal>
+
+          <button v-if="canApprove" class="btn btn-outline-success btn-sm" v-on:click="showApproveIssueModal">Approve</button>
+
+          <Modal v-model="approveIssueModal.show" title="Assign Reviewers">
+            <p>
+              Please assign at least one reviewer in order to approve this issue. The reviewers will be responsible for reviewing the proposed solution for this issue.
+            </p>
+            <p> AKTUELL NOCH DUMMY DATEN!!</p>
+            <div class="row">
+              <label class="col">Pick reviewers (CTRL+Click to choose multiple)</label>
+            </div>
+            <div class="row">
+              <select class="col custom-select" v-model="approveIssueModal.selectedReviewers" multiple>
+                <option v-for="reviewer in possibleReviewers" :key="reviewer.address" v-bind:value="reviewer.address">{{reviewer.username}} - {{reviewer.address}}</option>
+              </select>
+            </div>
+            <template slot="footer">
+              <button type="button" class="btn btn-primary" @click="approveIssue">Approve</button>
+              <button type="button" class="btn btn-secondary" @click="closeApproveIssueModal">Close</button>
+            </template>
+          </Modal>
+
+          <button v-if="canLock" class="btn btn-outline-warning btn-sm" v-on:click="showLockIssueModal">Lock Issue</button>
+
+          <Modal v-model="lockIssueModal.show" title="Lock Issue">
+            <p>
+              Do you really want to lock Issue "{{issue.title}}"?
+            </p>
+
+            <template slot="footer">
+              <button type="button" class="btn btn-primary" @click="lockIssue">Yes</button>
+              <button type="button" class="btn btn-secondary" @click="closeLockIssueModal">No</button>
+            </template>
+          </Modal>
+
+          <button v-if="canFinishDevelopment" class="btn btn-outline-primary btn-sm" v-on:click="showFinishDevelopmentModal">Finish Development</button>
+
+          <Modal v-model="finishDevelopmentModal.show" title="Finish Development">
+            <p>
+              Do you really want to finish the development of Issue "{{issue.title}}"?
+            </p>
+
+            <template slot="footer">
+              <button type="button" class="btn btn-primary" @click="finishDevelopment">Yes</button>
+              <button type="button" class="btn btn-secondary" @click="closeFinishDevelopmentModal">No</button>
+            </template>
+          </Modal>
+
+          <button v-if="canReview" class="btn btn-outline-primary btn-sm" v-on:click="showFinishReviewModal">Finish Review</button>
+
+          <Modal v-model="finishReviewModal.show" title="Finish Review">
+            <p>
+              Give your review feedback for issue "{{issue.title}}":
+            </p>
+
+            <template slot="footer">
+              <button type="button" class="btn btn-primary" @click="finishReview(true)">Accept</button>
+              <button type="button" class="btn btn-danger" @click="finishReview(false)">Reject</button>
+              <button type="button" class="btn btn-secondary" @click="closeFinishReviewModal">Cancel</button>
+            </template>
+          </Modal>
         </div>
       </div>
       <div class="row">
@@ -53,7 +111,7 @@
       </div>
     </div>
     <hr>
-    <div v-if="chainIssue">
+    <div v-if="contractIssue">
       <div class="row">
         <div class="col">
           <h2>Issue-Chain-Detail</h2>
@@ -63,7 +121,7 @@
         <div class="col">
           <span :class="chainBadgeState">{{readableLifecycle}}</span>
           <span>
-            <b>{{chainIssue.developer}}</b>
+            <b>{{contractIssue.developer}}</b>
             is listed as developer
           </span>
         </div>
@@ -71,22 +129,22 @@
       <hr>
       <div class="row">
         <div class="col">
-          <h4>{{chainIssue.donationSum}} Ether is the current bounty</h4>
+          <h4>{{contractIssue.donationSum}} Ether is the current bounty</h4>
         </div>
       </div>
-      <div v-for="donation in chainIssue.donationValues" :key="donation.donator" class="row">
+      <div v-for="donation in contractIssue.donationValues" :key="donation.donator" class="row">
         <div class="col">
           <span>{{donation.donator}} has donated {{donation.value}} Ether </span>
         </div>
       </div>
       <hr>
-      <div v-if="chainIssue.reviewStatus.length > 0">
+      <div v-if="contractIssue.reviewStatus.length > 0">
         <div class="row">
           <div class="col">
             <h4>Review-Overview</h4>
           </div>
         </div>
-        <div v-for="review in chainIssue.reviewStatus" :key="review.reviewer" class="row">
+        <div v-for="review in contractIssue.reviewStatus" :key="review.reviewer" class="row">
           <div class="col">
             <span v-if="review.value">{{review.reviewer}} has reviewed this issue</span>
             <span v-else>{{review.reviewer}} has not yet reviewed this issue</span>
@@ -165,9 +223,43 @@ export default {
       }
       return "badge badge-secondary";
     },
+    canDonate: function() {
+      // TODO disable for completed issues?
+      return true;
+    },
+    canApprove: function() {
+      return (
+        this.isMaintainer &&
+        this.contractIssue &&
+        this.contractIssue.lifecycleStatus == "DEFAULT"
+      );
+    },
+    canLock: function() {
+      return (
+        this.contractIssue &&
+        // TODO load address
+        // this.contractIssue.reviewers.includes(this.profile.address) &&
+        this.contractIssue.lifecycleStatus == "APPROVED"
+      );
+    },
+    canFinishDevelopment: function() {
+      return (
+        this.contractIssue &&
+        this.contractIssue.lifecycleStatus == "LOCKED" &&
+        this.userAddress == this.contractIssue.developer
+      );
+    },
+    canReview: function() {
+      return (
+        this.contractIssue &&
+        this.contractIssue.lifecycleStatus == "DEVELOPED" &&
+        this.contractIssue.reviewers.includes(this.userAddress)
+        // TODO check contractIssue.reviewStatus? Should reviewer be able to change status anytime?
+      );
+    },
     chainBadgeState: function() {
-      if (this.chainIssue != null) {
-        switch (this.chainIssue.lifecycleStatus) {
+      if (this.contractIssue != null) {
+        switch (this.contractIssue.lifecycleStatus) {
           case "DEFAULT": // Default = New
             return "badge badge-success";
           case "APPROVED":
@@ -185,8 +277,8 @@ export default {
       return "badge badge-secondary";
     },
     readableLifecycle: function() {
-      if (this.chainIssue != null) {
-        switch (this.chainIssue.lifecycleStatus) {
+      if (this.contractIssue != null) {
+        switch (this.contractIssue.lifecycleStatus) {
           case "APPROVED":
             return "Approved";
           case "LOCKED":
@@ -209,15 +301,30 @@ export default {
         address: null,
         pendingWithdrawals: null
       },
-      approveModal: {
+      issue: null,
+      contractIssue: null,
+      contractAddress: null,
+      isMaintainer: false,
+      userAddress: null,
+      possibleReviewers: null,
+
+      donateEtherModal: {
+        donation: 0,
+        show: false
+      },
+      approveIssueModal: {
         show: false,
         selectedReviewers: []
       },
-      issue: null,
-      contractAddress: null,
-      possibleReviewers: null,
-      chainIssue: null,
-      approvable: false
+      lockIssueModal: {
+        show: false
+      },
+      finishDevelopmentModal: {
+        show: false
+      },
+      finishReviewModal: {
+        show: false
+      }
     };
   },
   created: function() {
@@ -225,29 +332,62 @@ export default {
   },
   methods: {
     donateEther: function() {
-      alert("Hier muss der Metamask-Aufruf für das Donaten rein");
+      const donation = this.donateEtherModal.donation;
+      const client = Backend.getClient();
+      const issueId = this.issueId;
+      const contract = new Contract(this.contractAddress);
+      contract
+        .donate(issueId, donation)
+        .then(() => this.closeDonateEtherModal())
+        .then(() => this.updateData());
     },
     approveIssue: function() {
+      const client = Backend.getClient();
+      const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
-      console.log(this.approveModal.selectedReviewers);
-      this.$emit("isLoading", true);
+      const reviewers = this.approveIssueModal.selectedReviewers;
       contract
-        .approve(this.issueId, this.approveModal.selectedReviewers)
-        .then(() => {
-          this.$emit("isLoading", false);
-          this.closeApproveModal();
-          this.updateData();
-        });
+        .approve(issueId, reviewers)
+        .then(() => this.closeApproveIssueModal())
+        .then(() => this.updateData());
     },
-    setIssue: function(issue, chainIssue) {
+    lockIssue: function() {
+      const client = Backend.getClient();
+      const issueId = this.issueId;
+      const contract = new Contract(this.contractAddress);
+      contract
+        .lock(issueId)
+        .then(() => this.closeLockIssueModal())
+        .then(() => this.updateData());
+    },
+    finishDevelopment: function() {
+      const client = Backend.getClient();
+      const issueId = this.issueId;
+      const contract = new Contract(this.contractAddress);
+      contract
+        .develop(issueId)
+        .then(() => this.closeFinishDevelopmentModal())
+        .then(() => this.updateData());
+    },
+    finishReview: function(isAccepted) {
+      const client = Backend.getClient();
+      const issueId = this.issueId;
+      const contract = new Contract(this.contractAddress);
+      contract
+        .review(issueId, isAccepted)
+        .then(() => this.closeFinishReviewModal())
+        .then(() => this.updateData());
+    },
+    setIssue: function(issue, contractIssue) {
       this.issue = issue;
-      if (chainIssue !== undefined) {
-        this.chainIssue = chainIssue;
-        this.combineDonations(this.chainIssue);
-        this.combineReviews(this.chainIssue);
+      if (contractIssue !== undefined) {
+        this.contractIssue = contractIssue;
+        this.combineDonations(this.contractIssue);
+        this.combineReviews(this.contractIssue);
       }
     },
     combineDonations(cIssue) {
+      // TODO replace this with computed property
       cIssue.donationSum = cIssue.donationSum / 1000000000000000000;
       this.combined = [];
       if (cIssue.donationValues.length == cIssue.donators.length) {
@@ -262,6 +402,7 @@ export default {
       cIssue.donators = undefined; // Remove donators since donators are now merged in donationValues
     },
     combineReviews(cIssue) {
+      // TODO replace this with computed property
       this.combined = [];
       if (cIssue.reviewers.length == cIssue.reviewStatus.length) {
         for (let i = 0; i < cIssue.reviewers.length; i++) {
@@ -274,12 +415,11 @@ export default {
         }
       }
       cIssue.reviewStatus = this.combined;
-      cIssue.reviewers = undefined; // Remove reviewers since reviewers are now merged in reviewStatus
-    },
-    setContractAddress: function(contractAddress) {
-      this.contractAddress = contractAddress;
+      // TODO ignore for merge conflict > replace with computed property
+      // cIssue.reviewers = undefined; // Remove reviewers since reviewers are now merged in reviewStatus
     },
     setPossibleReviewers: function(possibleReviewers, projectMembers) {
+      // TODO replace this with computed property
       this.possibleReviewers = possibleReviewers.map(reviewer => {
         for (let i = 0; i < projectMembers.length; i++) {
           const member = projectMembers[i];
@@ -293,8 +433,17 @@ export default {
         }
       });
     },
-    setApprovable: function() {
-      this.approvable = true;
+    setContractAddress: function(address) {
+      this.contractAddress = address;
+    },
+    setContractIssue: function(issue) {
+      this.contractIssue = issue;
+    },
+    setIsMaintainer: function(val) {
+      this.isMaintainer = val;
+    },
+    setUserAddress: function(address) {
+      this.userAddress = address;
     },
     updateData: function() {
       const gitlab = Gitlab.getClient();
@@ -306,22 +455,22 @@ export default {
         gitlab.projects.issues.one(this.projectId, this.issueId),
         gitlab.projects.owned(),
         gitlab.projects.members.list(this.projectId),
-        backend.get("/projects/" + this.projectId).then(result => {
-          return result.data;
-        }),
         backend
           .get("/projects/" + this.projectId + "/reviewers")
-          .then(result => {
-            return result.data;
-          }),
+          .then(r => r.data),
         backend
-          .get("projects/" + this.projectId + "/issues/" + this.issueId)
+          .get("/projects/" + this.projectId + "/issues/" + this.issueId)
           .then(r => r.data)
           .catch(error => {
             console.log(
               "Could not get issue-details from backend/chain. Maybe this issue is not yet tracked"
-            ); // Resolve auch im Fehlerfall, damit das Promise.all() nicht auch aufs Maul fliegt
+            );
+            // TODO fix response code in backend to 404
+            if (error.response.status != 500) throw error;
           }),
+        // TODO currently duplicate profile call, needed as workaround for deb-159
+        backend.get("/profile").then(r => r.data),
+        backend.get("/projects/" + this.projectId).then(r => r.data),
         backend
           .get("/profile/withdrawals/" + this.projectId)
           .then(r => r.data)
@@ -331,26 +480,32 @@ export default {
               '"/profile/withdrawals/:id" failed: ignoring response as workaround.'
             );
           })
-      ]).then(results => {
-        const issue = results[0];
-        const ownedProjects = results[1];
-        const projectMembers = results[2];
-        const currentProject = results[3];
-        const possibleReviewers = results[4];
-        const chainIssue = results[5];
-        const profile = results[6];
+      ])
+        .then(results => {
+          const issue = results[0];
+          const ownedProjects = results[1];
+          const projectMembers = results[2];
+          const possibleReviewers = results[3];
+          const contractIssue = results[4];
+          const profile = results[5];
+          const project = results[6];
+          const profileWithdrawals = results[7];
 
-        this.setProfile(profile);
-        this.setIssue(issue, chainIssue);
-        this.setContractAddress(currentProject.address);
-        this.setPossibleReviewers(possibleReviewers, projectMembers);
-        if (ownedProjects.find(project => project.id == this.projectId)) {
-          this.setApprovable();
-        }
-        this.$emit("isLoading", false);
-      });
+          this.setIssue(issue, contractIssue);
+          if (ownedProjects.find(project => project.id == this.projectId)) {
+            this.setIsMaintainer(true);
+          }
+          this.setUserAddress(profile.address);
+          this.setPossibleReviewers(possibleReviewers, projectMembers);
+          this.setContractIssue(contractIssue);
+          this.setProfileForNavigation(profileWithdrawals);
+          this.setContractAddress(project.address);
+        })
+        .finally(() => this.$emit("isLoading", false));
     },
-    setProfile: function(newProfile) {
+    // TODO merge this with normal profile
+    // currently not possible, due to deb-159
+    setProfileForNavigation: function(newProfile) {
       if (newProfile) {
         this.profile = {
           address: newProfile.address,
@@ -358,11 +513,37 @@ export default {
         };
       }
     },
-    openApproveModal: function() {
-      this.approveModal.show = true;
+    showDonateEtherModal: function() {
+      this.donateEtherModal.show = true;
     },
-    closeApproveModal: function() {
-      this.approveModal.show = false;
+    closeDonateEtherModal: function() {
+      this.donateEtherModal.show = false;
+      this.donateEtherModal.donation = 0;
+    },
+    showApproveIssueModal: function() {
+      this.approveIssueModal.show = true;
+      this.approveIssueModal.reviewers = [];
+    },
+    closeApproveIssueModal: function() {
+      this.approveIssueModal.show = false;
+    },
+    showLockIssueModal: function() {
+      this.lockIssueModal.show = true;
+    },
+    closeLockIssueModal: function() {
+      this.lockIssueModal.show = false;
+    },
+    showFinishDevelopmentModal: function() {
+      this.finishDevelopmentModal.show = true;
+    },
+    closeFinishDevelopmentModal: function() {
+      this.finishDevelopmentModal.show = false;
+    },
+    showFinishReviewModal: function() {
+      this.finishReviewModal.show = true;
+    },
+    closeFinishReviewModal: function() {
+      this.finishReviewModal.show = false;
     }
   }
 };
