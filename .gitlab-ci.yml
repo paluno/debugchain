@@ -40,10 +40,10 @@ docker-build:
   stage: package
   script:
     - docker login -u "$dockerHubId" -p "$dockerHubPwd" docker.io
-    - docker build -t CONTAINER_RELEASE_IMAGE_SERVER ./server
-    - docker push CONTAINER_RELEASE_IMAGE_SERVER
-    - docker build -t CONTAINER_RELEASE_IMAGE_WEBAPP ./webapp
-    - docker push CONTAINER_RELEASE_IMAGE_WEBAPP
+    - docker build -t $CONTAINER_RELEASE_IMAGE_SERVER ./server
+    - docker push $CONTAINER_RELEASE_IMAGE_SERVER
+    - docker build -t $CONTAINER_RELEASE_IMAGE_WEBAPP ./webapp
+    - docker push $CONTAINER_RELEASE_IMAGE_WEBAPP
   only:
     - master
     - deployment-adaption
