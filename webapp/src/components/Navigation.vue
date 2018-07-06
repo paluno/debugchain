@@ -13,6 +13,10 @@
       </router-link>
     </div>
     <div class="navbar-nav">
+      <span v-if="session.loggedIn" class="navbar-text">
+        <small v-if="pendingWithdrawals != null">You have {{pendingWithdrawals | weiToEther}} ETH available</small>
+        <small v-if="address == null">Set your wallet address to access more actions</small>
+      </span>
       <router-link v-if="session.loggedIn" class="nav-item nav-link" :to="{ name: 'profile'}">
         Profile
       </router-link>
@@ -28,16 +32,20 @@
 // TODO load and display project name and / or issuename in nav items
 
 import UserSession from "@/auth.js";
+import getWeb3 from "@/api/getWeb3";
 
 export default {
-  name: "navigation",
-  props: {
-    projectId: {
-      type: String
-    },
-    issueId: {
-      type: String
+  name: "Navigation",
+  filters: {
+    weiToEther: function(value) {
+      return getWeb3().fromWei(value, "ether");
     }
+  },
+  props: {
+    projectId: String,
+    issueId: String,
+    pendingWithdrawals: Number,
+    address: String
   },
   data: function() {
     return {

@@ -1,6 +1,6 @@
 <template>
   <div class="projectsetup">
-    <Navigation/>
+    <Navigation :address="profile.address" />
 
     <vue-good-table :columns="columns" :rows="gitlabProjects" :pagination-options="{ enabled: true, perPage: 10}" :search-options="{ enabled: true}" styleClass="vgt-table striped bordered" @on-row-click="onRowClick">
     </vue-good-table>
@@ -45,6 +45,9 @@ export default {
   },
   data: function() {
     return {
+      profile: {
+        address: null
+      },
       createProjectModal: {
         show: false,
         id: 0,
@@ -82,12 +85,12 @@ export default {
       contract
         .deploy(projectId)
         .then(address => {
-          client.post("/projects/", {
+          return client.post("/projects/", {
             address: address,
             gitlabId: projectId
           });
-          this.$emit("isLoading", false);
         })
+        .then(() => this.$emit("isLoading", false))
         .then(() => {
           this.$router.push({
             name: "issueList",
@@ -105,14 +108,25 @@ export default {
         };
       });
     },
+    setProfile: function(newProfile) {
+      this.profile = {
+        address: newProfile.address
+      };
+    },
     updateData: function() {
-      const client = Gitlab.getClient();
+      const gitlab = Gitlab.getClient();
+      const backend = Backend.getClient();
 
       this.$emit("isLoading", true);
-      client.projects.list().then(projects => {
-        this.setProjects(projects);
-        this.$emit("isLoading", false);
-      });
+      Promise.all([
+        gitlab.projects.list(),
+        backend.get("/profile/").then(result => result.data)
+      ])
+        .then(results => {
+          this.setProjects(results[0]);
+          this.setProfile(results[1]);
+        })
+        .then(() => this.$emit("isLoading", false));
     },
     showCreateProjectModal: function(id, name, url) {
       this.createProjectModal.show = true;

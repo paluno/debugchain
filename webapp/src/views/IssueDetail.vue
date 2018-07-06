@@ -1,6 +1,26 @@
 <template>
   <div class="issue_detail">
-    <Navigation v-bind:projectId="projectId" v-bind:issueId="issueId" />
+    <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" v-bind:projectId="projectId" v-bind:issueId="issueId" />
+
+    <Modal v-model="approveIssueModal.show" title="Assign Reviewers">
+      <p>
+        Please assign at least one reviewer in order to approve this issue. The reviewers will be responsible for reviewing the proposed solution for this issue.
+      </p>
+      <p> AKTUELL NOCH DUMMY DATEN!!</p>
+      <div class="row">
+        <label class="col">Pick reviewers (CTRL+Click to choose multiple)</label>
+      </div>
+      <div class="row">
+        <select class="col custom-select" v-model="approveIssueModal.selectedReviewers" multiple>
+          <option v-for="reviewer in possibleReviewers" :key="reviewer.address" v-bind:value="reviewer.address">{{reviewer.username}} - {{reviewer.address}}</option>
+        </select>
+      </div>
+      <template slot="footer">
+        <button type="button" class="btn btn-primary" @click="approveIssue">Approve</button>
+        <button type="button" class="btn btn-secondary" @click="closeApproveIssueModal">Close</button>
+      </template>
+    </Modal>
+
     <div v-if="issue">
       <div class="form-group row">
         <div class="col">
@@ -101,6 +121,56 @@
         </div>
       </div>
     </div>
+    <hr>
+    <div v-if="contractIssue">
+      <div class="row">
+        <div class="col">
+          <h2>Issue-Chain-Detail</h2>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <span :class="chainBadgeState">{{readableLifecycle}}</span>
+          <span>
+            <b>{{contractIssue.developer}}</b>
+            is listed as developer
+          </span>
+        </div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col">
+          <h4>{{contractIssue.donationSum}} Ether is the current bounty</h4>
+        </div>
+      </div>
+      <div v-for="donation in contractIssue.donationValues" :key="donation.donator" class="row">
+        <div class="col">
+          <span>{{donation.donator}} has donated {{donation.value}} Ether </span>
+        </div>
+      </div>
+      <hr>
+      <div v-if="contractIssue.reviewStatus.length > 0">
+        <div class="row">
+          <div class="col">
+            <h4>Review-Overview</h4>
+          </div>
+        </div>
+        <div v-for="review in contractIssue.reviewStatus" :key="review.reviewer" class="row">
+          <div class="col">
+            <span v-if="review.value">{{review.reviewer}} has reviewed this issue</span>
+            <span v-else>{{review.reviewer}} has not yet reviewed this issue</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-else>
+      <div class="row">
+        <div class="col">
+          <h2>This issue is not yet tracked in the DebugChain</h2>
+          <p>It will automatically be part of the DebugChain after someone has donated some ether so it. You can do this by clicking the "Donate"-button above!</p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -197,22 +267,65 @@ export default {
         this.contractIssue.reviewers.includes(this.userAddress)
         // TODO check contractIssue.reviewStatus? Should reviewer be able to change status anytime?
       );
+    },
+    chainBadgeState: function() {
+      if (this.contractIssue != null) {
+        switch (this.contractIssue.lifecycleStatus) {
+          case "DEFAULT": // Default = New
+            return "badge badge-success";
+          case "APPROVED":
+            return "badge badge-info";
+          case "LOCKED":
+            return "badge badge-primary";
+          case "DEVELOPED":
+            return "badge badge-warning";
+          case "COMPLETED":
+            return "badge badge-light";
+          default:
+            return "badge badge-secondary";
+        }
+      }
+      return "badge badge-secondary";
+    },
+    readableLifecycle: function() {
+      if (this.contractIssue != null) {
+        switch (this.contractIssue.lifecycleStatus) {
+          case "APPROVED":
+            return "Approved";
+          case "LOCKED":
+            return "In Development";
+          case "DEVELOPED":
+            return "In Review";
+          case "COMPLETED":
+            return "Completed";
+          case "DEFAULT":
+            return "New";
+          default:
+            return "New";
+        }
+      }
     }
   },
   data: function() {
     return {
+      profile: {
+        address: null,
+        pendingWithdrawals: null
+      },
       issue: null,
       contractIssue: null,
       contractAddress: null,
       isMaintainer: false,
       userAddress: null,
+      possibleReviewers: null,
 
       donateEtherModal: {
         donation: 0,
         show: false
       },
       approveIssueModal: {
-        show: false
+        show: false,
+        selectedReviewers: []
       },
       lockIssueModal: {
         show: false
@@ -243,9 +356,7 @@ export default {
       const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
-      // TODO: get selected reviewers
-      //const reviewers = this.approveIssueModal.reviewers;
-      const reviewers = [contract.web3.eth.accounts[0]]; // Dummy reviewers addresses
+      const reviewers = this.approveIssueModal.selectedReviewers;
       contract
         .approve(issueId, reviewers)
         .then(() => this.closeApproveIssueModal())
@@ -278,8 +389,56 @@ export default {
         .then(() => this.closeFinishReviewModal())
         .then(() => this.updateData());
     },
-    setIssue: function(issue) {
+    setIssue: function(issue, contractIssue) {
       this.issue = issue;
+      if (contractIssue !== undefined) {
+        this.contractIssue = contractIssue;
+        this.combineDonations(this.contractIssue);
+        this.combineReviews(this.contractIssue);
+      }
+    },
+    combineDonations(cIssue) {
+      cIssue.donationSum = cIssue.donationSum / 1000000000000000000;
+      this.combined = [];
+      if (cIssue.donationValues.length == cIssue.donators.length) {
+        for (let i = 0; i < cIssue.donationValues.length; i++) {
+          this.combined[i] = {
+            donator: cIssue.donators[i],
+            value: cIssue.donationValues[i] / 1000000000000000000
+          };
+        }
+      }
+      cIssue.donationValues = this.combined;
+      cIssue.donators = undefined; // Remove donators since donators are now merged in donationValues
+    },
+    combineReviews(cIssue) {
+      this.combined = [];
+      if (cIssue.reviewers.length == cIssue.reviewStatus.length) {
+        for (let i = 0; i < cIssue.reviewers.length; i++) {
+          if (!this.combinedReviews === undefined) {
+            this.combinedReviews[i] = {
+              reviewer: cIssue.reviewers[i],
+              value: cIssue.reviewStatus[i]
+            };
+          }
+        }
+      }
+      cIssue.reviewStatus = this.combined;
+      cIssue.reviewers = undefined; // Remove reviewers since reviewers are now merged in reviewStatus
+    },
+    setPossibleReviewers: function(possibleReviewers, projectMembers) {
+      this.possibleReviewers = possibleReviewers.map(reviewer => {
+        for (let i = 0; i < projectMembers.length; i++) {
+          const member = projectMembers[i];
+          if (reviewer.gitlabId == member.id) {
+            return {
+              address: reviewer.address,
+              gitlabId: reviewer.gitlabId,
+              username: member.username
+            };
+          }
+        }
+      });
     },
     setContractAddress: function(address) {
       this.contractAddress = address;
@@ -296,41 +455,65 @@ export default {
     updateData: function() {
       const gitlab = Gitlab.getClient();
       const backend = Backend.getClient();
+
       this.$emit("isLoading", true);
+
       Promise.all([
         gitlab.projects.issues.one(this.projectId, this.issueId),
         gitlab.projects.owned(),
+        gitlab.projects.members.list(this.projectId),
         backend
-          .get("/profile/memberships")
-          .then(r => r.data)
-          .then(data => data.find(m => m.projectGitlabId == this.projectId)),
+          .get("/projects/" + this.projectId + "/reviewers")
+          .then(r => r.data),
         backend
           .get("/projects/" + this.projectId + "/issues/" + this.issueId)
           .then(r => r.data)
           .catch(error => {
+            console.log(
+              "Could not get issue-details from backend/chain. Maybe this issue is not yet tracked"
+            );
             // TODO fix response code in backend to 404
             if (error.response.status != 500) throw error;
           }),
-        backend.get("/profile").then(r => r.data),
-        backend.get("/projects/" + this.projectId).then(r => r.data)
+        backend.get("/projects/" + this.projectId).then(r => r.data),
+        backend
+          .get("/profile/withdrawals/" + this.projectId)
+          .then(r => r.data)
+          .catch(error => {
+            // see deb-159
+            console.log(
+              '"/profile/withdrawals/:id" failed: ignoring response as workaround.'
+            );
+          })
       ])
         .then(results => {
           const issue = results[0];
           const ownedProjects = results[1];
-          const membership = results[2];
-          const contractIssue = results[3];
-          const profile = results[4];
-          const project = results[5];
+          const projectMembers = results[2];
+          const possibleReviewers = results[3];
+          const contractIssue = results[4];
+          const profile = results[5];
+          const project = results[6];
 
-          this.setIssue(issue);
-          this.setContractAddress(project.address);
-          this.setContractIssue(contractIssue);
-          this.setUserAddress(profile.address);
+          this.setIssue(issue, contractIssue);
           if (ownedProjects.find(project => project.id == this.projectId)) {
             this.setIsMaintainer(true);
           }
+          this.setUserAddress(profile.address);
+          this.setPossibleReviewers(possibleReviewers, projectMembers);
+          this.setContractIssue(contractIssue);
+          this.setProfile(profile);
+          this.setContractAddress(project.address);
         })
         .finally(() => this.$emit("isLoading", false));
+    },
+    setProfile: function(newProfile) {
+      if (newProfile) {
+        this.profile = {
+          address: newProfile.address,
+          pendingWithdrawals: newProfile.pendingWithdrawals
+        };
+      }
     },
     showDonateEtherModal: function() {
       this.donateEtherModal.show = true;
