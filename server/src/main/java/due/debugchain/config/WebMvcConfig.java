@@ -34,9 +34,4 @@ public class WebMvcConfig implements WebMvcConfigurer {
         argumentResolvers.add(new ProjectResolver(projectService));
         argumentResolvers.add(new UserResolver(userService));
     }
-
-    @Override
-    public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addRedirectViewController("/", "index.html");
-    }
 }

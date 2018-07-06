@@ -8,7 +8,8 @@ stages:
 
 variables:
   DOCKER_DRIVER: overlay
-  CONTAINER_RELEASE_IMAGE: snseadam/debugchain
+  CONTAINER_RELEASE_IMAGE_SERVER: snseadam/dc-server
+  CONTAINER_RELEASE_IMAGE_WEBAPP: snseadam/dc-webapp
 
 maven-build:
   image: openjdk:8-jdk
@@ -33,14 +34,17 @@ maven-build:
   artifacts:
       paths:
         - server/target/*.jar
+        - webapp/target
       expire_in: 1 week
 
 docker-build:
   stage: package
   script:
-    - docker build -t $CONTAINER_RELEASE_IMAGE ./server
     - docker login -u "$dockerHubId" -p "$dockerHubPwd" docker.io
-    - docker push $CONTAINER_RELEASE_IMAGE
+    - docker build -t $CONTAINER_RELEASE_IMAGE_SERVER ./server
+    - docker push $CONTAINER_RELEASE_IMAGE_SERVER
+    - docker build -t $CONTAINER_RELEASE_IMAGE_WEBAPP ./webapp
+    - docker push $CONTAINER_RELEASE_IMAGE_WEBAPP
   only:
     - master
 
