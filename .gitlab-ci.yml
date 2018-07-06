@@ -47,5 +47,4 @@ docker-build:
     - docker push $CONTAINER_RELEASE_IMAGE_WEBAPP
   only:
     - master
-    - deployment-adaption
 
