@@ -34,6 +34,7 @@ maven-build:
   artifacts:
       paths:
         - server/target/*.jar
+        - webapp/target
       expire_in: 1 week
 
 docker-build:
