@@ -398,6 +398,7 @@ export default {
       }
     },
     combineDonations(cIssue) {
+      // TODO replace this with computed property
       cIssue.donationSum = cIssue.donationSum / 1000000000000000000;
       this.combined = [];
       if (cIssue.donationValues.length == cIssue.donators.length) {
@@ -412,6 +413,7 @@ export default {
       cIssue.donators = undefined; // Remove donators since donators are now merged in donationValues
     },
     combineReviews(cIssue) {
+      // TODO replace this with computed property
       this.combined = [];
       if (cIssue.reviewers.length == cIssue.reviewStatus.length) {
         for (let i = 0; i < cIssue.reviewers.length; i++) {
@@ -424,9 +426,11 @@ export default {
         }
       }
       cIssue.reviewStatus = this.combined;
-      cIssue.reviewers = undefined; // Remove reviewers since reviewers are now merged in reviewStatus
+      // TODO ignore for merge conflict > replace with computed property
+      // cIssue.reviewers = undefined; // Remove reviewers since reviewers are now merged in reviewStatus
     },
     setPossibleReviewers: function(possibleReviewers, projectMembers) {
+      // TODO replace this with computed property
       this.possibleReviewers = possibleReviewers.map(reviewer => {
         for (let i = 0; i < projectMembers.length; i++) {
           const member = projectMembers[i];
