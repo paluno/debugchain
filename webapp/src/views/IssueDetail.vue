@@ -2,25 +2,6 @@
   <div class="issue_detail">
     <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" v-bind:projectId="projectId" v-bind:issueId="issueId" />
 
-    <Modal v-model="approveIssueModal.show" title="Assign Reviewers">
-      <p>
-        Please assign at least one reviewer in order to approve this issue. The reviewers will be responsible for reviewing the proposed solution for this issue.
-      </p>
-      <p> AKTUELL NOCH DUMMY DATEN!!</p>
-      <div class="row">
-        <label class="col">Pick reviewers (CTRL+Click to choose multiple)</label>
-      </div>
-      <div class="row">
-        <select class="col custom-select" v-model="approveIssueModal.selectedReviewers" multiple>
-          <option v-for="reviewer in possibleReviewers" :key="reviewer.address" v-bind:value="reviewer.address">{{reviewer.username}} - {{reviewer.address}}</option>
-        </select>
-      </div>
-      <template slot="footer">
-        <button type="button" class="btn btn-primary" @click="approveIssue">Approve</button>
-        <button type="button" class="btn btn-secondary" @click="closeApproveIssueModal">Close</button>
-      </template>
-    </Modal>
-
     <div v-if="issue">
       <div class="form-group row">
         <div class="col">
@@ -48,14 +29,22 @@
 
           <button v-if="canApprove" class="btn btn-outline-success btn-sm" v-on:click="showApproveIssueModal">Approve</button>
 
-          <Modal v-model="approveIssueModal.show" title="Approve Issue">
+          <Modal v-model="approveIssueModal.show" title="Assign Reviewers">
             <p>
-              Do you really want to approve Issue "{{issue.title}}"?
+              Please assign at least one reviewer in order to approve this issue. The reviewers will be responsible for reviewing the proposed solution for this issue.
             </p>
-
+            <p> AKTUELL NOCH DUMMY DATEN!!</p>
+            <div class="row">
+              <label class="col">Pick reviewers (CTRL+Click to choose multiple)</label>
+            </div>
+            <div class="row">
+              <select class="col custom-select" v-model="approveIssueModal.selectedReviewers" multiple>
+                <option v-for="reviewer in possibleReviewers" :key="reviewer.address" v-bind:value="reviewer.address">{{reviewer.username}} - {{reviewer.address}}</option>
+              </select>
+            </div>
             <template slot="footer">
-              <button type="button" class="btn btn-primary" @click="approveIssue">Yes</button>
-              <button type="button" class="btn btn-secondary" @click="closeApproveIssueModal">No</button>
+              <button type="button" class="btn btn-primary" @click="approveIssue">Approve</button>
+              <button type="button" class="btn btn-secondary" @click="closeApproveIssueModal">Close</button>
             </template>
           </Modal>
 
