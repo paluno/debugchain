@@ -194,23 +194,29 @@ export default {
         for (let i = 0; i < projects.length; i++) {
           backend.get("/projects/" + projects[i].gitlabId + "/issues")
             .then(issues => {results.push(issues)})
-            .catch(err => {console.log("/issues call to project failed")});
+            .catch(err => {new Error("/issues call to project failed")});
         }
         if(results.length > 0){
           resolve(results);
         }
         else{
-          reject("No issues existent!");
+          reject(new Error("No issues existent!"));
         }
       })
     },
     filterAssignedIssues: function(issues) {
-      issues.array.forEach(element => {
-        if (element.developer == this.profile.address) {
-          assignedIssuesAsDev.push(element);
+      const profileAddress = this.profile.address.toUpperCase();
+      issues.forEach(element => {
+        const dev = element.developer.toUpperCase();
+        if (dev === profileAddress) {
+          this.assignedIssuesAsDev.push(element);
         }
-        else if (element.reviewers.includes(this.profile.address)){
-          assignedIssuesAsReviewer.push(element);
+        else {
+          element.reviewers.forEach(r => {
+            if (r.toUpperCase() === profileAddress){
+              this.assignedIssuesAsReviewer.push(r);
+            }
+          })
         }
       });
     },
@@ -240,10 +246,32 @@ export default {
         const gitlabUsername = this.getGitlabUsername(profile.gitlabId)
           .then(username => {this.gitlabUsername = username})
           .catch(err => {console.log(err)});
-        if (this.profile.address !== null) { //can only filter for assigned issues if address is set
+        
+          /*var dummyIssues = [
+                      {
+                        "developer": "0x6CF691F3Ca5eA6dB50c6Cd19DE380EA483837b69",
+                        "donationSum": 0,
+                        "donationValues": [
+                          0
+                        ],
+                        "donators": [
+                          "string"
+                        ],
+                        "id": 0,
+                        "lifecycleStatus": "DEFAULT",
+                        "reviewStatus": [
+                          true
+                        ],
+                        "reviewers": [
+                          "0x6CF691F3Ca5eA6dB50c6Cd19DE380EA483837b69"
+                        ]
+                      }
+            ];*/
+          if (this.profile.address !== null) { //can only filter for assigned issues if address is set
           const allIssues = this.getAllIssuesOfProjects(projects)
-          .then(issues => {this.filterAssignedIssues(issues)})
+          .then(issues => {this.filterAssignedIssues(dummyIssues)})
           .catch(err => {console.log(err)});
+          this.filterAssignedIssues(dummyIssues);
         }
         else {
           //TODO handle?
