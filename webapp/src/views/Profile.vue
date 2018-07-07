@@ -7,7 +7,7 @@
     <div class="form-group row">
       <label class="col-md-3" for="username">Username:</label>
       <div class="col-md-9">
-        <span class="">[Your gitlab username]</span>
+        <span class="">{{gitlabUsername}}</span>
       </div>
     </div>
     <div class="form-group row">
@@ -74,6 +74,7 @@ export default {
   data: function() {
     return {
       profile: null,
+      gitlabUsername: null,
       projectMemberships: [],
       showAddressModal: false
     };
@@ -204,6 +205,8 @@ export default {
         const projects = results[0];
         const profile = results[1];
         const memberships = results[2];
+        const gitlabUsername = this.getGitlabUsername(profile.gitlabId)
+          .then((username) => {this.gitlabUsername = username});
 
         this.setProfile(profile);
         this.setProjectMemberships(projects, memberships);
