@@ -172,8 +172,21 @@ export default {
         this.updateData();
       });
     },
+    getGitlabUsername: function(id) {
+      const gitlab = Gitlab.getClient();
+      return new Promise((resolve, reject) => {
+        gitlab.get("/users/" + id)
+          .then(results => {
+            resolve(results.username);
+          })
+          .catch(err => {
+            reject(err);
+          })
+      })
+    },
     updateData: function() {
       const backend = Backend.getClient();
+      const gitlab = Gitlab.getClient();
 
       this.$emit("isLoading", true);
       // TODO handle / display errors in component
