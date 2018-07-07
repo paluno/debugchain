@@ -76,7 +76,8 @@ export default {
       profile: null,
       gitlabUsername: null,
       projectMemberships: [],
-      assignedIssues: [],
+      assignedIssuesAsDev: [],
+      assignedIssuesAsReviewer: [],
       showAddressModal: false
     };
   },
@@ -192,18 +193,26 @@ export default {
       return new Promise((resolve, reject) => {
         for (let i = 0; i < projects.length; i++) {
           backend.get("/projects/" + projects[i].gitlabId + "/issues")
-            .then(issues => {results.push(issues)});
+            .then(issues => {results.push(issues)})
+            .catch(err => {console.log("/issues call to project failed")});
         }
         if(results.length > 0){
           resolve(results);
         }
         else{
-          reject("No projects existent!");
+          reject("No issues existent!");
         }
       })
     },
     filterAssignedIssues: function(issues) {
-      //TODO
+      issues.array.forEach(element => {
+        if (element.developer == this.profile.address) {
+          assignedIssuesAsDev.push(element);
+        }
+        else if (element.reviewers.includes(this.profile.address)){
+          assignedIssuesAsReviewer.push(element);
+        }
+      });
     },
     updateData: function() {
       const backend = Backend.getClient();
@@ -224,15 +233,22 @@ export default {
         const projects = results[0];
         const profile = results[1];
         const memberships = results[2];
-        const gitlabUsername = this.getGitlabUsername(profile.gitlabId)
-          .then(username => {this.gitlabUsername = username})
-          .catch(err => {console.log(err)});
-        const allIssues = this.getAllIssuesOfProjects(projects)
-          .then(issues => {this.filterAssignedIssues(issues)})
-          .catch(err => {console.log(err)});
 
         this.setProfile(profile);
         this.setProjectMemberships(projects, memberships);
+
+        const gitlabUsername = this.getGitlabUsername(profile.gitlabId)
+          .then(username => {this.gitlabUsername = username})
+          .catch(err => {console.log(err)});
+        if (this.profile.address !== null) { //can only filter for assigned issues if address is set
+          const allIssues = this.getAllIssuesOfProjects(projects)
+          .then(issues => {this.filterAssignedIssues(issues)})
+          .catch(err => {console.log(err)});
+        }
+        else {
+          //TODO handle?
+        }
+
         this.$emit("isLoading", false);
       });
     }
