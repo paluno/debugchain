@@ -76,6 +76,7 @@ export default {
       profile: null,
       gitlabUsername: null,
       projectMemberships: [],
+      assignedIssues: [],
       showAddressModal: false
     };
   },
@@ -185,9 +186,27 @@ export default {
           })
       })
     },
+    getAllIssuesOfProjects: function(projects) {
+      const backend = Backend.getClient();
+      const results = [];
+      return new Promise((resolve, reject) => {
+        for (let i = 0; i < projects.length; i++) {
+          backend.get("/projects/" + projects[i].gitlabId + "/issues")
+            .then(issues => {results.push(issues)});
+        }
+        if(results.length > 0){
+          resolve(results);
+        }
+        else{
+          reject("No projects existent!");
+        }
+      })
+    },
+    filterAssignedIssues: function(issues) {
+      //TODO
+    },
     updateData: function() {
       const backend = Backend.getClient();
-      const gitlab = Gitlab.getClient();
 
       this.$emit("isLoading", true);
       // TODO handle / display errors in component
@@ -206,7 +225,11 @@ export default {
         const profile = results[1];
         const memberships = results[2];
         const gitlabUsername = this.getGitlabUsername(profile.gitlabId)
-          .then((username) => {this.gitlabUsername = username});
+          .then(username => {this.gitlabUsername = username})
+          .catch(err => {console.log(err)});
+        const allIssues = this.getAllIssuesOfProjects(projects)
+          .then(issues => {this.filterAssignedIssues(issues)})
+          .catch(err => {console.log(err)});
 
         this.setProfile(profile);
         this.setProjectMemberships(projects, memberships);
