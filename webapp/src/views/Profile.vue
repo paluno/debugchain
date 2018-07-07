@@ -269,9 +269,8 @@ export default {
             ];*/
           if (this.profile.address !== null) { //can only filter for assigned issues if address is set
           const allIssues = this.getAllIssuesOfProjects(projects)
-          .then(issues => {this.filterAssignedIssues(dummyIssues)})
+          .then(issues => {this.filterAssignedIssues(issues)})
           .catch(err => {console.log(err)});
-          this.filterAssignedIssues(dummyIssues);
         }
         else {
           //TODO handle?
