@@ -24,10 +24,10 @@
       <div class="col-md-3">Reviewer-State:</div>
       <div class="col-md-9">
         <div class="form-check" v-for="membership in projectMemberships" :key="membership.projectGitlabId">
-          <input class="form-check-input" v-model="membership.isReviewer" v-bind:id="membership.projectGitlabId" type="checkbox" />
+          <input class="form-check-input" v-model="membership.isReviewer" v-bind:id="membership.projectGitlabId" @change="checkReviewerChange" type="checkbox" />
           <label class="form-check-label" v-bind:for="membership.projectGitlabId">I want to be a reviewer for Project: {{membership.projectGitlabId}}</label>
         </div>
-        <button class="btn btn-outline-secondary btn-sm" @click="saveMembership">Save Reviewer-State</button>
+        <button v-if="showSaveButton" class="btn btn-outline-secondary btn-sm" @click="saveMembership">Save Reviewer-State</button>
       </div>
     </div>
     <div v-else class="form-group row">
@@ -75,7 +75,9 @@ export default {
     return {
       profile: null,
       projectMemberships: [],
-      showAddressModal: false
+      unmodifiedMemberships: [],
+      showAddressModal: false,
+      showSaveButton: false
     };
   },
   components: {
@@ -120,6 +122,24 @@ export default {
           console.log(error);
         });
     },
+    checkReviewerChange: function() {
+      outer: for (let i = 0; i < this.unmodifiedMemberships.length; i++) {
+        const unmodified = this.unmodifiedMemberships[i];
+        inner: for (let i = 0; i < this.projectMemberships.length; i++) {
+          const current = this.projectMemberships[i];
+          // Finden wir ein einziges Projekt, bei welchem der Reviewerstate geändert wurde. Zeigen wir den SaveButton an und springen aus der Schleife
+          if (unmodified.projectGitlabId == current.projectGitlabId) {
+            if (unmodified.isReviewer != current.isReviewer) {
+              this.showSaveButton = true;
+              break outer; // Breakt nicht nur die inner loop, sondern auch die outer
+            } else {
+              //Button auch wieder ausgeblendet werden, wenn man seine modifizierte Auswahl zurückzieht.
+              this.showSaveButton = false;
+            }
+          }
+        }
+      }
+    },
     setProfile: function(profile) {
       this.profile = profile;
     },
@@ -155,6 +175,9 @@ export default {
           };
         });
       }
+      this.unmodifiedMemberships = JSON.parse(
+        JSON.stringify(this.projectMemberships)
+      );
     },
     saveMembership: function() {
       let preparedMemberships = this.projectMemberships.map(membership => {
