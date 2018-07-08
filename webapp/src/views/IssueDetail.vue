@@ -102,10 +102,7 @@
       </div>
       <hr>
       <div class="row">
-        <div class="col">
-          <p>
-            {{issue.description}}
-          </p>
+        <div class="col" v-html="markdownDescription">
         </div>
       </div>
     </div>
@@ -171,6 +168,7 @@ import Modal from "@/components/Modal.vue";
 import Gitlab from "@/api/gitlab";
 import Backend from "@/api/backend";
 import Contract from "@/api/contract";
+import marked from "marked";
 
 export default {
   name: "IssueDetail",
@@ -183,6 +181,9 @@ export default {
     issueId: String
   },
   computed: {
+    markdownDescription: function() {
+      return marked(this.issue.description);
+    },
     prettyTime: function() {
       if (this.issue != null) {
         const options = {
