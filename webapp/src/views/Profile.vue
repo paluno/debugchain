@@ -78,7 +78,8 @@ export default {
       projectMemberships: [],
       assignedIssuesAsDev: [],
       assignedIssuesAsReviewer: [],
-      showAddressModal: false
+      showAddressModal: false,
+      allIssues: []
     };
   },
   components: {
@@ -88,6 +89,25 @@ export default {
   },
   created: function() {
     this.updateData();
+  },
+  computed: {
+    filterAssignedIssues: function() {
+      const profileAddress = this.profile.address.toUpperCase();
+
+      this.allIssues.forEach(element => {
+        const dev = element.developer.toUpperCase();
+        if (dev === profileAddress) {
+          this.assignedIssuesAsDev.push(element);
+        }
+        else {
+          element.reviewers.forEach(r => {
+            if (r.toUpperCase() === profileAddress){
+              this.assignedIssuesAsReviewer.push(r);
+            }
+          })
+        }
+      });
+    }
   },
   methods: {
     addressModalSaveEvent: function(newAddress) {
@@ -187,39 +207,14 @@ export default {
           })
       })
     },
-    getAllIssuesOfProjects: function(projects) {
+    
+    setAssignedIssues: function(projects) {
       const backend = Backend.getClient();
-      const results = [];
-      return new Promise((resolve, reject) => {
-        for (let i = 0; i < projects.length; i++) {
-          backend.get("/projects/" + projects[i].gitlabId + "/issues")
-            .then(issues => {results.push(issues)})
-            .catch(err => {new Error("/issues call to project failed")});
-        }
-        if(results.length > 0){
-          resolve(results);
-        }
-        else{
-          reject(new Error("No issues existent!"));
-        }
-      })
+      projects.map(p => {backend.get("/projects/" + p.gitlabId + "/issues/")
+                          .then(issues => { issues.data.forEach(element => {this.allIssues.push(element)}) })
+                          });
     },
-    filterAssignedIssues: function(issues) {
-      const profileAddress = this.profile.address.toUpperCase();
-      issues.forEach(element => {
-        const dev = element.developer.toUpperCase();
-        if (dev === profileAddress) {
-          this.assignedIssuesAsDev.push(element);
-        }
-        else {
-          element.reviewers.forEach(r => {
-            if (r.toUpperCase() === profileAddress){
-              this.assignedIssuesAsReviewer.push(r);
-            }
-          })
-        }
-      });
-    },
+    
     updateData: function() {
       const backend = Backend.getClient();
 
@@ -247,31 +242,9 @@ export default {
           .then(username => {this.gitlabUsername = username})
           .catch(err => {console.log(err)});
         
-          /*var dummyIssues = [
-                      {
-                        "developer": "0x6CF691F3Ca5eA6dB50c6Cd19DE380EA483837b69",
-                        "donationSum": 0,
-                        "donationValues": [
-                          0
-                        ],
-                        "donators": [
-                          "string"
-                        ],
-                        "id": 0,
-                        "lifecycleStatus": "DEFAULT",
-                        "reviewStatus": [
-                          true
-                        ],
-                        "reviewers": [
-                          "0x6CF691F3Ca5eA6dB50c6Cd19DE380EA483837b69"
-                        ]
-                      }
-            ];*/
           if (this.profile.address !== null) { //can only filter for assigned issues if address is set
-          const allIssues = this.getAllIssuesOfProjects(projects)
-          .then(issues => {this.filterAssignedIssues(issues)})
-          .catch(err => {console.log(err)});
-        }
+          this.setAssignedIssues(projects);
+          }
         else {
           //TODO handle?
         }
