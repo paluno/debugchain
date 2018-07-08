@@ -227,7 +227,9 @@ export default {
       return "badge badge-secondary";
     },
     canDonate: function() {
-      // TODO disable for completed issues?
+      if (this.contractIssue != null) {
+        return this.contractIssue.lifecycleStatus != "COMPLETED";
+      }
       return true;
     },
     canApprove: function() {
