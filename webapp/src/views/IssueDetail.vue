@@ -16,7 +16,7 @@
             </p>
             <div class="row">
               <label class="col-sm-3">Donation:</label>
-              <input class="col" placeholder="Enter your donation" v-model="donateEtherModal.donation" />
+              <input class="col" type="number" step="0.1" placeholder="Enter your donation" v-model="donateEtherModal.donation" />
               <label class="col-sm-3"> Ether </label>
               <!--TODO check the validity of the input-->
             </div>
