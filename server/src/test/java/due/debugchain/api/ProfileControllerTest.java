@@ -3,6 +3,7 @@ package due.debugchain.api;
 import due.debugchain.IntegrationTest;
 import due.debugchain.contracts.DebugChain;
 import due.debugchain.persistence.ProjectService;
+import due.debugchain.persistence.UserService;
 import due.debugchain.persistence.entities.ProjectEntity;
 import due.debugchain.persistence.entities.UserEntity;
 import due.debugchain.persistence.repositories.UserRepository;
@@ -61,13 +62,22 @@ public class ProfileControllerTest extends IntegrationTest {
 
     @Test
     public void getProfileWithdrawals() throws Exception {
-        System.out.println(mockMvc.perform(get("/api/profile/withdrawals/999")
+        mockMvc.perform(get("/api/profile/withdrawals/999")
                 .with(userToken(678L)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.gitlabId", equalTo(678)))
                 .andExpect(jsonPath("$.address", equalTo("0x627306090abab3a6e1400e9345bc60c78a8bef57")))
-                //.andExpect(jsonPath("$.pendingWithdrawals", equalTo(0)))
-                .andReturn().getResponse().getContentAsString());
+                .andExpect(jsonPath("$.pendingWithdrawals", equalTo(0)));
+    }
+
+    @Test
+    public void getProfileWithdrawalsNoAdress() throws Exception {
+        mockMvc.perform(get("/api/profile/withdrawals/999")
+                .with(userToken(679L)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.gitlabId", equalTo(679)))
+                .andExpect(jsonPath("$.address", equalTo(null)))
+                .andExpect(jsonPath("$.pendingWithdrawals", equalTo(0)));
     }
 
     @Test

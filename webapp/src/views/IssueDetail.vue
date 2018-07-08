@@ -33,7 +33,6 @@
             <p>
               Please assign at least one reviewer in order to approve this issue. The reviewers will be responsible for reviewing the proposed solution for this issue.
             </p>
-            <p> AKTUELL NOCH DUMMY DATEN!!</p>
             <div class="row">
               <label class="col">Pick reviewers (CTRL+Click to choose multiple)</label>
             </div>
@@ -103,10 +102,7 @@
       </div>
       <hr>
       <div class="row">
-        <div class="col">
-          <p>
-            {{issue.description}}
-          </p>
+        <div class="col" v-html="markdownDescription">
         </div>
       </div>
     </div>
@@ -120,9 +116,12 @@
       <div class="row">
         <div class="col">
           <span :class="chainBadgeState">{{readableLifecycle}}</span>
-          <span>
+          <span v-if="contractIssue.developer">
             <b>{{contractIssue.developer}}</b>
             is listed as developer
+          </span>
+          <span v-else>
+            There is no developer assigned to this issue
           </span>
         </div>
       </div>
@@ -170,6 +169,7 @@ import Gitlab from "@/api/gitlab";
 import Backend from "@/api/backend";
 import Contract from "@/api/contract";
 import getWeb3 from "@/api/getWeb3";
+import marked from "marked";
 
 export default {
   name: "IssueDetail",
@@ -182,6 +182,9 @@ export default {
     issueId: String
   },
   computed: {
+    markdownDescription: function() {
+      return marked(this.issue.description);
+    },
     prettyTime: function() {
       if (this.issue != null) {
         const options = {
@@ -225,7 +228,9 @@ export default {
       return "badge badge-secondary";
     },
     canDonate: function() {
-      // TODO disable for completed issues?
+      if (this.contractIssue != null) {
+        return this.contractIssue.lifecycleStatus != "COMPLETED";
+      }
       return true;
     },
     canApprove: function() {
