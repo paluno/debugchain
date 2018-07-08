@@ -51,9 +51,15 @@ public class ProfileController {
     @GetMapping("/withdrawals/{projectId}")
     public UserResource getProfileWithdrawals(UserEntity currentUser, ProjectEntity project) {
 
-        long withdrawals = contractService.getUserWithdrawals(project.getAddress(), currentUser.getAddress().toString()).longValue();
-
         UserResource userResource = userMapper.entityToResource(currentUser);
+
+        //if user address is not set
+        if(currentUser.getAddress() == null) {
+            userResource.setPendingWithdrawals(0L);
+            return userResource;
+        }
+
+        long withdrawals = contractService.getUserWithdrawals(project.getAddress(), currentUser.getAddress().toString()).longValue();
         userResource.setPendingWithdrawals(withdrawals);
 
         return userResource;
