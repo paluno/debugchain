@@ -12,6 +12,7 @@
 import Gitlab from "@/api/gitlab";
 import Backend from "@/api/backend";
 import Navigation from "@/components/Navigation";
+import getWeb3 from "@/api/getWeb3";
 
 export default {
   name: "IssueList",
@@ -69,7 +70,7 @@ export default {
         return {
           id: gIssue.id,
           issue: gIssue.title,
-          eth: cIssue ? cIssue.donationSum : 0,
+          eth: cIssue ? getWeb3().fromWei(cIssue.donationSum, "ether") : 0,
           status: cIssue ? this.getIssueStateFromContractIssue(cIssue) : "New"
         };
       });
