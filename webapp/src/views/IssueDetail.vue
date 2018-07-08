@@ -33,7 +33,6 @@
             <p>
               Please assign at least one reviewer in order to approve this issue. The reviewers will be responsible for reviewing the proposed solution for this issue.
             </p>
-            <p> AKTUELL NOCH DUMMY DATEN!!</p>
             <div class="row">
               <label class="col">Pick reviewers (CTRL+Click to choose multiple)</label>
             </div>
