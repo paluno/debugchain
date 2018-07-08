@@ -120,9 +120,12 @@
       <div class="row">
         <div class="col">
           <span :class="chainBadgeState">{{readableLifecycle}}</span>
-          <span>
+          <span v-if="contractIssue.developer">
             <b>{{contractIssue.developer}}</b>
             is listed as developer
+          </span>
+          <span v-else>
+            There is no developer assigned to this issue
           </span>
         </div>
       </div>
