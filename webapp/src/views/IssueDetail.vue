@@ -86,9 +86,23 @@
             </template>
           </Modal>
 
+          <button v-if="canReview" class="btn btn-outline-primary btn-sm" v-on:click="showFinishReviewModal">Finish Review</button>
+
+          <Modal v-model="finishReviewModal.show" title="Finish Review">
+            <p>
+              Give your review feedback for issue "{{issue.title}}":
+            </p>
+
+            <template slot="footer">
+              <button type="button" class="btn btn-primary" @click="finishReview(true)">Accept</button>
+              <button type="button" class="btn btn-danger" @click="finishReview(false)">Reject</button>
+              <button type="button" class="btn btn-secondary" @click="closeFinishReviewModal">Cancel</button>
+            </template>
+          </Modal>
+
           <button v-if="canReset" class="btn btn-outline-primary btn-sm" v-on:click="showResetIssueModal">Reset Issue</button>
 
-          <Modal v-model="finishReviewModal.show" title="Reset Issue">
+          <Modal v-model="resetIssueModal.show" title="Reset Issue">
             <p>
               Do you really want to reset Issue "{{issue.title}}"?
             </p>
@@ -101,7 +115,7 @@
 
           <button v-if="canDelete" class="btn btn-outline-primary btn-sm" v-on:click="showDeleteIssueModal">Delete Issue</button>
 
-          <Modal v-model="finishReviewModal.show" title="Delete Issue">
+          <Modal v-model="deleteIssueModal.show" title="Delete Issue">
             <p>
               Do you really want to delete Issue "{{issue.title}}"?
             </p>
