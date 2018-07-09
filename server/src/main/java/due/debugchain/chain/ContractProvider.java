@@ -16,8 +16,7 @@ import java.math.BigInteger;
 import java.util.function.Consumer;
 
 import static due.debugchain.contracts.DebugChain.*;
-import static org.web3j.protocol.core.DefaultBlockParameterName.EARLIEST;
-import static org.web3j.protocol.core.DefaultBlockParameterName.PENDING;
+import static org.web3j.protocol.core.DefaultBlockParameterName.LATEST;
 import static org.web3j.tx.Contract.GAS_LIMIT;
 import static org.web3j.tx.ManagedTransaction.GAS_PRICE;
 
@@ -72,7 +71,7 @@ public class ContractProvider {
     }
 
     private static EthFilter filter(Event event, String address) {
-        EthFilter filter = new EthFilter(EARLIEST, PENDING, address.substring(2)); // works only with '0x' cut off
+        EthFilter filter = new EthFilter(LATEST, LATEST, address.substring(2)); // works only with '0x' cut off
         filter.addSingleTopic(EventEncoder.encode(event));
         return filter;
     }
