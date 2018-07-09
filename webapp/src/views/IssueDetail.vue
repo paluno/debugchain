@@ -86,20 +86,6 @@
             </template>
           </Modal>
 
-          <button v-if="canReview" class="btn btn-outline-primary btn-sm" v-on:click="showFinishReviewModal">Finish Review</button>
-
-          <Modal v-model="finishReviewModal.show" title="Finish Review">
-            <p>
-              Give your review feedback for issue "{{issue.title}}":
-            </p>
-
-            <template slot="footer">
-              <button type="button" class="btn btn-primary" @click="finishReview(true)">Accept</button>
-              <button type="button" class="btn btn-danger" @click="finishReview(false)">Reject</button>
-              <button type="button" class="btn btn-secondary" @click="closeFinishReviewModal">Cancel</button>
-            </template>
-          </Modal>
-
           <button v-if="canReset" class="btn btn-outline-primary btn-sm" v-on:click="showResetIssueModal">Reset Issue</button>
 
           <Modal v-model="resetIssueModal.show" title="Reset Issue">
@@ -289,11 +275,9 @@ export default {
     },
     canUnlock: function() {
       return (
+        this.isMaintainer && 
         this.contractIssue &&
-        this.contractIssue.lifecycleStatus == "APPROVED" &&
-        this.contractIssue.lifecycleStatus == "LOCKED" &&
-        (this.isMaintainer ||
-        this.userAddress == this.contractIssue.developer)
+        this.contractIssue.lifecycleStatus == "LOCKED"
       );
     },
     canFinishDevelopment: function() {
@@ -440,7 +424,7 @@ export default {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
       contract
-        .lock(issueId)
+        .unlock(issueId)
         .then(() => this.closeUnlockIssueModal())
         .then(() => this.updateData());
     },
@@ -471,7 +455,7 @@ export default {
         .then(() => this.closeResetIssueModal())
         .then(() => this.updateData());
     },
-    deleteIssue: function() {
+    deleteIssue: function(isAccepted) {
       const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
@@ -653,16 +637,16 @@ export default {
       this.finishReviewModal.show = false;
     },
     showResetIssueModal: function() {
-      this.finishReviewModal.show = true;
+      this.resetIssueModal.show = true;
     },
     closeResetIssueModal: function() {
-      this.finishReviewModal.show = false;
+      this.resetIssueModal.show = false;
     },
     showDeleteIssueModal: function() {
-      this.finishReviewModal.show = true;
+      this.deleteIssueModal.show = true;
     },
     closeDeleteIssueModal: function() {
-      this.finishReviewModal.show = false;
+      this.deleteIssueModal.show = false;
     },
   }
 };
