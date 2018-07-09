@@ -13,9 +13,12 @@
       <button @click="donate">Donate (0.005 ETH)</button><br>
       <button @click="approve">Approve</button><br>
       <button @click="lock">Lock</button><br>
+      <button @click="unlock">Unlock</button><br>
       <button @click="develop">Give to review</button><br>
       <button @click="reviewAccept">Review accept</button><br>
       <button @click="reviewDecline">Review decline</button><br>
+      <button @click="resetIssue">Reset Issue</button><br>
+      <button @click="deleteIssue">Delete Issue</button><br>
       <button @click="withdraw">Payday</button><br>
     </div>
     <hr>
@@ -125,6 +128,16 @@ export default {
         console.log("issue " + this.contract.issueId + " locked.");
       });
     },
+    unlock: function() {
+      if (!this.contract.issueId) {
+        alert("Please enter an issue id");
+        return;
+      }
+      const contract = this.getContract();
+      return contract.unlock(this.contract.issueId).then(() => {
+        console.log("issue " + this.contract.issueId + "unlocked.");
+      });
+    },
     develop: function() {
       if (!this.contract.issueId) {
         alert("Please enter an issue id");
@@ -162,7 +175,28 @@ export default {
       return contract.withdraw().then(() => {
         console.log("withdrawn ether");
       });
+    },
+    resetIssue: function() {
+      if (!this.contract.issueId) {
+        alert("Please enter an issue id");
+        return;
+      }
+      const contract = this.getContract();
+      return contract.reset(this.contract.issueId).then(() => {
+        console.log("Issue reseted");
+      });
+    },
+    delete: function() {
+      if (!this.contract.issueId) {
+        alert("Please enter an issue id");
+        return;
+      }
+      const contract = this.getContract();
+      return contract.delete(this.contract.issueId).then(() => {
+        console.log("Issue deleted");
+      });
     }
+
   }
 };
 </script>

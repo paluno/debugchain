@@ -80,6 +80,16 @@ export default class Contract {
         });
     }
 
+    unlock(issueId) {
+        return new Promise((resolve, reject) => {
+            this.instance.unlockIssue(
+                issueId,
+                {from: this.web3.eth.accounts[0], gas: DEFAULT_GAS},
+                handleCallback(resolve, reject)
+            );
+        });
+    }
+
     develop(issueId) {
         return new Promise((resolve, reject) => {
             this.instance.setDeveloped(
@@ -114,5 +124,24 @@ export default class Contract {
         });
     }
 
+    reset(issueId) {
+        return new Promise((resolve, reject) => {
+            this.instance.resetIssue(
+                issueId,
+                {from: this.web3.eth.accounts[0], gas: DEFAULT_GAS},
+                handleCallback(resolve, reject)
+            );
+        });
+    }
+
+    delete(issueId) {
+        return new Promise((resolve, reject) => {
+            this.instance.deleteIssue(
+                issueId,
+                {from: this.web3.eth.accounts[0], gas: DEFAULT_GAS},
+                handleCallback(resolve, reject)
+            );
+        });
+    }
 
 }
