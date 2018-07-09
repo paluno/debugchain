@@ -60,6 +60,19 @@
             </template>
           </Modal>
 
+          <button v-if="canUnlock" class="btn btn-outline-warning btn-sm" v-on:click="showUnlockIssueModal">Unlock Issue</button>
+
+          <Modal v-model="unlockIssueModal.show" title="Unlock Issue">
+            <p>
+              Do you really want to unlock Issue "{{issue.title}}"?
+            </p>
+
+            <template slot="footer">
+              <button type="button" class="btn btn-primary" @click="unlockIssue">Yes</button>
+              <button type="button" class="btn btn-secondary" @click="closeUnlockIssueModal">No</button>
+            </template>
+          </Modal>
+
           <button v-if="canFinishDevelopment" class="btn btn-outline-primary btn-sm" v-on:click="showFinishDevelopmentModal">Finish Development</button>
 
           <Modal v-model="finishDevelopmentModal.show" title="Finish Development">
@@ -260,6 +273,15 @@ export default {
         this.contractIssue.lifecycleStatus == "APPROVED"
       );
     },
+    canUnlock: function() {
+      return (
+        this.contractIssue &&
+        this.contractIssue.lifecycleStatus == "APPROVED" &&
+        this.contractIssue.lifecycleStatus == "LOCKED" &&
+        (this.isMaintainer ||
+        this.userAddress == this.contractIssue.developer)
+      );
+    },
     canFinishDevelopment: function() {
       return (
         this.contractIssue &&
@@ -349,6 +371,9 @@ export default {
       lockIssueModal: {
         show: false
       },
+      unlockIssueModal: {
+        show: false
+      },
       finishDevelopmentModal: {
         show: false
       },
@@ -394,6 +419,15 @@ export default {
       contract
         .lock(issueId)
         .then(() => this.closeLockIssueModal())
+        .then(() => this.updateData());
+    },
+    unlockIssue: function() {
+      const client = Backend.getClient();
+      const issueId = this.issueId;
+      const contract = new Contract(this.contractAddress);
+      contract
+        .lock(issueId)
+        .then(() => this.closeUnlockIssueModal())
         .then(() => this.updateData());
     },
     finishDevelopment: function() {
@@ -585,6 +619,12 @@ export default {
     },
     closeLockIssueModal: function() {
       this.lockIssueModal.show = false;
+    },
+    showUnlockIssueModal: function() {
+      this.unlockIssueModal.show = true;
+    },
+    closeUnlockIssueModal: function() {
+      this.unlockIssueModal.show = false;
     },
     showFinishDevelopmentModal: function() {
       this.finishDevelopmentModal.show = true;
