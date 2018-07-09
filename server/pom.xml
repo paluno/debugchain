@@ -14,7 +14,6 @@
     <properties>
         <main.basedir>${project.parent.basedir}</main.basedir>
         <java.version>1.8</java.version>
-        <docker.image.prefix>debugchain</docker.image.prefix>
         <org.mapstruct.version>1.2.0.Final</org.mapstruct.version>
         <org.projectlombok.version>1.16.20</org.projectlombok.version>
         <springfox-version>2.7.0</springfox-version>
@@ -242,35 +241,5 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>docker</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.spotify</groupId>
-                        <artifactId>dockerfile-maven-plugin</artifactId>
-                        <version>1.4.0</version>
-                        <executions>
-                            <execution>
-                                <id>build</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>build</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <repository>${docker.image.prefix}/${project.artifactId}</repository>
-                            <buildArgs>
-                                <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
-                            </buildArgs>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
 </project>

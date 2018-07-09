@@ -29,8 +29,7 @@ maven-build:
     - ./mvnw -B compile
     - ./mvnw -B -q -pl :contracts frontend:npm@test-rpc &
     - sleep 5
-    - ./mvnw -B test
-    - ./mvnw -pl :server install
+    - ./mvnw -B install
   artifacts:
       paths:
         - server/target/*.jar
