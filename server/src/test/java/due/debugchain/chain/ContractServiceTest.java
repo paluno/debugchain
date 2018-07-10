@@ -4,7 +4,6 @@ import due.debugchain.CacheInvalidationRule;
 import due.debugchain.IntegrationTest;
 import due.debugchain.contracts.DebugChain;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
