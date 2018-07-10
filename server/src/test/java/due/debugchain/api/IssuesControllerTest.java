@@ -40,7 +40,7 @@ public class IssuesControllerTest extends IntegrationTest {
         mockMvc.perform(get("/api/projects/1/issues/1")
                 .with(userToken()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[?(@.id == 1 && @.donationSum == 1)]").exists());
+                .andExpect(jsonPath("$[?(@.id == 1 && @.donationSum == 1 && @.developer == null)]").exists());
 
     }
 
@@ -52,10 +52,12 @@ public class IssuesControllerTest extends IntegrationTest {
                 .andExpect(jsonPath("$", iterableWithSize(2)))
                 .andExpect(jsonPath("$[0].id", equalTo(1)))
                 .andExpect(jsonPath("$[0].donationSum", equalTo(1)))
+                .andExpect(jsonPath("$[0].developer", equalTo(null)))
                 .andExpect(jsonPath("$[0].donators[0]", equalTo("0x627306090abab3a6e1400e9345bc60c78a8bef57")))
                 .andExpect(jsonPath("$[1].id", equalTo(2)))
                 .andExpect(jsonPath("$[1].donationSum", equalTo(1)))
-                .andExpect(jsonPath("$[0].donators[0]", equalTo("0x627306090abab3a6e1400e9345bc60c78a8bef57")));
+                .andExpect(jsonPath("$[1].developer", equalTo(null)))
+                .andExpect(jsonPath("$[1].donators[0]", equalTo("0x627306090abab3a6e1400e9345bc60c78a8bef57")));
     }
 
 

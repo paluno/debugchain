@@ -36,7 +36,7 @@ contract DebugChain {
      *
      * @param _pId project ID to be persisted
      */
-    function DebugChain(uint _pId) public {
+constructor(uint _pId) public {
         maintainer = msg.sender;
         projectId = _pId;
     }
@@ -79,7 +79,7 @@ contract DebugChain {
             issues[_id].donationsLookup.push(msg.sender);
         }
         // emit corresponding event
-        donationRecieved(msg.sender, _id, msg.value);
+        emit DonationReceived(msg.sender, _id, msg.value);
     }
 
     /**
@@ -284,7 +284,7 @@ contract DebugChain {
         // set the reviewers
         setReviewers(_id, _reviewers);
         // fire lifecycle event
-        issueApproved(msg.sender, _id);
+        emit IssueApproved(msg.sender, _id);
     }
 
     /**
@@ -300,14 +300,14 @@ contract DebugChain {
         if (_val) {
             issues[_id].lifecycleStatus = 2;
             // fire lifecycle event
-            issueLocked(msg.sender, _id);
+            emit IssueLocked(msg.sender, _id);
         } else {
             // reset developer address
             issues[_id].developer = address(0);
             // reset lifecycle to allow re-locking
             issues[_id].lifecycleStatus = 1;
             // fire lifecycle event
-            issueUnlocked(msg.sender, _id);
+emit IssueUnlocked(msg.sender, _id);
         }
     }
 
@@ -324,7 +324,7 @@ contract DebugChain {
 
         issues[_id].lifecycleStatus = 3;
         // fire lifecycle event
-        issueDeveloped(msg.sender, _id);
+emit IssueDeveloped(msg.sender, _id);
     }
 
     /**
@@ -343,7 +343,7 @@ contract DebugChain {
             completeIssue(_id);
         }
         // fire lifecycle event
-        issueReviewed(msg.sender, _id);
+        emit IssueReviewed(msg.sender, _id);
     }
 
     /**
@@ -372,7 +372,7 @@ contract DebugChain {
         pendingWithdrawals[issues[_id].developer] = issues[_id].donationSum;
         issues[_id].lifecycleStatus = 4;
         // fire lifecycle event
-        issueCompleted(msg.sender, _id);
+emit IssueCompleted(msg.sender, _id);
     }
 
     /**
@@ -390,7 +390,7 @@ contract DebugChain {
         // reset the reviewers address array
         setReviewers(_id, new address[](0));
         // fire lifecycle event
-        issueReset(msg.sender, _id);
+emit IssueReset(msg.sender, _id);
     }
 
     /**
@@ -408,7 +408,7 @@ contract DebugChain {
         removeFromIssueLookup(_id);
         delete issues[_id];
         // fire lifecycle event
-        issueDeleted(msg.sender, _id);
+emit IssueDeleted(msg.sender, _id);
     }
 
     /**
@@ -480,50 +480,50 @@ contract DebugChain {
      *
      **/
 
-    event donationRecieved (
+    event DonationReceived (
         address indexed _from,
         uint indexed _id,
         uint _amount
     );
 
-    event issueApproved (
+event IssueApproved (
         address indexed _by,
         uint indexed _id
     );
 
-    event issueLocked (
+event IssueLocked (
         address indexed _by,
         uint indexed _id
     );
 
-    event issueUnlocked (
+        event IssueUnlocked (
         address indexed _by,
         uint indexed _id
     );
 
-    event issueDeveloped (
-        address indexed _by,
-        uint indexed _id
+event IssueDeveloped (
+address _by,
+uint _id
+);
+
+event IssueReviewed (
+address _by,
+uint _id
+);
+
+event IssueCompleted (
+address _by,
+uint _id
     );
 
-    event issueReviewed (
-        address indexed _by,
-        uint indexed _id
-    );
+event IssueReset (
+address _by,
+uint _id
+);
 
-    event issueCompleted (
-        address indexed _by,
-        uint indexed _id
-    );
-
-    event issueReset (
-        address indexed _by,
-        uint indexed _id
-    );
-
-    event issueDeleted (
-        address indexed _by,
-        uint indexed _id
+event IssueDeleted (
+address _by,
+uint _id
     );
 
     /**

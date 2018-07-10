@@ -15,7 +15,7 @@ maven-build:
   image: openjdk:8-jdk
   stage: build
   variables:
-    MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository -Dorg.slf4j.simpleLogger.defaultLogLevel=info -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dspring.profiles.active=prod"
+    MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository -Dorg.slf4j.simpleLogger.defaultLogLevel=info -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dspring.profiles.active=test"
   cache:
     paths:
       - contracts/node_modules
@@ -29,8 +29,7 @@ maven-build:
     - ./mvnw -B compile
     - ./mvnw -B -q -pl :contracts frontend:npm@test-rpc &
     - sleep 5
-    - ./mvnw -B test
-    - ./mvnw -pl :server install
+    - ./mvnw -B install
   artifacts:
       paths:
         - server/target/*.jar
