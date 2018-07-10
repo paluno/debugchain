@@ -455,7 +455,7 @@ export default {
         .then(() => this.closeResetIssueModal())
         .then(() => this.updateData());
     },
-    deleteIssue: function(isAccepted) {
+    deleteIssue: function() {
       const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
