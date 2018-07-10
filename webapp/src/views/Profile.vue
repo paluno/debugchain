@@ -208,7 +208,7 @@ export default {
       })
     },
     
-    setAssignedIssues: function(projects) {
+    getAllIssues: function(projects) {
       const backend = Backend.getClient();
       projects.map(p => {backend.get("/projects/" + p.gitlabId + "/issues/")
                           .then(issues => { issues.data.forEach(element => {this.allIssues.push(element)}) })
@@ -242,9 +242,10 @@ export default {
           .then(username => {this.gitlabUsername = username})
           .catch(err => {console.log(err)});
         
-          if (this.profile.address !== null) { //can only filter for assigned issues if address is set
-          this.setAssignedIssues(projects);
-          }
+        if (this.profile.address !== null) { //can only filter for assigned issues if address is set
+        //get all issues of all projects, to then filter for assigned issues afterwards
+        this.getAllIssues(projects);
+        }
         else {
           //TODO handle?
         }
