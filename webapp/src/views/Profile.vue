@@ -39,9 +39,7 @@
     <hr class="my-4">
     <h2>Assigned issues:</h2>
     <vue-good-table :columns="columns"
-                    :rows="rows"
-                    :pagination-options="{ enabled: true, perPage: 5}"
-                    :search-options="{ enabled: true}"
+                    :rows="filterAssignedIssues"
                     styleClass="vgt-table striped bordered">
     </vue-good-table>
   </div>
@@ -69,17 +67,11 @@ export default {
         {
           label: "ID",
           field: "id",
-          type: "number",
-          filterOptions: {
-            enabled: true
-          }
+          type: "number"
         },
         {
           label: "Status",
-          field: "status",
-          filterOptions: {
-            enabled: true
-          }
+          field: "status"
         },
         {
           label: "ETH",
@@ -88,10 +80,7 @@ export default {
         },
         {
           label: "Assigned as",
-          field: "assignedAs",
-          filterOptions: {
-            enabled: true
-          }
+          field: "assignedAs"
         }
       ],
       rows: []
@@ -107,39 +96,33 @@ export default {
   },
   computed: {
     filterAssignedIssues: function() {
-      const profileAddress = this.profile.address.toUpperCase();
+      if(this.profile.address === null) return [];
+      const profileAddress = this.profile.address.toLowerCase();
+      const rows = [];
 
-      this.allIssues.forEach(element => {
-        const dev = element.developer.toUpperCase();
-        if (dev === profileAddress) {
-          this.assignedIssuesAsDev.push(element);
+      this.allIssues.forEach(issue => {
+        if (issue.developer.toLowerCase() === profileAddress) {
+          rows.push({
+            id: issue.id,
+            status: issue.lifecycleStatus,
+            eth: issue.donationSum,
+            assignedAs: "Developer"
+          });
         }
         else {
-          element.reviewers.forEach(r => {
-            if (r.toUpperCase() === profileAddress){
-              this.assignedIssuesAsReviewer.push(r);
+          issue.reviewers.forEach(r => {
+            if (r.toLowerCase() === profileAddress){
+              rows.push({
+                id: issue.id,
+                status: issue.lifecycleStatus,
+                eth: issue.donationSum,
+                assignedAs: "Reviewer" 
+              });
             }
-          })
+          });
         }
       });
-    },
-    setRows: function() {
-      this.assignedIssuesAsDev.forEach(element => {
-        this.rows.push({
-          id: element.id,
-          status: element.lifecycleStatus,
-          eth: donationSum,
-          assignedAs: "Developer"
-        });
-      });
-      this.assignedIssuesAsReviewer.forEach(element => {
-        this.rows.push({
-          id: element.id,
-          status: element.lifecycleStatus,
-          eth: donationSum,
-          assignedAs: "Reviewer"
-        });
-      });
+      return rows;
     }
   },
   methods: {
@@ -245,9 +228,9 @@ export default {
       const backend = Backend.getClient();
       projects.map(p => {backend.get("/projects/" + p.gitlabId + "/issues/")
                           .then(issues => { issues.data.forEach(element => {this.allIssues.push(element)}) })
-                          });
+                          });        
     },
-    
+   
     updateData: function() {
       const backend = Backend.getClient();
 
