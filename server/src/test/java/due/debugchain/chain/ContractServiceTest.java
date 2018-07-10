@@ -22,7 +22,6 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@Ignore // TODO
 public class ContractServiceTest extends IntegrationTest {
 
     private String address = "0xMOCK";

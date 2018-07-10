@@ -1,4 +1,6 @@
-web3j.client-address: "http://localhost:9545"
+web3j:
+  client-address: "http://localhost:9545"
+  pollingInterval: 3000
 server:
     port: 8080
     restPath: /api
@@ -10,7 +12,6 @@ spring:
     cache:
       jcache:
         config: classpath:ehcache.xml
-      type: none
 oauth2.gitlab.userEndpoint: "http://localhost/api/v4/user"
 
 ---
