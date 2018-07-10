@@ -33,9 +33,19 @@ public class ContractIntegrationTest extends IntegrationTest {
         contract.donate(bigIssueId, toWei("1", ETHER).toBigInteger()).send();
         IssueStruct issue = service.getIssue(contract.getContractAddress(), issueId);
         assertThat(issue.getLifecycleStatus()).isEqualTo(DEFAULT);
+        assertThat(issue.getDonationSum()).isEqualTo(toWei("1", ETHER).toBigInteger());
         contract.setApproved(bigIssueId, true, singletonList(credentials.getAddress())).send();
-        sleep(pollingInterval + 500); // wait for events to be fired
+        waitForEvents();
         issue = service.getIssue(contract.getContractAddress(), issueId);
         assertThat(issue.getLifecycleStatus()).isEqualTo(APPROVED);
+        contract.donate(bigIssueId, toWei("2.1", ETHER).toBigInteger()).send();
+        waitForEvents();
+        issue = service.getIssue(contract.getContractAddress(), issueId);
+        assertThat(issue.getLifecycleStatus()).isEqualTo(APPROVED);
+        assertThat(issue.getDonationSum()).isEqualTo(toWei("3.1", ETHER).toBigInteger());
+    }
+
+    private void waitForEvents() throws Exception {
+        sleep(pollingInterval + 500); // wait for events to be fired
     }
 }

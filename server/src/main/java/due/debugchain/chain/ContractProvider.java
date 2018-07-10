@@ -63,6 +63,7 @@ public class ContractProvider {
         contract.issueLockedEventObservable(filter(ISSUELOCKED_EVENT, contractAddress)).subscribe(event -> emitter.accept(event._id));
         contract.issueUnlockedEventObservable(filter(ISSUEUNLOCKED_EVENT, contractAddress)).subscribe(event -> emitter.accept(event._id));
         contract.issueResetEventObservable(filter(ISSUERESET_EVENT, contractAddress)).subscribe(event -> emitter.accept(event._id));
+        contract.donationReceivedEventObservable(filter(DONATIONRECEIVED_EVENT, contractAddress)).subscribe(event -> emitter.accept(event._id));
         return contract;
     }
 
