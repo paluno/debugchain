@@ -23,5 +23,5 @@ spring:
 ---
 spring:
   profiles: "prod"
-web3j.client-address: "https://kovan.infura.io"
+web3j.client-address: "https://rinkeby.infura.io"
 oauth2.gitlab.userEndpoint: "http://debugchain.k202.de/api/v4/user"
