@@ -38,27 +38,12 @@
     </div>
     <hr class="my-4">
     <h2>Assigned issues:</h2>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Issue</th>
-          <th>Role</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>1</td>
-          <td>Fix pagination</td>
-          <td>As Developer</td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>Dummy data</td>
-          <td>As Reviewer</td>
-        </tr>
-      </tbody>
-    </table>
+    <vue-good-table :columns="columns"
+                    :rows="rows"
+                    :pagination-options="{ enabled: true, perPage: 5}"
+                    :search-options="{ enabled: true}"
+                    styleClass="vgt-table striped bordered">
+    </vue-good-table>
   </div>
 </template>
 
@@ -79,7 +64,37 @@ export default {
       assignedIssuesAsDev: [],
       assignedIssuesAsReviewer: [],
       showAddressModal: false,
-      allIssues: []
+      allIssues: [],
+      columns: [
+        {
+          label: "ID",
+          field: "id",
+          type: "number",
+          filterOptions: {
+            enabled: true
+          }
+        },
+        {
+          label: "Status",
+          field: "status",
+          filterOptions: {
+            enabled: true
+          }
+        },
+        {
+          label: "ETH",
+          field: "eth",
+          type: "number"
+        },
+        {
+          label: "Assigned as",
+          field: "assignedAs",
+          filterOptions: {
+            enabled: true
+          }
+        }
+      ],
+      rows: []
     };
   },
   components: {
@@ -106,6 +121,24 @@ export default {
             }
           })
         }
+      });
+    },
+    setRows: function() {
+      this.assignedIssuesAsDev.forEach(element => {
+        this.rows.push({
+          id: element.id,
+          status: element.lifecycleStatus,
+          eth: donationSum,
+          assignedAs: "Developer"
+        });
+      });
+      this.assignedIssuesAsReviewer.forEach(element => {
+        this.rows.push({
+          id: element.id,
+          status: element.lifecycleStatus,
+          eth: donationSum,
+          assignedAs: "Reviewer"
+        });
       });
     }
   },
