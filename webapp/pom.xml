@@ -94,7 +94,7 @@
                 <configuration>
                     <filesets>
                         <fileset>
-                            <directory>abi</directory>
+                            <directory>contracts</directory>
                             <includes>
                                 <include>**</include>
                             </includes>

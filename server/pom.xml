@@ -58,22 +58,12 @@
         </dependency>
         <dependency>
             <groupId>org.web3j</groupId>
-            <artifactId>web3j-spring-boot-starter</artifactId>
-            <version>1.6.0</version>
+            <artifactId>core</artifactId>
+            <version>3.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.reactivex</groupId>
-            <artifactId>rxjava-reactive-streams</artifactId>
-            <version>1.2.1</version>
-        </dependency>
-        <dependency>
-            <groupId>io.reactivex.rxjava2</groupId>
-            <artifactId>rxjava</artifactId>
-            <version>2.1.13</version>
         </dependency>
 
         <!-- Caching -->
@@ -199,7 +189,7 @@
             <plugin>
                 <groupId>org.web3j</groupId>
                 <artifactId>web3j-maven-plugin</artifactId>
-                <version>0.3.0</version>
+                <version>0.3.1</version>
                 <configuration>
                     <packageName>due.debugchain.contracts</packageName>
                     <sourceDestination>${basedir}/target/generated-sources/contracts</sourceDestination>
