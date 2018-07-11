@@ -393,7 +393,6 @@ export default {
   methods: {
     donateEther: function() {
       const donation = this.donateEtherModal.donation;
-      const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
       contract
@@ -402,7 +401,6 @@ export default {
         .then(() => this.updateData());
     },
     approveIssue: function() {
-      const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
       const reviewers = this.approveIssueModal.selectedReviewers;
@@ -412,7 +410,6 @@ export default {
         .then(() => this.updateData());
     },
     lockIssue: function() {
-      const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
       contract
@@ -421,7 +418,6 @@ export default {
         .then(() => this.updateData());
     },
     unlockIssue: function() {
-      const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
       contract
@@ -430,7 +426,6 @@ export default {
         .then(() => this.updateData());
     },
     finishDevelopment: function() {
-      const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
       contract
@@ -439,7 +434,6 @@ export default {
         .then(() => this.updateData());
     },
     finishReview: function(isAccepted) {
-      const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
       contract
@@ -448,7 +442,6 @@ export default {
         .then(() => this.updateData());
     },
     resetIssue: function() {
-      const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
       contract
@@ -457,7 +450,6 @@ export default {
         .then(() => this.updateData());
     },
     deleteIssue: function() {
-      const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
       contract
