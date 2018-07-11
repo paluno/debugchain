@@ -5,7 +5,7 @@
     <div v-if="issue">
       <div class="form-group row">
         <div class="col">
-          <h1>{{issue.title}}</h1>
+          <h1><a :href="issue.web_url">{{issue.title}}</a></h1>
         </div>
         <div class="col-auto">
           <button v-if="canDonate" class="btn btn-outline-secondary btn-sm" v-on:click="showDonateEtherModal">Donate Ether</button>
