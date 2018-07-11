@@ -22,6 +22,21 @@ export default class Contract {
         }
     }
 
+    balance() {
+        return new Promise((resolve, reject) => {
+            const account = this.web3.eth.accounts[0];
+            this.web3.eth.getBalance(
+                account,
+                (err, result) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(this.web3.fromWei(result, "ether"));
+                    }
+                });
+        });
+    }
+    
     deploy(projectId) {
         return new Promise((resolve, reject) => {
             const address = this.instance.address;
@@ -31,7 +46,7 @@ export default class Contract {
             let firstCall = true;
             this.instance.new(
                 projectId,
-                {data: byteCode, from: this.web3.eth.accounts[0], gas: DEFAULT_GAS},
+                { data: byteCode, from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 (err, contract) => {
                     if (err) {
                         reject(err);
@@ -52,7 +67,7 @@ export default class Contract {
         return new Promise((resolve, reject) => {
             this.instance.donate(
                 issueId,
-                {from: this.web3.eth.accounts[0], value: this.web3.toWei(donationValue, "ether"), gas: DEFAULT_GAS},
+                { from: this.web3.eth.accounts[0], value: this.web3.toWei(donationValue, "ether"), gas: DEFAULT_GAS },
                 handleCallback(resolve, reject)
             );
         });
@@ -64,7 +79,7 @@ export default class Contract {
                 issueId,
                 true, // TODO: this will be removed
                 reviewers,
-                {from: this.web3.eth.accounts[0], gas: DEFAULT_GAS},
+                { from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 handleCallback(resolve, reject)
             );
         });
@@ -74,7 +89,7 @@ export default class Contract {
         return new Promise((resolve, reject) => {
             this.instance.setDeveloper(
                 issueId,
-                {from: this.web3.eth.accounts[0], gas: DEFAULT_GAS},
+                { from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 handleCallback(resolve, reject)
             );
         });
@@ -84,7 +99,7 @@ export default class Contract {
         return new Promise((resolve, reject) => {
             this.instance.unlockIssue(
                 issueId,
-                {from: this.web3.eth.accounts[0], gas: DEFAULT_GAS},
+                { from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 handleCallback(resolve, reject)
             );
         });
@@ -95,7 +110,7 @@ export default class Contract {
             this.instance.setDeveloped(
                 issueId,
                 true, // TODO: this will be removed
-                {from: this.web3.eth.accounts[0], gas: DEFAULT_GAS},
+                { from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 handleCallback(resolve, reject)
             );
         });
@@ -109,7 +124,7 @@ export default class Contract {
             this.instance.setReviewed(
                 issueId,
                 accepted,
-                {from: this.web3.eth.accounts[0], gas: DEFAULT_GAS},
+                { from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 handleCallback(resolve, reject)
             );
         });
@@ -118,7 +133,7 @@ export default class Contract {
     withdraw() {
         return new Promise((resolve, reject) => {
             this.instance.withdraw(
-                {from: this.web3.eth.accounts[0], gas: DEFAULT_GAS},
+                { from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 handleCallback(resolve, reject)
             );
         });
@@ -128,7 +143,7 @@ export default class Contract {
         return new Promise((resolve, reject) => {
             this.instance.resetIssue(
                 issueId,
-                {from: this.web3.eth.accounts[0], gas: DEFAULT_GAS},
+                { from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 handleCallback(resolve, reject)
             );
         });
@@ -138,7 +153,7 @@ export default class Contract {
         return new Promise((resolve, reject) => {
             this.instance.deleteIssue(
                 issueId,
-                {from: this.web3.eth.accounts[0], gas: DEFAULT_GAS},
+                { from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 handleCallback(resolve, reject)
             );
         });

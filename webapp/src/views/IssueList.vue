@@ -44,10 +44,8 @@ export default {
   },
   computed: {
     canWithdraw: function() {
-      this.profile.pendingWithdrawals = 1 ;
-      return (
-        this.profile.pendingWithdrawals && this.contractAddress? true : false
-      );
+      this.profile.pendingWithdrawals = 1; // TODO: remove this line
+      return this.profile.pendingWithdrawals != 0 && this.balance != 0;
     }
   },
   data: function() {
@@ -87,6 +85,7 @@ export default {
       ],
       rows: [],
       contractAddress: null,
+      balance: 0,
       withdrawModal: {
         show: false
       }
@@ -128,6 +127,12 @@ export default {
         .then(() => this.closeWithdrawModal())
         .then(() => this.updateData());
     },
+    getBalance: function() {
+      const contract = new Contract();
+      contract
+        .balance()
+        .then((res) => (this.balance = res));
+    },
     updateData: function() {
       const gitlab = Gitlab.getClient();
       const backend = Backend.getClient();
@@ -148,9 +153,7 @@ export default {
             );
             return null;
           }),
-        backend
-          .get("/projects/" + this.projectId)
-          .then(r => r.data)
+        backend.get("/projects/" + this.projectId).then(r => r.data)
       ]).then(results => {
         const issues = results[0];
         const contractIssues = results[1];
@@ -159,8 +162,9 @@ export default {
 
         this.setIssues(issues, contractIssues);
         this.setProfile(profile);
-        this.$emit("isLoading", false);
         this.setContractAddress(project.address);
+        this.getBalance();
+        this.$emit("isLoading", false);
       });
     },
     setProfile: function(newProfile) {
