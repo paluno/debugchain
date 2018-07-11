@@ -123,22 +123,14 @@ export default {
         });
     },
     checkReviewerChange: function() {
-      outer: for (let i = 0; i < this.unmodifiedMemberships.length; i++) {
-        const unmodified = this.unmodifiedMemberships[i];
-        inner: for (let i = 0; i < this.projectMemberships.length; i++) {
-          const current = this.projectMemberships[i];
-          // Finden wir ein einziges Projekt, bei welchem der Reviewerstate geändert wurde. Zeigen wir den SaveButton an und springen aus der Schleife
-          if (unmodified.projectGitlabId == current.projectGitlabId) {
-            if (unmodified.isReviewer != current.isReviewer) {
-              this.showSaveButton = true;
-              break outer; // Breakt nicht nur die inner loop, sondern auch die outer
-            } else {
-              //Button auch wieder ausgeblendet werden, wenn man seine modifizierte Auswahl zurückzieht.
-              this.showSaveButton = false;
-            }
-          }
-        }
-      }
+      const modified = this.unmodifiedMemberships.some(unmodified =>
+        this.projectMemberships.some(
+          membership =>
+            unmodified.projectGitlabId === membership.projectGitlabId &&
+            unmodified.isReviewer !== membership.isReviewer
+        )
+      );
+      this.showSaveButton = modified;
     },
     setProfile: function(profile) {
       this.profile = profile;
