@@ -59,8 +59,6 @@ export default {
       profile: null,
       gitlabUsername: null,
       projectMemberships: [],
-      assignedIssuesAsDev: [],
-      assignedIssuesAsReviewer: [],
       showAddressModal: false,
       allIssues: [],
       columns: [
