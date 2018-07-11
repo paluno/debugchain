@@ -384,6 +384,7 @@ export default {
       deleteIssueModal: {
         show: false
       },
+      
     };
   },
   created: function() {
