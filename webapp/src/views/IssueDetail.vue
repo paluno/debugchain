@@ -252,14 +252,12 @@ export default {
       }
       return "badge badge-secondary";
     },
-    canRunOperation: function(){
+    canRunOperation: function() {
       return this.balance != 0;
     },
     canDonate: function() {
       if (this.contractIssue != null) {
-        return (
-          this.contractIssue.lifecycleStatus != "COMPLETED"
-        );
+        return this.contractIssue.lifecycleStatus != "COMPLETED";
       }
       return true;
     },
@@ -301,14 +299,10 @@ export default {
       );
     },
     canReset: function() {
-      return (
-        this.isMaintainer && 
-        this.contractIssue);
+      return this.isMaintainer && this.contractIssue;
     },
     canDelete: function() {
-      return (
-        this.isMaintainer && 
-        this.contractIssue);
+      return this.isMaintainer && this.contractIssue;
     },
     chainBadgeState: function() {
       if (this.contractIssue != null) {

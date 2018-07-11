@@ -44,7 +44,6 @@ export default {
   },
   computed: {
     canWithdraw: function() {
-      this.profile.pendingWithdrawals = 1; // TODO: remove this line
       return this.profile.pendingWithdrawals != 0 && this.balance != 0;
     }
   },
@@ -129,9 +128,7 @@ export default {
     },
     getBalance: function() {
       const contract = new Contract();
-      contract
-        .balance()
-        .then((res) => (this.balance = res));
+      contract.balance().then(res => (this.balance = res));
     },
     updateData: function() {
       const gitlab = Gitlab.getClient();

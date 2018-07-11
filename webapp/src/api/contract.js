@@ -36,7 +36,7 @@ export default class Contract {
                 });
         });
     }
-    
+
     deploy(projectId) {
         return new Promise((resolve, reject) => {
             const address = this.instance.address;
