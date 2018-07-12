@@ -411,12 +411,12 @@ export default {
       // TODO replace this with computed property
       let combined = [];
       if (cIssue.reviewers.length == cIssue.reviewStatus.length) {
-        for (let i = 0; i < cIssue.reviewers.length; i++) {
-          combined[i] = {
-            reviewer: cIssue.reviewers[i],
-            value: cIssue.reviewStatus[i]
+        combined = cIssue.reviewers.map((reviewer, index)=>{
+          return {
+            reviewer: reviewer,
+            value: cIssue.reviewStatus[index]
           };
-        }
+        })
       }
       cIssue.reviewStatus = combined;
       // TODO ignore for merge conflict > replace with computed property
