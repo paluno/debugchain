@@ -573,6 +573,7 @@ export default {
           this.setContractIssue(contractIssue);
           this.setProfileForNavigation(profileWithdrawals);
           this.setContractAddress(project.address);
+          this.getBalance();
         })
         .finally(() => this.$emit("isLoading", false));
     },
