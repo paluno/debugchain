@@ -47,6 +47,7 @@
 
 
 <script>
+import ErrorContainer from "@/api/errorContainer";
 import Gitlab from "@/api/gitlab";
 import Modal from "@/components/Modal.vue";
 import Navigation from "@/components/Navigation";
@@ -110,13 +111,15 @@ export default {
             gitlabId: projectId
           });
         })
-        .then(() => this.$emit("isLoading", false))
         .then(() => {
           this.$router.push({
             name: "issueList",
             params: { projectId: projectId.toString() }
           });
-        });
+        })
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false))
+        .then(() => this.closeCreateProjectModal());
     },
     setProjects: function(gitlabProjects, debugChainProjects) {
       this.gitlabProjects = gitlabProjects.map(gProject => {
@@ -150,6 +153,7 @@ export default {
           this.setProjects(results[0], results[2]);
           this.setProfile(results[1]);
         })
+        .catch(error => ErrorContainer.add(error))
         .then(() => this.$emit("isLoading", false));
     },
     showCreateProjectModal: function(id, name, url) {
@@ -182,13 +186,9 @@ export default {
           } else {
             this.showCreateProjectModal(id, name, url);
           }
-          this.$emit("isLoading", false);
         })
-        .catch(error => {
-          // TODO error handling
-          this.$emit("isLoading", false);
-          alert("Could not load projects from backend: " + error.message);
-        });
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false));
     },
     onRowClick: function(params) {
       this.openProject(params.row.id, params.row.name, params.row.url);

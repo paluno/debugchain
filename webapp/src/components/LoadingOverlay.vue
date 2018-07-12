@@ -13,7 +13,7 @@ export default {};
 <style>
 .overlay {
   position: fixed;
-  z-index: 9998;
+  z-index: 2000;
   top: 0;
   left: 0;
   width: 100%;
