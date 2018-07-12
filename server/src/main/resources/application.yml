@@ -24,7 +24,6 @@ spring:
 spring:
   profiles: "prod"
   jpa:
-    databasePlatform: "org.hibernate.dialect.PostgreSQLDialect"
     hibernate:
       ddlAuto: create-drop
   datasource:
