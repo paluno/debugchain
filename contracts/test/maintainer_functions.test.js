@@ -17,10 +17,11 @@ contract('DebugChain Maintainer Functions Test', async (accounts) => {
             assertError(error);
         }
     });
-    /*
     it("should reset an issue after reviewers have been set", async () => {
         let instance = await DebugChain.deployed();
-        await instance.setReviewers(1, [accounts[1], accounts[2]]);
+        await instance.setApproved(1, true, [accounts[1], accounts[2]], { from: accounts[0] });
+        await instance.setDeveloper(1, { from: accounts[3] });
+        await instance.setDeveloped(1, { from: accounts[3] });
         await instance.setReviewed(1, true, { from: accounts[1] });
         let issue = await instance.getIssue.call(1);
         assert.equal(issue[3][0], accounts[1], 'reviewer should be set');
@@ -30,5 +31,4 @@ contract('DebugChain Maintainer Functions Test', async (accounts) => {
         assert.notEqual(_issue[3][0], accounts[1], 'reviewer should not be set');
         assert.isNotTrue(_issue[4][0], 'review status should be false');
     });
-    */
 });
