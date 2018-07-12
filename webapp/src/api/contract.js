@@ -94,7 +94,6 @@ export default class Contract {
         return new Promise((resolve, reject) => {
             this.instance.setDeveloped(
                 issueId,
-                true, // TODO: this will be removed
                 { from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 handleCallback(resolve, reject)
             );
