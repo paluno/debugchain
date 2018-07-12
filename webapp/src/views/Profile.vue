@@ -7,7 +7,7 @@
     <div class="form-group row">
       <label class="col-md-3" for="username">Username:</label>
       <div class="col-md-9">
-        <span class="">[Your gitlab username]</span>
+        <span class="">{{gitlabUsername}}</span>
       </div>
     </div>
     <div class="form-group row">
@@ -38,27 +38,10 @@
     </div>
     <hr class="my-4">
     <h2>Assigned issues:</h2>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Issue</th>
-          <th>Role</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>1</td>
-          <td>Fix pagination</td>
-          <td>As Developer</td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>Dummy data</td>
-          <td>As Reviewer</td>
-        </tr>
-      </tbody>
-    </table>
+    <vue-good-table :columns="columns"
+                    :rows="filterAssignedIssues"
+                    styleClass="vgt-table striped bordered">
+    </vue-good-table>
   </div>
 </template>
 
@@ -68,16 +51,40 @@ import SetAddressModal from "@/components/modals/SetAddressModal";
 import Backend from "@/api/backend";
 import Gitlab from "@/api/gitlab";
 import Navigation from "@/components/Navigation";
+import getWeb3 from "@/api/getWeb3";
 
 export default {
   name: "profile",
   data: function() {
     return {
       profile: null,
+      gitlabUsername: null,
       projectMemberships: [],
-      unmodifiedMemberships: [],
       showAddressModal: false,
-      showSaveButton: false
+      allIssues: [],
+      unmodifiedMemberships: [],
+      showSaveButton: false,
+      columns: [
+        {
+          label: "ID",
+          field: "id",
+          type: "number"
+        },
+        {
+          label: "Status",
+          field: "status"
+        },
+        {
+          label: "ETH",
+          field: "eth",
+          type: "number"
+        },
+        {
+          label: "Assigned as",
+          field: "assignedAs"
+        }
+      ],
+      rows: []
     };
   },
   components: {
@@ -87,6 +94,37 @@ export default {
   },
   created: function() {
     this.updateData();
+  },
+  computed: {
+    filterAssignedIssues: function() {
+      if(this.profile.address === null) return [];
+      const profileAddress = this.profile.address.toLowerCase();
+      const rows = [];
+
+      this.allIssues.forEach(issue => {
+        if (issue.developer !== null && issue.developer.toLowerCase() === profileAddress) {
+          rows.push({
+            id: issue.id,
+            status: issue.lifecycleStatus,
+            eth: getWeb3().fromWei(issue.donationSum, "ether"),
+            assignedAs: "Developer"
+          });
+        }
+        else {
+          issue.reviewers.forEach(r => {
+            if (r !== null && r.toLowerCase() === profileAddress){
+              rows.push({
+                id: issue.id,
+                status: issue.lifecycleStatus,
+                eth: getWeb3().fromWei(issue.donationSum, "ether"),
+                assignedAs: "Reviewer" 
+              });
+            }
+          });
+        }
+      });
+      return rows;
+    }
   },
   methods: {
     addressModalSaveEvent: function(newAddress) {
@@ -187,6 +225,26 @@ export default {
         this.updateData();
       });
     },
+    getGitlabUsername: function(id) {
+      const gitlab = Gitlab.getClient();
+      return new Promise((resolve, reject) => {
+        gitlab.get("/users/" + id)
+          .then(results => {
+            resolve(results.username);
+          })
+          .catch(err => {
+            reject(err);
+          })
+      })
+    },
+    
+    getAllIssues: function(projects) {
+      const backend = Backend.getClient();
+      projects.map(p => {backend.get("/projects/" + p.gitlabId + "/issues/")
+                          .then(issues => { issues.data.forEach(element => {this.allIssues.push(element)}) })
+                          });        
+    },
+   
     updateData: function() {
       const backend = Backend.getClient();
 
@@ -209,6 +267,19 @@ export default {
 
         this.setProfile(profile);
         this.setProjectMemberships(projects, memberships);
+
+        const gitlabUsername = this.getGitlabUsername(profile.gitlabId)
+          .then(username => {this.gitlabUsername = username})
+          .catch(err => {console.log(err)});
+        
+        if (this.profile.address !== null) { //can only filter for assigned issues if address is set
+        //get all issues of all projects, to then filter for assigned issues afterwards
+        this.getAllIssues(projects);
+        }
+        else {
+          //TODO handle?
+        }
+
         this.$emit("isLoading", false);
       });
     }
