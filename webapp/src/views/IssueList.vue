@@ -139,16 +139,7 @@ export default {
         backend
           .get("projects/" + this.projectId + "/issues/")
           .then(result => result.data),
-        backend
-          .get("/profile/withdrawals/" + this.projectId)
-          .then(r => r.data)
-          .catch(error => {
-            // see deb-159
-            console.log(
-              '"/profile/withdrawals/:id" failed: ignoring response as workaround.'
-            );
-            return null;
-          }),
+        backend.get("/profile/withdrawals/" + this.projectId).then(r => r.data),
         backend.get("/projects/" + this.projectId).then(r => r.data)
       ]).then(results => {
         const issues = results[0];
