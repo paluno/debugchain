@@ -31,7 +31,7 @@ export default class Contract {
                     if (err) {
                         reject(err);
                     } else {
-                        resolve(this.web3.fromWei(result, "ether"));
+                        resolve(this.web3.fromWei(result, "ether").toNumber());
                     }
                 });
         });
