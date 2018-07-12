@@ -16,7 +16,7 @@
             </p>
             <div class="row">
               <label class="col-sm-3">Donation:</label>
-              <input class="col" type="number" step="0.1" placeholder="Enter your donation" v-model="donateEtherModal.donation" />
+              <input class="col" type="number" placeholder="Enter your donation" v-model="donateEtherModal.donation" />
               <label class="col-sm-3"> Ether </label>
               <!--TODO check the validity of the input-->
             </div>
@@ -33,6 +33,7 @@
             <p>
               Please assign at least one reviewer in order to approve this issue. The reviewers will be responsible for reviewing the proposed solution for this issue.
             </p>
+            <p> AKTUELL NOCH DUMMY DATEN!!</p>
             <div class="row">
               <label class="col">Pick reviewers (CTRL+Click to choose multiple)</label>
             </div>
@@ -127,7 +128,10 @@
       </div>
       <hr>
       <div class="row">
-        <div class="col" v-html="markdownDescription">
+        <div class="col">
+          <p>
+            {{issue.description}}
+          </p>
         </div>
       </div>
     </div>
@@ -141,12 +145,9 @@
       <div class="row">
         <div class="col">
           <span :class="chainBadgeState">{{readableLifecycle}}</span>
-          <span v-if="contractIssue.developer">
+          <span>
             <b>{{contractIssue.developer}}</b>
             is listed as developer
-          </span>
-          <span v-else>
-            There is no developer assigned to this issue
           </span>
         </div>
       </div>
@@ -193,8 +194,6 @@ import Modal from "@/components/Modal.vue";
 import Gitlab from "@/api/gitlab";
 import Backend from "@/api/backend";
 import Contract from "@/api/contract";
-import getWeb3 from "@/api/getWeb3";
-import marked from "marked";
 
 export default {
   name: "IssueDetail",
@@ -207,9 +206,6 @@ export default {
     issueId: String
   },
   computed: {
-    markdownDescription: function() {
-      return marked(this.issue.description);
-    },
     prettyTime: function() {
       if (this.issue != null) {
         const options = {
@@ -256,9 +252,7 @@ export default {
       return this.balance != 0;
     },
     canDonate: function() {
-      if (this.contractIssue != null) {
-        return this.contractIssue.lifecycleStatus != "COMPLETED";
-      }
+      // TODO disable for completed issues?
       return true;
     },
     canApprove: function() {
@@ -467,13 +461,13 @@ export default {
     },
     combineDonations(cIssue) {
       // TODO replace this with computed property
-      cIssue.donationSum = getWeb3().fromWei(cIssue.donationSum, "ether");
+      cIssue.donationSum = cIssue.donationSum / 1000000000000000000;
       this.combined = [];
       if (cIssue.donationValues.length == cIssue.donators.length) {
         for (let i = 0; i < cIssue.donationValues.length; i++) {
           this.combined[i] = {
             donator: cIssue.donators[i],
-            value: getWeb3().fromWei(cIssue.donationValues[i], "ether")
+            value: cIssue.donationValues[i] / 1000000000000000000
           };
         }
       }
@@ -559,28 +553,28 @@ export default {
               '"/profile/withdrawals/:id" failed: ignoring response as workaround.'
             );
           })
-      ]).then(results => {
-        const issue = results[0];
-        const ownedProjects = results[1];
-        const projectMembers = results[2];
-        const possibleReviewers = results[3];
-        const contractIssue = results[4];
-        const profile = results[5];
-        const project = results[6];
-        const profileWithdrawals = results[7];
+      ])
+        .then(results => {
+          const issue = results[0];
+          const ownedProjects = results[1];
+          const projectMembers = results[2];
+          const possibleReviewers = results[3];
+          const contractIssue = results[4];
+          const profile = results[5];
+          const project = results[6];
+          const profileWithdrawals = results[7];
 
-        this.setIssue(issue, contractIssue);
-        if (ownedProjects.find(project => project.id == this.projectId)) {
-          this.setIsMaintainer(true);
-        }
-        this.setUserAddress(profile.address);
-        this.setPossibleReviewers(possibleReviewers, projectMembers);
-        this.setContractIssue(contractIssue);
-        this.setProfileForNavigation(profileWithdrawals);
-        this.setContractAddress(project.address);
-        this.getBalance();
-        this.$emit("isLoading", false);
-      });
+          this.setIssue(issue, contractIssue);
+          if (ownedProjects.find(project => project.id == this.projectId)) {
+            this.setIsMaintainer(true);
+          }
+          this.setUserAddress(profile.address);
+          this.setPossibleReviewers(possibleReviewers, projectMembers);
+          this.setContractIssue(contractIssue);
+          this.setProfileForNavigation(profileWithdrawals);
+          this.setContractAddress(project.address);
+        })
+        .finally(() => this.$emit("isLoading", false));
     },
     // TODO merge this with normal profile
     // currently not possible, due to deb-159
