@@ -571,26 +571,27 @@ export default {
           }),
         backend.get("/profile/withdrawals/" + this.projectId).then(r => r.data),
         backend.get("/projects/" + this.projectId).then(r => r.data)
-      ]).then(results => {
-        const issue = results[0];
-        const ownedProjects = results[1];
-        const projectMembers = results[2];
-        const possibleReviewers = results[3];
-        const contractIssue = results[4];
-        const profile = results[5];
-        const project = results[6];
+      ])
+        .then(results => {
+          const issue = results[0];
+          const ownedProjects = results[1];
+          const projectMembers = results[2];
+          const possibleReviewers = results[3];
+          const contractIssue = results[4];
+          const profile = results[5];
+          const project = results[6];
 
-        this.setIssue(issue, contractIssue);
-        if (ownedProjects.find(project => project.id == this.projectId)) {
-          this.setIsMaintainer(true);
-        }
-        // TODO consider using web3 address instead of profile
-        this.setUserAddress(profile.address);
-        this.setPossibleReviewers(possibleReviewers, projectMembers);
-        this.setContractIssue(contractIssue);
-        this.setProfile(profile);
-        this.setContractAddress(project.address);
-      })
+          this.setIssue(issue, contractIssue);
+          if (ownedProjects.find(project => project.id == this.projectId)) {
+            this.setIsMaintainer(true);
+          }
+          // TODO consider using web3 address instead of profile
+          this.setUserAddress(profile.address);
+          this.setPossibleReviewers(possibleReviewers, projectMembers);
+          this.setContractIssue(contractIssue);
+          this.setProfile(profile);
+          this.setContractAddress(project.address);
+        })
         .catch(error => ErrorContainer.add(error))
         .then(() => this.$emit("isLoading", false));
     },

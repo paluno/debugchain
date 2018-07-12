@@ -123,8 +123,10 @@ export default {
     },
     setProjects: function(gitlabProjects, debugChainProjects) {
       this.gitlabProjects = gitlabProjects.map(gProject => {
-        const dcProject = debugChainProjects.find(p => p.gitlabId == gProject.id);
-        const projectExistent = (dcProject === undefined ? "No" : "Yes");
+        const dcProject = debugChainProjects.find(
+          p => p.gitlabId == gProject.id
+        );
+        const projectExistent = dcProject === undefined ? "No" : "Yes";
         return {
           id: gProject.id,
           url: gProject.web_url,

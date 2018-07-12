@@ -98,27 +98,29 @@ export default {
   },
   computed: {
     filterAssignedIssues: function() {
-      if(this.profile.address === null) return [];
+      if (this.profile.address === null) return [];
       const profileAddress = this.profile.address.toLowerCase();
       const rows = [];
 
       this.allIssues.forEach(issue => {
-        if (issue.developer !== null && issue.developer.toLowerCase() === profileAddress) {
+        if (
+          issue.developer !== null &&
+          issue.developer.toLowerCase() === profileAddress
+        ) {
           rows.push({
             id: issue.id,
             status: issue.lifecycleStatus,
             eth: getWeb3().fromWei(issue.donationSum, "ether"),
             assignedAs: "Developer"
           });
-        }
-        else {
+        } else {
           issue.reviewers.forEach(r => {
-            if (r !== null && r.toLowerCase() === profileAddress){
+            if (r !== null && r.toLowerCase() === profileAddress) {
               rows.push({
                 id: issue.id,
                 status: issue.lifecycleStatus,
                 eth: getWeb3().fromWei(issue.donationSum, "ether"),
-                assignedAs: "Reviewer" 
+                assignedAs: "Reviewer"
               });
             }
           });
