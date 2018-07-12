@@ -8,13 +8,14 @@ stages:
 
 variables:
   DOCKER_DRIVER: overlay
-  CONTAINER_RELEASE_IMAGE: snseadam/debugchain
+  CONTAINER_RELEASE_IMAGE_SERVER: snseadam/dc-server
+  CONTAINER_RELEASE_IMAGE_WEBAPP: snseadam/dc-webapp
 
 maven-build:
   image: openjdk:8-jdk
   stage: build
   variables:
-    MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository -Dorg.slf4j.simpleLogger.defaultLogLevel=info -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dspring.profiles.active=prod"
+    MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository -Dorg.slf4j.simpleLogger.defaultLogLevel=info -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true -Dspring.profiles.active=test"
   cache:
     paths:
       - contracts/node_modules
@@ -28,19 +29,21 @@ maven-build:
     - ./mvnw -B compile
     - ./mvnw -B -q -pl :contracts frontend:npm@test-rpc &
     - sleep 5
-    - ./mvnw -B test
-    - ./mvnw -pl :server install
+    - ./mvnw -B install
   artifacts:
       paths:
         - server/target/*.jar
+        - webapp/target
       expire_in: 1 week
 
 docker-build:
   stage: package
   script:
-    - docker build -t $CONTAINER_RELEASE_IMAGE ./server
     - docker login -u "$dockerHubId" -p "$dockerHubPwd" docker.io
-    - docker push $CONTAINER_RELEASE_IMAGE
+    - docker build -t $CONTAINER_RELEASE_IMAGE_SERVER ./server
+    - docker push $CONTAINER_RELEASE_IMAGE_SERVER
+    - docker build -t $CONTAINER_RELEASE_IMAGE_WEBAPP ./webapp
+    - docker push $CONTAINER_RELEASE_IMAGE_WEBAPP
   only:
     - master
 

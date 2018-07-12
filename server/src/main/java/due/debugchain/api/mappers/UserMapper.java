@@ -38,6 +38,9 @@ public interface UserMapper {
         if (address == null){
             return null;
         }
+        if (address.equals(Address.DEFAULT)){
+            return null;
+        }
         return address.toString();
     }
 }

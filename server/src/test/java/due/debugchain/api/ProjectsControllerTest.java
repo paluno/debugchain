@@ -96,4 +96,11 @@ public class ProjectsControllerTest extends IntegrationTest {
                 .andExpect(jsonPath("$[1].gitlabId", equalTo(677)));
     }
 
+    @Test
+    public void getIssuesWithWrongProjectId() throws Exception {
+        mockMvc.perform(get("/api/projects/12/issues")
+                .with(userToken()))
+                .andExpect(status().isNotFound());
+
+    }
 }

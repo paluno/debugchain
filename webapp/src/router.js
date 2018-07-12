@@ -25,6 +25,12 @@ const router = new Router({
       }
     },
     {
+        path: '/index.html',
+        redirect: {
+            name: 'projects',
+        }
+    },
+    {
       path: '/projects',
       name: 'projects',
       component: ProjectList,
