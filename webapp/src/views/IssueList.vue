@@ -1,9 +1,9 @@
 <template>
   <div class="issueList">
     <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" :projectId="projectId" />
-    <div  v-if="canWithdraw" class="form-group row">
+    <div v-if="canWithdraw" class="form-group row">
       <div class="col">
-            <p>You have {{this.profile.pendingWithdrawals}} Ether in your pending withdrawals for this project.</p>
+        <p>You have {{this.profile.pendingWithdrawals}} Ether in your pending withdrawals for this project.</p>
       </div>
       <div class="col-auto">
         <button class="btn btn-outline-primary btn-sm" v-on:click="showWithdrawModal">Withdraw</button>
@@ -44,7 +44,10 @@ export default {
   },
   computed: {
     canWithdraw: function() {
-      return this.profile.pendingWithdrawals != 0;
+      return (
+        typeof this.profile.pendingWithdrawals === "number" &&
+        this.profile.pendingWithdrawals > 0
+      );
     }
   },
   data: function() {
