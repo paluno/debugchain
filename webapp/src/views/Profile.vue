@@ -24,10 +24,10 @@
       <div class="col-md-3">Reviewer-State:</div>
       <div class="col-md-9">
         <div class="form-check" v-for="membership in projectMemberships" :key="membership.projectGitlabId">
-          <input class="form-check-input" v-model="membership.isReviewer" v-bind:id="membership.projectGitlabId" type="checkbox" />
+          <input class="form-check-input" v-model="membership.isReviewer" v-bind:id="membership.projectGitlabId" @change="checkReviewerChange" type="checkbox" />
           <label class="form-check-label" v-bind:for="membership.projectGitlabId">I want to be a reviewer for Project: {{membership.projectGitlabId}}</label>
         </div>
-        <button class="btn btn-outline-secondary btn-sm" @click="saveMembership">Save Reviewer-State</button>
+        <button v-if="showSaveButton" class="btn btn-outline-secondary btn-sm" @click="saveMembership">Save Reviewer-State</button>
       </div>
     </div>
     <div v-else class="form-group row">
@@ -64,6 +64,8 @@ export default {
       assignedIssuesAsReviewer: [],
       showAddressModal: false,
       allIssues: [],
+      unmodifiedMemberships: [],
+      showSaveButton: false,
       columns: [
         {
           label: "ID",
@@ -160,6 +162,16 @@ export default {
           console.log(error);
         });
     },
+    checkReviewerChange: function() {
+      const modified = this.unmodifiedMemberships.some(unmodified =>
+        this.projectMemberships.some(
+          membership =>
+            unmodified.projectGitlabId === membership.projectGitlabId &&
+            unmodified.isReviewer !== membership.isReviewer
+        )
+      );
+      this.showSaveButton = modified;
+    },
     setProfile: function(profile) {
       this.profile = profile;
     },
@@ -195,6 +207,9 @@ export default {
           };
         });
       }
+      this.unmodifiedMemberships = JSON.parse(
+        JSON.stringify(this.projectMemberships)
+      );
     },
     saveMembership: function() {
       let preparedMemberships = this.projectMemberships.map(membership => {
