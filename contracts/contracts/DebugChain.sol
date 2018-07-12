@@ -330,6 +330,7 @@ contract DebugChain {
     function setReviewed(uint _id, bool _val) public issueExists(_id) onlyReviewer(_id) {
         // only accept reviews, when issue is marked as developed
         require(issues[_id].lifecycleStatus == 3);
+        // TODO lock reviewer out after succesful review
 
         // on successful review, write new value to chain and check for completion
         if (_val) {
@@ -338,8 +339,10 @@ contract DebugChain {
             if (checkForCompletion(_id)) {
                 completeIssue(_id);
             }
-        } else { // on a rejection-review, reset review status and keep lifecycle
+        } else { // on a rejection-review, reset review status
             resetReviewStatus(_id);
+            // and reset lifecycle to in development
+            issues[_id].lifecycleStatus = 2;
         }
 
         // fire lifecycle event

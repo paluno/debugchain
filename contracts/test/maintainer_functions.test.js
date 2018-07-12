@@ -30,5 +30,6 @@ contract('DebugChain Maintainer Functions Test', async (accounts) => {
         let _issue = await instance.getIssue.call(1);
         assert.notEqual(_issue[3][0], accounts[1], 'reviewer should not be set');
         assert.isNotTrue(_issue[4][0], 'review status should be false');
+        assert.equal(_issue[5], 1, 'lifecycle status should be 1')
     });
 });
