@@ -60,6 +60,30 @@ public class IssuesControllerTest extends IntegrationTest {
                 .andExpect(jsonPath("$[1].donators[0]", equalTo("0x627306090abab3a6e1400e9345bc60c78a8bef57")));
     }
 
+    @Test
+    public void getIssuesWithWrongIssueId() throws Exception {
+        System.out.println(mockMvc.perform(get("/api/projects/1/issues/12")
+                .with(userToken()))
+                .andExpect(status().isNotFound())
+                .andReturn().getResponse().getContentAsString());
+
+    }
+
+    @Test
+    public void getIssuesWithWrongProjectIdA() throws Exception {
+        mockMvc.perform(get("/api/projects/12/issues/12")
+                .with(userToken()))
+                .andExpect(status().isNotFound());
+
+    }
+
+    @Test
+    public void getIssuesWithWrongProjectIdB() throws Exception {
+        mockMvc.perform(get("/api/projects/12/issues")
+                .with(userToken()))
+                .andExpect(status().isNotFound());
+
+    }
 
 
 }

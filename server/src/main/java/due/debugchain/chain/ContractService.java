@@ -11,13 +11,10 @@ import org.springframework.stereotype.Service;
 import org.web3j.protocol.core.RemoteCall;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static due.debugchain.chain.IssueStruct.fromTuple;
 import static java.math.BigInteger.valueOf;
-import static java.util.stream.Collectors.*;
 
 /**
  * Service for contract interaction.
@@ -31,7 +28,13 @@ public class ContractService {
 
     @Cacheable(value = "issues", key = "#contractAddress + '-' + #issueId")
     public IssueStruct getIssue(String contractAddress, Long issueId) {
-        return fromTuple(send(contract(contractAddress).getIssue(valueOf(issueId))));
+        try {
+            return fromTuple(send(contract(contractAddress).getIssue(valueOf(issueId))));
+        } catch (ContractException e) {
+            if (e.getCause() != null && e.getCause().getClass().getName().equals("java.lang.NullPointerException"))
+                throw new IssueNotFoundException();
+            throw e;
+        }
     }
 
     @Cacheable(value = "issuesIdList", key = "#contractAddress")
@@ -53,9 +56,9 @@ public class ContractService {
      */
     @EventListener
     @Caching(evict = {
-        @CacheEvict(value = "issues", key = "#event.contractAddress + '-' + #event.issueId"),
-        @CacheEvict(value = "issuesIdList", key = "#event.contractAddress"),
-        @CacheEvict(value = "profileEther", key = "#contractAddress + '-' + #profileAdress")
+            @CacheEvict(value = "issues", key = "#event.contractAddress + '-' + #event.issueId"),
+            @CacheEvict(value = "issuesIdList", key = "#event.contractAddress"),
+            @CacheEvict(value = "profileEther", key = "#contractAddress + '-' + #profileAdress")
     })
     public void evictIssue(IssueUpdateEvent event) {
         log.info(String.format("Cache evicted for issue %s in contract %s", event.getIssueId(), event.getContractAddress()));
