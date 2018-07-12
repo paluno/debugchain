@@ -23,5 +23,18 @@ spring:
 ---
 spring:
   profiles: "prod"
+  jpa:
+    hibernate:
+      ddlAuto: create-drop
+    database-platform: org.hibernate.dialect.PostgreSQL9Dialect
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://192.168.178.45:5432/debugchain
+    username: postgres
+    password: password
 web3j.client-address: "http://debugchain.k202.de:8545"
 oauth2.gitlab.userEndpoint: "http://debugchain.k202.de/api/v4/user"
