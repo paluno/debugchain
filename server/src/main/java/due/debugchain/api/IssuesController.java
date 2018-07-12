@@ -41,13 +41,8 @@ public class IssuesController {
     }
 
     @GetMapping("/{issueId}")
-    public IssueResource getIssue(@PathVariable("projectId") long projectId, @PathVariable("issueId") long issueId) {
+    public IssueResource getIssue(ProjectEntity project, @PathVariable("issueId") long issueId) {
 
-        Optional<ProjectEntity> project = projectService.getProject(projectId);
-
-        return project
-                .map(projectEntity -> issueMapper.entityToResource(contractService.getIssue(projectEntity.getAddress(), issueId)))
-                .orElseThrow(ProjectNotFoundException::new);
-
+        return issueMapper.entityToResource(contractService.getIssue(project.getAddress(), issueId));
     }
 }
