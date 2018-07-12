@@ -7,7 +7,7 @@
         <div class="col">
           <h1>{{issue.title}}</h1>
         </div>
-        <div v-if="canRunOperation" class="col-auto">
+        <div class="col-auto">
           <button v-if="canDonate" class="btn btn-outline-secondary btn-sm" v-on:click="showDonateEtherModal">Donate Ether</button>
 
           <Modal v-model="donateEtherModal.show" title="Donate Ether">
@@ -248,9 +248,6 @@ export default {
       }
       return "badge badge-secondary";
     },
-    canRunOperation: function() {
-      return this.balance != 0;
-    },
     canDonate: function() {
       // TODO disable for completed issues?
       return true;
@@ -348,7 +345,6 @@ export default {
       isMaintainer: false,
       userAddress: null,
       possibleReviewers: null,
-      balance: 0,
       donateEtherModal: {
         donation: 0,
         show: false
@@ -454,10 +450,6 @@ export default {
         this.combineDonations(this.contractIssue);
         this.combineReviews(this.contractIssue);
       }
-    },
-    getBalance: function() {
-      const contract = new Contract();
-      contract.balance().then(res => (this.balance = res));
     },
     combineDonations(cIssue) {
       // TODO replace this with computed property
@@ -573,7 +565,6 @@ export default {
           this.setContractIssue(contractIssue);
           this.setProfileForNavigation(profileWithdrawals);
           this.setContractAddress(project.address);
-          this.getBalance();
         })
         .finally(() => this.$emit("isLoading", false));
     },
