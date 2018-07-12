@@ -27,6 +27,7 @@
 </template>
 
 <script>
+import ErrorContainer from "@/api/errorContainer";
 import Gitlab from "@/api/gitlab";
 import Backend from "@/api/backend";
 import Modal from "@/components/Modal.vue";
@@ -141,17 +142,19 @@ export default {
           .then(result => result.data),
         backend.get("/profile/withdrawals/" + this.projectId).then(r => r.data),
         backend.get("/projects/" + this.projectId).then(r => r.data)
-      ]).then(results => {
-        const issues = results[0];
-        const contractIssues = results[1];
-        const profile = results[2];
-        const project = results[3];
+      ])
+        .then(results => {
+          const issues = results[0];
+          const contractIssues = results[1];
+          const profile = results[2];
+          const project = results[3];
 
-        this.setIssues(issues, contractIssues);
-        this.setProfile(profile);
-        this.setContractAddress(project.address);
-        this.$emit("isLoading", false);
-      });
+          this.setIssues(issues, contractIssues);
+          this.setProfile(profile);
+          this.setContractAddress(project.address);
+        })
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false));
     },
     setProfile: function(newProfile) {
       if (newProfile) {

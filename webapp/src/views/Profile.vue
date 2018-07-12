@@ -46,6 +46,7 @@
 </template>
 
 <script>
+import ErrorContainer from "@/api/errorContainer";
 import Modal from "@/components/Modal";
 import SetAddressModal from "@/components/modals/SetAddressModal";
 import Backend from "@/api/backend";
@@ -137,28 +138,10 @@ export default {
         })
         .then(response => {
           this.updateData();
-          this.$emit("isLoading", false);
           this.showAddressModal = false;
         })
-        .catch(error => {
-          // TODO handle / display errors in component
-          this.$emit("isLoading", false);
-          const msg = "Could not save address.\n";
-          if (error.response) {
-            alert(
-              "Could not save address.\nServer returned error: " +
-                error.response.status +
-                error.response.statusText +
-                "\n" +
-                JSON.stringify(error.response.data, null, 2)
-            );
-          } else {
-            console.log(
-              "Could not save address.\nUnknown error: " + error.message
-            );
-          }
-          console.log(error);
-        });
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false));
     },
     checkReviewerChange: function() {
       const modified = this.unmodifiedMemberships.some(unmodified =>
@@ -220,68 +203,63 @@ export default {
 
       const backend = Backend.getClient();
       this.$emit("isLoading", true);
-      backend.post("/profile/memberships", preparedMemberships).then(result => {
-        this.$emit("isLoading", false);
-        this.updateData();
-      });
+      backend
+        .post("/profile/memberships", preparedMemberships)
+        .then(result => this.updateData())
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false));
     },
     getGitlabUsername: function(id) {
       const gitlab = Gitlab.getClient();
-      return new Promise((resolve, reject) => {
-        gitlab.get("/users/" + id)
-          .then(results => {
-            resolve(results.username);
-          })
-          .catch(err => {
-            reject(err);
-          })
-      })
+      return gitlab.get("/users/" + id).then(r => r.username);
     },
-    
+
+    // TODO implement as endpoint in backend!
     getAllIssues: function(projects) {
       const backend = Backend.getClient();
-      projects.map(p => {backend.get("/projects/" + p.gitlabId + "/issues/")
-                          .then(issues => { issues.data.forEach(element => {this.allIssues.push(element)}) })
-                          });        
+      projects.map(p => {
+        backend.get("/projects/" + p.gitlabId + "/issues/").then(issues => {
+          issues.data.forEach(element => {
+            this.allIssues.push(element);
+          });
+        });
+      });
     },
-   
+
     updateData: function() {
       const backend = Backend.getClient();
 
       this.$emit("isLoading", true);
       // TODO handle / display errors in component
       Promise.all([
-        backend.get("/projects").then(response => {
-          return response.data;
-        }),
-        backend.get("/profile").then(response => {
-          return response.data;
-        }),
-        backend.get("/profile/memberships").then(response => {
-          return response.data;
+        backend.get("/projects").then(r => r.data),
+        backend.get("/profile").then(r => r.data),
+        backend.get("/profile/memberships").then(r => r.data)
+      ])
+        .then(results => {
+          const projects = results[0];
+          const profile = results[1];
+          const memberships = results[2];
+
+          this.setProfile(profile);
+          this.setProjectMemberships(projects, memberships);
+
+          // TODO this is not awaited! > include in Promise.all
+          const gitlabUsername = this.getGitlabUsername(profile.gitlabId)
+            .then(username => (this.gitlabUsername = username))
+            .catch(error => ErrorContainer.add(error));
+
+          // TODO this is not awaited! > include in Promise.all
+          if (this.profile.address !== null) {
+            //can only filter for assigned issues if address is set
+            //get all issues of all projects, to then filter for assigned issues afterwards
+            this.getAllIssues(projects);
+          } else {
+            //TODO handle?
+          }
         })
-      ]).then(results => {
-        const projects = results[0];
-        const profile = results[1];
-        const memberships = results[2];
-
-        this.setProfile(profile);
-        this.setProjectMemberships(projects, memberships);
-
-        const gitlabUsername = this.getGitlabUsername(profile.gitlabId)
-          .then(username => {this.gitlabUsername = username})
-          .catch(err => {console.log(err)});
-        
-        if (this.profile.address !== null) { //can only filter for assigned issues if address is set
-        //get all issues of all projects, to then filter for assigned issues afterwards
-        this.getAllIssues(projects);
-        }
-        else {
-          //TODO handle?
-        }
-
-        this.$emit("isLoading", false);
-      });
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false));
     }
   }
 };
