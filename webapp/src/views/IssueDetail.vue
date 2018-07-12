@@ -204,6 +204,7 @@
 </template>
 
 <script>
+import ErrorContainer from "@/api/errorContainer";
 import Navigation from "@/components/Navigation";
 import Modal from "@/components/Modal.vue";
 import Gitlab from "@/api/gitlab";
@@ -410,8 +411,10 @@ export default {
       const contract = new Contract(this.contractAddress);
       contract
         .donate(issueId, donation)
-        .then(() => this.closeDonateEtherModal())
-        .then(() => this.updateData());
+        .then(() => this.updateData())
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false))
+        .then(() => this.closeDonateEtherModal());
     },
     approveIssue: function() {
       const issueId = this.issueId;
@@ -419,16 +422,20 @@ export default {
       const reviewers = this.approveIssueModal.selectedReviewers;
       contract
         .approve(issueId, reviewers)
-        .then(() => this.closeApproveIssueModal())
-        .then(() => this.updateData());
+        .then(() => this.updateData())
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false))
+        .then(() => this.closeApproveIssueModal());
     },
     lockIssue: function() {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
       contract
         .lock(issueId)
-        .then(() => this.closeLockIssueModal())
-        .then(() => this.updateData());
+        .then(() => this.updateData())
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false))
+        .then(() => this.closeLockIssueModal());
     },
     unlockIssue: function() {
       const issueId = this.issueId;
@@ -443,16 +450,20 @@ export default {
       const contract = new Contract(this.contractAddress);
       contract
         .develop(issueId)
-        .then(() => this.closeFinishDevelopmentModal())
-        .then(() => this.updateData());
+        .then(() => this.updateData())
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false))
+        .then(() => this.closeFinishDevelopmentModal());
     },
     finishReview: function(isAccepted) {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
       contract
         .review(issueId, isAccepted)
-        .then(() => this.closeFinishReviewModal())
-        .then(() => this.updateData());
+        .then(() => this.updateData())
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false))
+        .then(() => this.closeFinishReviewModal());
     },
     resetIssue: function() {
       const issueId = this.issueId;
@@ -579,8 +590,9 @@ export default {
         this.setContractIssue(contractIssue);
         this.setProfile(profile);
         this.setContractAddress(project.address);
-        this.$emit("isLoading", false);
-      });
+      })
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false));
     },
     setProfile: function(newProfile) {
       if (newProfile) {
