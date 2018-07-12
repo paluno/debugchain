@@ -243,9 +243,8 @@ export default {
     canLock: function() {
       return (
         this.contractIssue &&
-        // TODO load address
-        // this.contractIssue.reviewers.includes(this.profile.address) &&
-        this.contractIssue.lifecycleStatus == "APPROVED"
+        this.contractIssue.lifecycleStatus == "APPROVED" &&
+        this.contractIssue.reviewers.includes(this.userAddress)
       );
     },
     canFinishDevelopment: function() {
@@ -471,21 +470,11 @@ export default {
             console.log(
               "Could not get issue-details from backend/chain. Maybe this issue is not yet tracked"
             );
-            // TODO fix response code in backend to 404
-            if (error.response.status != 500) throw error;
+            // ignore 404 (issue not in contract)
+            if (error.response.status != 404) throw error;
           }),
-        // TODO currently duplicate profile call, needed as workaround for deb-159
-        backend.get("/profile").then(r => r.data),
-        backend.get("/projects/" + this.projectId).then(r => r.data),
-        backend
-          .get("/profile/withdrawals/" + this.projectId)
-          .then(r => r.data)
-          .catch(error => {
-            // see deb-159
-            console.log(
-              '"/profile/withdrawals/:id" failed: ignoring response as workaround.'
-            );
-          })
+        backend.get("/profile/withdrawals/" + this.projectId).then(r => r.data),
+        backend.get("/projects/" + this.projectId).then(r => r.data)
       ]).then(results => {
         const issue = results[0];
         const ownedProjects = results[1];
@@ -494,23 +483,21 @@ export default {
         const contractIssue = results[4];
         const profile = results[5];
         const project = results[6];
-        const profileWithdrawals = results[7];
 
         this.setIssue(issue, contractIssue);
         if (ownedProjects.find(project => project.id == this.projectId)) {
           this.setIsMaintainer(true);
         }
+        // TODO consider using web3 address instead of profile
         this.setUserAddress(profile.address);
         this.setPossibleReviewers(possibleReviewers, projectMembers);
         this.setContractIssue(contractIssue);
-        this.setProfileForNavigation(profileWithdrawals);
+        this.setProfile(profile);
         this.setContractAddress(project.address);
         this.$emit("isLoading", false);
       });
     },
-    // TODO merge this with normal profile
-    // currently not possible, due to deb-159
-    setProfileForNavigation: function(newProfile) {
+    setProfile: function(newProfile) {
       if (newProfile) {
         this.profile = {
           address: newProfile.address,
