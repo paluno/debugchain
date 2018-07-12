@@ -22,21 +22,6 @@ export default class Contract {
         }
     }
 
-    balance() {
-        return new Promise((resolve, reject) => {
-            const account = this.web3.eth.accounts[0];
-            this.web3.eth.getBalance(
-                account,
-                (err, result) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(this.web3.fromWei(result, "ether").toNumber());
-                    }
-                });
-        });
-    }
-
     deploy(projectId) {
         return new Promise((resolve, reject) => {
             const address = this.instance.address;

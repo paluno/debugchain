@@ -44,7 +44,7 @@ export default {
   },
   computed: {
     canWithdraw: function() {
-      return this.profile.pendingWithdrawals != 0 && this.balance != 0;
+      return this.profile.pendingWithdrawals != 0;
     }
   },
   data: function() {
@@ -84,7 +84,6 @@ export default {
       ],
       rows: [],
       contractAddress: null,
-      balance: 0,
       withdrawModal: {
         show: false
       }
@@ -126,10 +125,6 @@ export default {
         .then(() => this.closeWithdrawModal())
         .then(() => this.updateData());
     },
-    getBalance: function() {
-      const contract = new Contract();
-      contract.balance().then(res => (this.balance = res));
-    },
     updateData: function() {
       const gitlab = Gitlab.getClient();
       const backend = Backend.getClient();
@@ -160,7 +155,6 @@ export default {
         this.setIssues(issues, contractIssues);
         this.setProfile(profile);
         this.setContractAddress(project.address);
-        this.getBalance();
         this.$emit("isLoading", false);
       });
     },
