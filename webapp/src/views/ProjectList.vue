@@ -67,6 +67,10 @@ export default {
         {
           label: "URL",
           field: "url"
+        },
+        {
+          label: "Project existent",
+          field: "created"
         }
       ],
       gitlabProjects: []
@@ -98,13 +102,16 @@ export default {
           });
         });
     },
-    setProjects: function(newProjects) {
-      this.gitlabProjects = newProjects.map(project => {
+    setProjects: function(gitlabProjects, debugChainProjects) {
+      this.gitlabProjects = gitlabProjects.map(gProject => {
+        const dcProject = debugChainProjects.find(p => p.gitlabId == gProject.id);
+        const projectExistent = (dcProject === undefined ? "No" : "Yes");
         return {
-          id: project.id,
-          url: project.web_url,
-          name: project.name,
-          owner: project.owner.username
+          id: gProject.id,
+          url: gProject.web_url,
+          name: gProject.name,
+          owner: gProject.owner.username,
+          created: projectExistent
         };
       });
     },
@@ -120,10 +127,11 @@ export default {
       this.$emit("isLoading", true);
       Promise.all([
         gitlab.projects.list(),
-        backend.get("/profile/").then(result => result.data)
+        backend.get("/profile/").then(result => result.data),
+        backend.get("/projects").then(result => result.data)
       ])
         .then(results => {
-          this.setProjects(results[0]);
+          this.setProjects(results[0], results[2]);
           this.setProfile(results[1]);
         })
         .then(() => this.$emit("isLoading", false));
