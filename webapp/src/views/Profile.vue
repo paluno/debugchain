@@ -102,7 +102,7 @@ export default {
       const rows = [];
 
       this.allIssues.forEach(issue => {
-        if (issue.developer.toLowerCase() === profileAddress) {
+        if (issue.developer !== null && issue.developer.toLowerCase() === profileAddress) {
           rows.push({
             id: issue.id,
             status: issue.lifecycleStatus,
@@ -112,7 +112,7 @@ export default {
         }
         else {
           issue.reviewers.forEach(r => {
-            if (r.toLowerCase() === profileAddress){
+            if (r !== null && r.toLowerCase() === profileAddress){
               rows.push({
                 id: issue.id,
                 status: issue.lifecycleStatus,
