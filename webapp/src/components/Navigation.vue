@@ -14,7 +14,7 @@
     </div>
     <div class="navbar-nav">
       <span v-if="session.loggedIn" class="navbar-text">
-        <small v-if="pendingWithdrawals != null">You have {{pendingWithdrawals | weiToEther}} ETH available</small>
+        <small v-if="typeof pendingWithdrawals === 'number' && pendingWithdrawals > 0">You have {{pendingWithdrawals | weiToEther}} ETH available</small>
         <small v-if="address == null">Set your wallet address to access more actions</small>
       </span>
       <router-link v-if="session.loggedIn" class="nav-item nav-link" :to="{ name: 'profile'}">
