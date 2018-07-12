@@ -23,5 +23,13 @@ spring:
 ---
 spring:
   profiles: "prod"
+  jpa:
+    databasePlatform: "org.hibernate.dialect.PostgreSQLDialect"
+    hibernate:
+      ddlAuto: create-drop
+  datasource:
+    url: jdbc:postgresql://192.168.178.45:5432/debugchain
+    username: postgres
+    password: password
 web3j.client-address: "http://debugchain.k202.de:8545"
 oauth2.gitlab.userEndpoint: "http://debugchain.k202.de/api/v4/user"
