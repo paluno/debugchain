@@ -17,7 +17,7 @@ contract('DebugChain Maintainer Functions Test', async (accounts) => {
             assertError(error);
         }
     });
-    it("should reset an issue after reviewers have been set", async () => {
+    it("should reset the issue. Its lifecycleStatus is: DEVELOPED and a succesful review has been set", async () => {
         let instance = await DebugChain.deployed();
         await instance.setApproved(1, true, [accounts[1], accounts[2]], { from: accounts[0] });
         await instance.setDeveloper(1, { from: accounts[3] });
@@ -30,6 +30,6 @@ contract('DebugChain Maintainer Functions Test', async (accounts) => {
         let _issue = await instance.getIssue.call(1);
         assert.notEqual(_issue[3][0], accounts[1], 'reviewer should not be set');
         assert.isNotTrue(_issue[4][0], 'review status should be false');
-        assert.equal(_issue[5], 1, 'lifecycle status should be 1')
+        assert.equal(_issue[5], 1, 'lifecycle status should be: APPROVED')
     });
 });

@@ -28,6 +28,11 @@ contract('DebugChain Lifecycle Test', async (accounts) => {
         let issue = await instance.getIssue.call(1);
         assert.equal(issue[5], 1);
         assert.equal(issue[3][0], accounts[2]);
+        await new Promise((resolve, reject) => {
+            instance.IssueApproved((err, result) => {
+                err ? reject(err) : resolve(result);
+            });
+        });
     });
     it("should set the developer address and lock the issue", async () => {
         let instance = await DebugChain.deployed();
