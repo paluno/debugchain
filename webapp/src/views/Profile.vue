@@ -51,6 +51,7 @@ import SetAddressModal from "@/components/modals/SetAddressModal";
 import Backend from "@/api/backend";
 import Gitlab from "@/api/gitlab";
 import Navigation from "@/components/Navigation";
+import getWeb3 from "@/api/getWeb3";
 
 export default {
   name: "profile",
@@ -105,7 +106,7 @@ export default {
           rows.push({
             id: issue.id,
             status: issue.lifecycleStatus,
-            eth: issue.donationSum,
+            eth: getWeb3().fromWei(issue.donationSum, "ether"),
             assignedAs: "Developer"
           });
         }
@@ -115,7 +116,7 @@ export default {
               rows.push({
                 id: issue.id,
                 status: issue.lifecycleStatus,
-                eth: issue.donationSum,
+                eth: getWeb3().fromWei(issue.donationSum, "ether"),
                 assignedAs: "Reviewer" 
               });
             }
