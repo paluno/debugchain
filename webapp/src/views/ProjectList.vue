@@ -2,7 +2,23 @@
   <div class="projectsetup">
     <Navigation :address="profile.address" />
 
-    <vue-good-table :columns="columns" :rows="gitlabProjects" :pagination-options="{ enabled: true, perPage: 10}" :search-options="{ enabled: true}" styleClass="vgt-table striped bordered" @on-row-click="onRowClick">
+    <vue-good-table :columns="columns"
+      :rows="gitlabProjects"
+      :pagination-options="{ enabled: true, perPage: 10}"
+      :search-options="{ enabled: true}"
+      styleClass="vgt-table striped bordered"
+      @on-row-click="onRowClick">
+        <template slot="table-row" slot-scope="props">
+          <span v-if="props.column.field == 'created' && props.formattedRow[props.column.field] == 'Yes'">
+            <span style="font-weight: bold; color: green;">{{props.row.created}}</span> 
+          </span>
+          <span v-else-if="props.column.field == 'created' && props.formattedRow[props.column.field] == 'No'">
+            <span style="font-weight: bold; color: red;">{{props.row.created}}</span>
+          </span>
+          <span v-else>
+            {{props.formattedRow[props.column.field]}}
+          </span>
+        </template>
     </vue-good-table>
 
     <Modal v-model="createProjectModal.show" title="Create Project">
