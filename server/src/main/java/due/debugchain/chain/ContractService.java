@@ -31,7 +31,7 @@ public class ContractService {
         try {
             return fromTuple(send(contract(contractAddress).getIssue(valueOf(issueId))));
         } catch (ContractException e) {
-            if (e.getCause() != null && e.getCause().getClass().getName().equals("java.lang.NullPointerException"))
+            if (e.getCause() instanceof NullPointerException)
                 throw new IssueNotFoundException();
             throw e;
         }

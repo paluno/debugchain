@@ -62,28 +62,10 @@ public class IssuesControllerTest extends IntegrationTest {
 
     @Test
     public void getIssuesWithWrongIssueId() throws Exception {
-        System.out.println(mockMvc.perform(get("/api/projects/1/issues/12")
-                .with(userToken()))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString());
-
-    }
-
-    @Test
-    public void getIssuesWithWrongProjectIdA() throws Exception {
-        mockMvc.perform(get("/api/projects/12/issues/12")
+        mockMvc.perform(get("/api/projects/1/issues/12")
                 .with(userToken()))
                 .andExpect(status().isNotFound());
 
     }
-
-    @Test
-    public void getIssuesWithWrongProjectIdB() throws Exception {
-        mockMvc.perform(get("/api/projects/12/issues")
-                .with(userToken()))
-                .andExpect(status().isNotFound());
-
-    }
-
 
 }

@@ -9,8 +9,4 @@ public class IssueNotFoundException extends RuntimeException {
     public IssueNotFoundException() {
         super("Issue was not found.");
     }
-
-    public IssueNotFoundException(String message) {
-        super("Issue was not found.");
-    }
 }
