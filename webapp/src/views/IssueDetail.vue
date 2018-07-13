@@ -20,19 +20,7 @@
 
           <finish-development-action v-if="canFinishDevelopment" @finishedDevelopment="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></finish-development-action>
 
-          <button v-if="canReview" class="btn btn-outline-primary btn-sm" v-on:click="showFinishReviewModal">Finish Review</button>
-
-          <Modal v-model="finishReviewModal.show" title="Finish Review">
-            <p>
-              Give your review feedback for issue "{{issue.title}}":
-            </p>
-
-            <template slot="footer">
-              <button type="button" class="btn btn-primary" @click="finishReview(true)">Accept</button>
-              <button type="button" class="btn btn-danger" @click="finishReview(false)">Reject</button>
-              <button type="button" class="btn btn-secondary" @click="closeFinishReviewModal">Cancel</button>
-            </template>
-          </Modal>
+          <review-action v-if="canReview" @reviewed="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></review-action>
 
           <button v-if="canReset" class="btn btn-outline-primary btn-sm" v-on:click="showResetIssueModal">Reset Issue</button>
 
@@ -144,6 +132,7 @@ import ApproveAction from "@/components/actions/ApproveAction";
 import LockAction from "@/components/actions/LockAction";
 import UnlockAction from "@/components/actions/UnlockAction";
 import FinishDevelopmentAction from "@/components/actions/FinishDevelopmentAction";
+import ReviewAction from "@/components/actions/ReviewAction";
 import Gitlab from "@/api/gitlab";
 import Backend from "@/api/backend";
 import Contract from "@/api/contract";
@@ -159,7 +148,8 @@ export default {
     ApproveAction,
     LockAction,
     UnlockAction,
-    FinishDevelopmentAction
+    FinishDevelopmentAction,
+    ReviewAction
   },
   props: {
     projectId: String,
@@ -315,9 +305,6 @@ export default {
       isMaintainer: false,
       userAddress: null,
       possibleReviewers: null,
-      finishReviewModal: {
-        show: false
-      },
       resetIssueModal: {
         show: false
       },
@@ -330,18 +317,6 @@ export default {
     this.updateData();
   },
   methods: {
-    finishReview: function(isAccepted) {
-      const issueId = this.issueId;
-      const contract = new Contract(this.contractAddress);
-
-      this.$emit("isLoading", true);
-      contract
-        .review(issueId, isAccepted)
-        .then(() => this.updateData())
-        .catch(error => ErrorContainer.add(error))
-        .then(() => this.$emit("isLoading", false))
-        .then(() => this.closeFinishReviewModal());
-    },
     resetIssue: function() {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
@@ -487,12 +462,6 @@ export default {
           pendingWithdrawals: newProfile.pendingWithdrawals
         };
       }
-    },
-    showFinishReviewModal: function() {
-      this.finishReviewModal.show = true;
-    },
-    closeFinishReviewModal: function() {
-      this.finishReviewModal.show = false;
     },
     showResetIssueModal: function() {
       this.resetIssueModal.show = true;
