@@ -24,6 +24,7 @@
 </template>
 
 <script>
+import ErrorContainer from "@/api/errorContainer";
 import Modal from "@/components/Modal.vue";
 import Contract from "@/api/contract";
 
