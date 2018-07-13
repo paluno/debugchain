@@ -1,6 +1,24 @@
 <template>
   <div class="issueList">
     <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" :projectId="projectId" />
+    <div v-if="canWithdraw" class="form-group row">
+      <div class="col">
+        <p>You have {{this.profile.pendingWithdrawals}} Ether in your pending withdrawals for this project.</p>
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-outline-primary btn-sm" v-on:click="showWithdrawModal">Withdraw</button>
+        <Modal v-model="withdrawModal.show" title="Withdraw">
+          <p>
+            Do you really want to get pending withdrawals for the project: "{{projectId}}"?
+          </p>
+
+          <template slot="footer">
+            <button type="button" class="btn btn-primary" @click="withdraw">Yes</button>
+            <button type="button" class="btn btn-secondary" @click="closeWithdrawModal">No</button>
+          </template>
+        </Modal>
+      </div>
+    </div>
     <div class="table">
       <vue-good-table :columns="columns" :rows="rows" :pagination-options="{ enabled: true, perPage: 5}" :search-options="{ enabled: true}" styleClass="vgt-table striped bordered" @on-row-click="navigate">
       </vue-good-table>
@@ -11,7 +29,9 @@
 <script>
 import Gitlab from "@/api/gitlab";
 import Backend from "@/api/backend";
+import Modal from "@/components/Modal.vue";
 import Navigation from "@/components/Navigation";
+import Contract from "@/api/contract";
 import getWeb3 from "@/api/getWeb3";
 
 export default {
@@ -20,7 +40,16 @@ export default {
     projectId: String
   },
   components: {
-    Navigation
+    Navigation,
+    Modal
+  },
+  computed: {
+    canWithdraw: function() {
+      return (
+        typeof this.profile.pendingWithdrawals === "number" &&
+        this.profile.pendingWithdrawals > 0
+      );
+    }
   },
   data: function() {
     return {
@@ -57,7 +86,11 @@ export default {
           }
         }
       ],
-      rows: []
+      rows: [],
+      contractAddress: null,
+      withdrawModal: {
+        show: false
+      }
     };
   },
   created: function() {
@@ -89,6 +122,13 @@ export default {
           return "New";
       }
     },
+    withdraw: function() {
+      const contract = new Contract(this.contractAddress);
+      contract
+        .withdraw()
+        .then(() => this.closeWithdrawModal())
+        .then(() => this.updateData());
+    },
     updateData: function() {
       const gitlab = Gitlab.getClient();
       const backend = Backend.getClient();
@@ -99,14 +139,17 @@ export default {
         backend
           .get("projects/" + this.projectId + "/issues/")
           .then(result => result.data),
-        backend.get("/profile/withdrawals/" + this.projectId).then(r => r.data)
+        backend.get("/profile/withdrawals/" + this.projectId).then(r => r.data),
+        backend.get("/projects/" + this.projectId).then(r => r.data)
       ]).then(results => {
         const issues = results[0];
         const contractIssues = results[1];
         const profile = results[2];
+        const project = results[3];
 
         this.setIssues(issues, contractIssues);
         this.setProfile(profile);
+        this.setContractAddress(project.address);
         this.$emit("isLoading", false);
       });
     },
@@ -118,6 +161,9 @@ export default {
         };
       }
     },
+    setContractAddress: function(address) {
+      this.contractAddress = address;
+    },
     navigate: function(params) {
       this.$router.push({
         name: "issue",
@@ -126,6 +172,13 @@ export default {
           issueId: params.row.id.toString()
         }
       });
+    },
+
+    showWithdrawModal: function() {
+      this.withdrawModal.show = true;
+    },
+    closeWithdrawModal: function() {
+      this.withdrawModal.show = false;
     }
   }
 };

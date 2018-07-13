@@ -5,7 +5,9 @@
     <div v-if="issue">
       <div class="form-group row">
         <div class="col">
-          <h1><a :href="issue.web_url">{{issue.title}}</a></h1>
+          <h1>
+            <a :href="issue.web_url">{{issue.title}}</a>
+          </h1>
         </div>
         <div class="col-auto">
           <button v-if="canDonate" class="btn btn-outline-secondary btn-sm" v-on:click="showDonateEtherModal">Donate Ether</button>
@@ -60,6 +62,19 @@
             </template>
           </Modal>
 
+          <button v-if="canUnlock" class="btn btn-outline-warning btn-sm" v-on:click="showUnlockIssueModal">Unlock Issue</button>
+
+          <Modal v-model="unlockIssueModal.show" title="Unlock Issue">
+            <p>
+              Do you really want to unlock Issue "{{issue.title}}"?
+            </p>
+
+            <template slot="footer">
+              <button type="button" class="btn btn-primary" @click="unlockIssue">Yes</button>
+              <button type="button" class="btn btn-secondary" @click="closeUnlockIssueModal">No</button>
+            </template>
+          </Modal>
+
           <button v-if="canFinishDevelopment" class="btn btn-outline-primary btn-sm" v-on:click="showFinishDevelopmentModal">Finish Development</button>
 
           <Modal v-model="finishDevelopmentModal.show" title="Finish Development">
@@ -84,6 +99,32 @@
               <button type="button" class="btn btn-primary" @click="finishReview(true)">Accept</button>
               <button type="button" class="btn btn-danger" @click="finishReview(false)">Reject</button>
               <button type="button" class="btn btn-secondary" @click="closeFinishReviewModal">Cancel</button>
+            </template>
+          </Modal>
+
+          <button v-if="canReset" class="btn btn-outline-primary btn-sm" v-on:click="showResetIssueModal">Reset Issue</button>
+
+          <Modal v-model="resetIssueModal.show" title="Reset Issue">
+            <p>
+              Do you really want to reset Issue "{{issue.title}}"?
+            </p>
+
+            <template slot="footer">
+              <button type="button" class="btn btn-primary" @click="resetIssue">Yes</button>
+              <button type="button" class="btn btn-secondary" @click="closeResetIssueModal">No</button>
+            </template>
+          </Modal>
+
+          <button v-if="canDelete" class="btn btn-outline-primary btn-sm" v-on:click="showDeleteIssueModal">Delete Issue</button>
+
+          <Modal v-model="deleteIssueModal.show" title="Delete Issue">
+            <p>
+              Do you really want to delete Issue "{{issue.title}}"?
+            </p>
+
+            <template slot="footer">
+              <button type="button" class="btn btn-primary" @click="deleteIssue">Yes</button>
+              <button type="button" class="btn btn-secondary" @click="closeDeleteIssueModal">No</button>
             </template>
           </Modal>
         </div>
@@ -242,9 +283,14 @@ export default {
     },
     canLock: function() {
       return (
+        this.contractIssue && this.contractIssue.lifecycleStatus == "APPROVED"
+      );
+    },
+    canUnlock: function() {
+      return (
         this.contractIssue &&
-        this.contractIssue.lifecycleStatus == "APPROVED" &&
-        this.contractIssue.reviewers.includes(this.userAddress)
+        this.contractIssue.lifecycleStatus == "LOCKED" &&
+        (this.isMaintainer || this.userAddress == this.contractIssue.developer)
       );
     },
     canFinishDevelopment: function() {
@@ -260,6 +306,20 @@ export default {
         this.contractIssue.lifecycleStatus == "DEVELOPED" &&
         this.contractIssue.reviewers.includes(this.userAddress)
         // TODO check contractIssue.reviewStatus? Should reviewer be able to change status anytime?
+      );
+    },
+    canReset: function() {
+      return (
+        this.isMaintainer &&
+        this.contractIssue &&
+        this.contractIssue.lifecycleStatus != "COMPLETED"
+      );
+    },
+    canDelete: function() {
+      return (
+        this.isMaintainer &&
+        this.contractIssue &&
+        this.contractIssue.lifecycleStatus != "COMPLETED"
       );
     },
     chainBadgeState: function() {
@@ -312,7 +372,6 @@ export default {
       isMaintainer: false,
       userAddress: null,
       possibleReviewers: null,
-
       donateEtherModal: {
         donation: 0,
         show: false
@@ -324,10 +383,19 @@ export default {
       lockIssueModal: {
         show: false
       },
+      unlockIssueModal: {
+        show: false
+      },
       finishDevelopmentModal: {
         show: false
       },
       finishReviewModal: {
+        show: false
+      },
+      resetIssueModal: {
+        show: false
+      },
+      deleteIssueModal: {
         show: false
       }
     };
@@ -338,7 +406,6 @@ export default {
   methods: {
     donateEther: function() {
       const donation = this.donateEtherModal.donation;
-      const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
       contract
@@ -347,7 +414,6 @@ export default {
         .then(() => this.updateData());
     },
     approveIssue: function() {
-      const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
       const reviewers = this.approveIssueModal.selectedReviewers;
@@ -357,7 +423,6 @@ export default {
         .then(() => this.updateData());
     },
     lockIssue: function() {
-      const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
       contract
@@ -365,8 +430,15 @@ export default {
         .then(() => this.closeLockIssueModal())
         .then(() => this.updateData());
     },
+    unlockIssue: function() {
+      const issueId = this.issueId;
+      const contract = new Contract(this.contractAddress);
+      contract
+        .unlock(issueId)
+        .then(() => this.closeUnlockIssueModal())
+        .then(() => this.updateData());
+    },
     finishDevelopment: function() {
-      const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
       contract
@@ -375,12 +447,27 @@ export default {
         .then(() => this.updateData());
     },
     finishReview: function(isAccepted) {
-      const client = Backend.getClient();
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
       contract
         .review(issueId, isAccepted)
         .then(() => this.closeFinishReviewModal())
+        .then(() => this.updateData());
+    },
+    resetIssue: function() {
+      const issueId = this.issueId;
+      const contract = new Contract(this.contractAddress);
+      contract
+        .reset(issueId)
+        .then(() => this.closeResetIssueModal())
+        .then(() => this.updateData());
+    },
+    deleteIssue: function() {
+      const issueId = this.issueId;
+      const contract = new Contract(this.contractAddress);
+      contract
+        .delete(issueId)
+        .then(() => this.closeDeleteIssueModal())
         .then(() => this.updateData());
     },
     setIssue: function(issue, contractIssue) {
@@ -410,12 +497,12 @@ export default {
       // TODO replace this with computed property
       let combined = [];
       if (cIssue.reviewers.length == cIssue.reviewStatus.length) {
-        combined = cIssue.reviewers.map((reviewer, index)=>{
+        combined = cIssue.reviewers.map((reviewer, index) => {
           return {
             reviewer: reviewer,
             value: cIssue.reviewStatus[index]
           };
-        })
+        });
       }
       cIssue.reviewStatus = combined;
       // TODO ignore for merge conflict > replace with computed property
@@ -523,6 +610,12 @@ export default {
     closeLockIssueModal: function() {
       this.lockIssueModal.show = false;
     },
+    showUnlockIssueModal: function() {
+      this.unlockIssueModal.show = true;
+    },
+    closeUnlockIssueModal: function() {
+      this.unlockIssueModal.show = false;
+    },
     showFinishDevelopmentModal: function() {
       this.finishDevelopmentModal.show = true;
     },
@@ -534,6 +627,18 @@ export default {
     },
     closeFinishReviewModal: function() {
       this.finishReviewModal.show = false;
+    },
+    showResetIssueModal: function() {
+      this.resetIssueModal.show = true;
+    },
+    closeResetIssueModal: function() {
+      this.resetIssueModal.show = false;
+    },
+    showDeleteIssueModal: function() {
+      this.deleteIssueModal.show = true;
+    },
+    closeDeleteIssueModal: function() {
+      this.deleteIssueModal.show = false;
     }
   }
 };

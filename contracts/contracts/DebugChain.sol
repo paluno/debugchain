@@ -383,6 +383,7 @@ contract DebugChain {
      *
      * @param _id issue id
      */
+    // TODO reset lifecycleStatus to default instead of approved. 
     function resetIssue(uint _id) public issueExists(_id) onlyMaintainer {
         // reset the review status
         resetReviewStatus(_id);
