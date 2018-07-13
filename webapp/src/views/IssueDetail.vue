@@ -281,16 +281,14 @@ export default {
     },
     canLock: function() {
       return (
-        this.contractIssue &&
-        this.contractIssue.lifecycleStatus == "APPROVED" &&
-        this.contractIssue.reviewers.includes(this.userAddress)
+        this.contractIssue && this.contractIssue.lifecycleStatus == "APPROVED"
       );
     },
     canUnlock: function() {
       return (
-        this.isMaintainer &&
         this.contractIssue &&
-        this.contractIssue.lifecycleStatus == "LOCKED"
+        this.contractIssue.lifecycleStatus == "LOCKED" &&
+        (this.isMaintainer || this.userAddress == this.contractIssue.developer)
       );
     },
     canFinishDevelopment: function() {
