@@ -5,7 +5,9 @@
     <div v-if="issue">
       <div class="form-group row">
         <div class="col">
-          <h1><a :href="issue.web_url">{{issue.title}}</a></h1>
+          <h1>
+            <a :href="issue.web_url">{{issue.title}}</a>
+          </h1>
         </div>
         <div class="col-auto">
           <button v-if="canDonate" class="btn btn-outline-secondary btn-sm" v-on:click="showDonateEtherModal">Donate Ether</button>
@@ -85,7 +87,7 @@
               <button type="button" class="btn btn-secondary" @click="closeFinishDevelopmentModal">No</button>
             </template>
           </Modal>
-          
+
           <button v-if="canReview" class="btn btn-outline-primary btn-sm" v-on:click="showFinishReviewModal">Finish Review</button>
 
           <Modal v-model="finishReviewModal.show" title="Finish Review">
@@ -307,10 +309,18 @@ export default {
       );
     },
     canReset: function() {
-      return this.isMaintainer && this.contractIssue;
+      return (
+        this.isMaintainer &&
+        this.contractIssue &&
+        this.contractIssue.lifecycleStatus != "COMPLETED"
+      );
     },
     canDelete: function() {
-      return this.isMaintainer && this.contractIssue;
+      return (
+        this.isMaintainer &&
+        this.contractIssue &&
+        this.contractIssue.lifecycleStatus != "COMPLETED"
+      );
     },
     chainBadgeState: function() {
       if (this.contractIssue != null) {
@@ -487,12 +497,12 @@ export default {
       // TODO replace this with computed property
       let combined = [];
       if (cIssue.reviewers.length == cIssue.reviewStatus.length) {
-        combined = cIssue.reviewers.map((reviewer, index)=>{
+        combined = cIssue.reviewers.map((reviewer, index) => {
           return {
             reviewer: reviewer,
             value: cIssue.reviewStatus[index]
           };
-        })
+        });
       }
       cIssue.reviewStatus = combined;
       // TODO ignore for merge conflict > replace with computed property
