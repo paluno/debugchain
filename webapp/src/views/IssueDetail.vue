@@ -18,18 +18,7 @@
 
           <unlock-action v-if="canUnlock" @unlocked="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></unlock-action>
 
-          <button v-if="canFinishDevelopment" class="btn btn-outline-primary btn-sm" v-on:click="showFinishDevelopmentModal">Finish Development</button>
-
-          <Modal v-model="finishDevelopmentModal.show" title="Finish Development">
-            <p>
-              Do you really want to finish the development of Issue "{{issue.title}}"?
-            </p>
-
-            <template slot="footer">
-              <button type="button" class="btn btn-primary" @click="finishDevelopment">Yes</button>
-              <button type="button" class="btn btn-secondary" @click="closeFinishDevelopmentModal">No</button>
-            </template>
-          </Modal>
+          <finish-development-action v-if="canFinishDevelopment" @finishedDevelopment="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></finish-development-action>
 
           <button v-if="canReview" class="btn btn-outline-primary btn-sm" v-on:click="showFinishReviewModal">Finish Review</button>
 
@@ -154,6 +143,7 @@ import DonateAction from "@/components/actions/DonateAction";
 import ApproveAction from "@/components/actions/ApproveAction";
 import LockAction from "@/components/actions/LockAction";
 import UnlockAction from "@/components/actions/UnlockAction";
+import FinishDevelopmentAction from "@/components/actions/FinishDevelopmentAction";
 import Gitlab from "@/api/gitlab";
 import Backend from "@/api/backend";
 import Contract from "@/api/contract";
@@ -168,7 +158,8 @@ export default {
     DonateAction,
     ApproveAction,
     LockAction,
-    UnlockAction
+    UnlockAction,
+    FinishDevelopmentAction
   },
   props: {
     projectId: String,
@@ -324,9 +315,6 @@ export default {
       isMaintainer: false,
       userAddress: null,
       possibleReviewers: null,
-      finishDevelopmentModal: {
-        show: false
-      },
       finishReviewModal: {
         show: false
       },
@@ -342,18 +330,6 @@ export default {
     this.updateData();
   },
   methods: {
-    finishDevelopment: function() {
-      const issueId = this.issueId;
-      const contract = new Contract(this.contractAddress);
-
-      this.$emit("isLoading", true);
-      contract
-        .develop(issueId)
-        .then(() => this.updateData())
-        .catch(error => ErrorContainer.add(error))
-        .then(() => this.$emit("isLoading", false))
-        .then(() => this.closeFinishDevelopmentModal());
-    },
     finishReview: function(isAccepted) {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
@@ -511,12 +487,6 @@ export default {
           pendingWithdrawals: newProfile.pendingWithdrawals
         };
       }
-    },
-    showFinishDevelopmentModal: function() {
-      this.finishDevelopmentModal.show = true;
-    },
-    closeFinishDevelopmentModal: function() {
-      this.finishDevelopmentModal.show = false;
     },
     showFinishReviewModal: function() {
       this.finishReviewModal.show = true;
