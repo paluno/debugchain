@@ -12,25 +12,7 @@
 
           <donate-action v-if="canDonate" @donated="updateData" :contractAddress="contractAddress" :issueId="issueId" @isLoading="onIsLoadingChanged"></donate-action>
 
-          <button v-if="canApprove" class="btn btn-outline-success btn-sm" v-on:click="showApproveIssueModal">Approve</button>
-
-          <Modal v-model="approveIssueModal.show" title="Assign Reviewers">
-            <p>
-              Please assign at least one reviewer in order to approve this issue. The reviewers will be responsible for reviewing the proposed solution for this issue.
-            </p>
-            <div class="row">
-              <label class="col">Pick reviewers (CTRL+Click to choose multiple)</label>
-            </div>
-            <div class="row">
-              <select class="col custom-select" v-model="approveIssueModal.selectedReviewers" multiple>
-                <option v-for="reviewer in possibleReviewers" :key="reviewer.address" v-bind:value="reviewer.address">{{reviewer.username}} - {{reviewer.address}}</option>
-              </select>
-            </div>
-            <template slot="footer">
-              <button type="button" class="btn btn-primary" @click="approveIssue">Approve</button>
-              <button type="button" class="btn btn-secondary" @click="closeApproveIssueModal">Close</button>
-            </template>
-          </Modal>
+          <approve-action v-if="canApprove" @approved="updateData" :contractAddress="contractAddress" :issueId="issueId" :possibleReviewers="possibleReviewers" @isLoading="onIsLoadingChanged"></approve-action>
 
           <button v-if="canLock" class="btn btn-outline-warning btn-sm" v-on:click="showLockIssueModal">Lock Issue</button>
 
@@ -191,6 +173,7 @@ import ErrorContainer from "@/api/errorContainer";
 import Navigation from "@/components/Navigation";
 import Modal from "@/components/Modal.vue";
 import DonateAction from "@/components/actions/DonateAction";
+import ApproveAction from "@/components/actions/ApproveAction";
 import Gitlab from "@/api/gitlab";
 import Backend from "@/api/backend";
 import Contract from "@/api/contract";
@@ -202,7 +185,8 @@ export default {
   components: {
     Modal,
     Navigation,
-    DonateAction
+    DonateAction,
+    ApproveAction
   },
   props: {
     projectId: String,
@@ -358,10 +342,6 @@ export default {
       isMaintainer: false,
       userAddress: null,
       possibleReviewers: null,
-      approveIssueModal: {
-        show: false,
-        selectedReviewers: []
-      },
       lockIssueModal: {
         show: false
       },
@@ -386,23 +366,10 @@ export default {
     this.updateData();
   },
   methods: {
-    approveIssue: function() {
-      const issueId = this.issueId;
-      const contract = new Contract(this.contractAddress);
-      const reviewers = this.approveIssueModal.selectedReviewers;
-      
-      this.$emit("isLoading", true);
-      contract
-        .approve(issueId, reviewers)
-        .then(() => this.updateData())
-        .catch(error => ErrorContainer.add(error))
-        .then(() => this.$emit("isLoading", false))
-        .then(() => this.closeApproveIssueModal());
-    },
     lockIssue: function() {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
-      
+
       this.$emit("isLoading", true);
       contract
         .lock(issueId)
@@ -414,19 +381,19 @@ export default {
     unlockIssue: function() {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
-      
+
       this.$emit("isLoading", true);
       contract
         .unlock(issueId)
         .then(() => this.updateData())
         .catch(error => ErrorContainer.add(error))
         .then(() => this.$emit("isLoading", false))
-        .then(() => this.closeUnlockIssueModal())
+        .then(() => this.closeUnlockIssueModal());
     },
     finishDevelopment: function() {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
-      
+
       this.$emit("isLoading", true);
       contract
         .develop(issueId)
@@ -438,7 +405,7 @@ export default {
     finishReview: function(isAccepted) {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
-      
+
       this.$emit("isLoading", true);
       contract
         .review(issueId, isAccepted)
@@ -450,7 +417,7 @@ export default {
     resetIssue: function() {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
-      
+
       this.$emit("isLoading", true);
       contract
         .reset(issueId)
@@ -592,13 +559,6 @@ export default {
           pendingWithdrawals: newProfile.pendingWithdrawals
         };
       }
-    },
-    showApproveIssueModal: function() {
-      this.approveIssueModal.show = true;
-      this.approveIssueModal.reviewers = [];
-    },
-    closeApproveIssueModal: function() {
-      this.approveIssueModal.show = false;
     },
     showLockIssueModal: function() {
       this.lockIssueModal.show = true;
