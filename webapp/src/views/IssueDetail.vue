@@ -14,31 +14,9 @@
 
           <approve-action v-if="canApprove" @approved="updateData" :contractAddress="contractAddress" :issueId="issueId" :possibleReviewers="possibleReviewers" @isLoading="onIsLoadingChanged"></approve-action>
 
-          <button v-if="canLock" class="btn btn-outline-warning btn-sm" v-on:click="showLockIssueModal">Lock Issue</button>
+          <lock-action v-if="canLock" @locked="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></lock-action>
 
-          <Modal v-model="lockIssueModal.show" title="Lock Issue">
-            <p>
-              Do you really want to lock Issue "{{issue.title}}"?
-            </p>
-
-            <template slot="footer">
-              <button type="button" class="btn btn-primary" @click="lockIssue">Yes</button>
-              <button type="button" class="btn btn-secondary" @click="closeLockIssueModal">No</button>
-            </template>
-          </Modal>
-
-          <button v-if="canUnlock" class="btn btn-outline-warning btn-sm" v-on:click="showUnlockIssueModal">Unlock Issue</button>
-
-          <Modal v-model="unlockIssueModal.show" title="Unlock Issue">
-            <p>
-              Do you really want to unlock Issue "{{issue.title}}"?
-            </p>
-
-            <template slot="footer">
-              <button type="button" class="btn btn-primary" @click="unlockIssue">Yes</button>
-              <button type="button" class="btn btn-secondary" @click="closeUnlockIssueModal">No</button>
-            </template>
-          </Modal>
+          <unlock-action v-if="canUnlock" @unlocked="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></unlock-action>
 
           <button v-if="canFinishDevelopment" class="btn btn-outline-primary btn-sm" v-on:click="showFinishDevelopmentModal">Finish Development</button>
 
@@ -174,6 +152,8 @@ import Navigation from "@/components/Navigation";
 import Modal from "@/components/Modal.vue";
 import DonateAction from "@/components/actions/DonateAction";
 import ApproveAction from "@/components/actions/ApproveAction";
+import LockAction from "@/components/actions/LockAction";
+import UnlockAction from "@/components/actions/UnlockAction";
 import Gitlab from "@/api/gitlab";
 import Backend from "@/api/backend";
 import Contract from "@/api/contract";
@@ -186,7 +166,9 @@ export default {
     Modal,
     Navigation,
     DonateAction,
-    ApproveAction
+    ApproveAction,
+    LockAction,
+    UnlockAction
   },
   props: {
     projectId: String,
@@ -342,12 +324,6 @@ export default {
       isMaintainer: false,
       userAddress: null,
       possibleReviewers: null,
-      lockIssueModal: {
-        show: false
-      },
-      unlockIssueModal: {
-        show: false
-      },
       finishDevelopmentModal: {
         show: false
       },
@@ -366,30 +342,6 @@ export default {
     this.updateData();
   },
   methods: {
-    lockIssue: function() {
-      const issueId = this.issueId;
-      const contract = new Contract(this.contractAddress);
-
-      this.$emit("isLoading", true);
-      contract
-        .lock(issueId)
-        .then(() => this.updateData())
-        .catch(error => ErrorContainer.add(error))
-        .then(() => this.$emit("isLoading", false))
-        .then(() => this.closeLockIssueModal());
-    },
-    unlockIssue: function() {
-      const issueId = this.issueId;
-      const contract = new Contract(this.contractAddress);
-
-      this.$emit("isLoading", true);
-      contract
-        .unlock(issueId)
-        .then(() => this.updateData())
-        .catch(error => ErrorContainer.add(error))
-        .then(() => this.$emit("isLoading", false))
-        .then(() => this.closeUnlockIssueModal());
-    },
     finishDevelopment: function() {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
@@ -559,18 +511,6 @@ export default {
           pendingWithdrawals: newProfile.pendingWithdrawals
         };
       }
-    },
-    showLockIssueModal: function() {
-      this.lockIssueModal.show = true;
-    },
-    closeLockIssueModal: function() {
-      this.lockIssueModal.show = false;
-    },
-    showUnlockIssueModal: function() {
-      this.unlockIssueModal.show = true;
-    },
-    closeUnlockIssueModal: function() {
-      this.unlockIssueModal.show = false;
     },
     showFinishDevelopmentModal: function() {
       this.finishDevelopmentModal.show = true;
