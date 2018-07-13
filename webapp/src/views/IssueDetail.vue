@@ -9,24 +9,8 @@
         </div>
         <div class="col-auto">
           <a class="btn btn-link btn-sm" :href="issue.web_url" target="_blank">Open in Gitlab  <i class="fas fa-external-link-alt"></i></a>
-          <button v-if="canDonate" class="btn btn-outline-secondary btn-sm" v-on:click="showDonateEtherModal">Donate Ether</button>
 
-          <Modal v-model="donateEtherModal.show" title="Donate Ether">
-            <p>
-              How much Ether do you want to donate on this Issue?
-            </p>
-            <div class="row">
-              <label class="col-sm-3">Donation:</label>
-              <input class="col" type="number" step="0.1" placeholder="Enter your donation" v-model="donateEtherModal.donation" />
-              <label class="col-sm-3"> Ether </label>
-              <!--TODO check the validity of the input-->
-            </div>
-
-            <template slot="footer">
-              <button type="button" class="btn btn-primary" @click="donateEther">Save</button>
-              <button type="button" class="btn btn-secondary" @click="closeDonateEtherModal">Close</button>
-            </template>
-          </Modal>
+          <donate-action v-if="canDonate" @donated="updateData" :contractAddress="contractAddress" :issueId="issueId" @isLoading="onIsLoadingChanged"></donate-action>
 
           <button v-if="canApprove" class="btn btn-outline-success btn-sm" v-on:click="showApproveIssueModal">Approve</button>
 
@@ -206,6 +190,7 @@
 import ErrorContainer from "@/api/errorContainer";
 import Navigation from "@/components/Navigation";
 import Modal from "@/components/Modal.vue";
+import DonateAction from "@/components/actions/DonateAction";
 import Gitlab from "@/api/gitlab";
 import Backend from "@/api/backend";
 import Contract from "@/api/contract";
@@ -216,7 +201,8 @@ export default {
   name: "IssueDetail",
   components: {
     Modal,
-    Navigation
+    Navigation,
+    DonateAction
   },
   props: {
     projectId: String,
@@ -372,10 +358,6 @@ export default {
       isMaintainer: false,
       userAddress: null,
       possibleReviewers: null,
-      donateEtherModal: {
-        donation: 0,
-        show: false
-      },
       approveIssueModal: {
         show: false,
         selectedReviewers: []
@@ -404,19 +386,6 @@ export default {
     this.updateData();
   },
   methods: {
-    donateEther: function() {
-      const donation = this.donateEtherModal.donation;
-      const issueId = this.issueId;
-      const contract = new Contract(this.contractAddress);
-      
-      this.$emit("isLoading", true);
-      contract
-        .donate(issueId, donation)
-        .then(() => this.updateData())
-        .catch(error => ErrorContainer.add(error))
-        .then(() => this.$emit("isLoading", false))
-        .then(() => this.closeDonateEtherModal());
-    },
     approveIssue: function() {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
@@ -624,13 +593,6 @@ export default {
         };
       }
     },
-    showDonateEtherModal: function() {
-      this.donateEtherModal.show = true;
-    },
-    closeDonateEtherModal: function() {
-      this.donateEtherModal.show = false;
-      this.donateEtherModal.donation = 0;
-    },
     showApproveIssueModal: function() {
       this.approveIssueModal.show = true;
       this.approveIssueModal.reviewers = [];
@@ -673,6 +635,9 @@ export default {
     },
     closeDeleteIssueModal: function() {
       this.deleteIssueModal.show = false;
+    },
+    onIsLoadingChanged: function(isLoading) {
+      this.$emit("isLoading", isLoading);
     }
   }
 };
