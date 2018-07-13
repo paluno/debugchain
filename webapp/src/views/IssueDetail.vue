@@ -409,6 +409,8 @@ export default {
       const donation = this.donateEtherModal.donation;
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
+      
+      this.$emit("isLoading", true);
       contract
         .donate(issueId, donation)
         .then(() => this.updateData())
@@ -420,6 +422,8 @@ export default {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
       const reviewers = this.approveIssueModal.selectedReviewers;
+      
+      this.$emit("isLoading", true);
       contract
         .approve(issueId, reviewers)
         .then(() => this.updateData())
@@ -430,6 +434,8 @@ export default {
     lockIssue: function() {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
+      
+      this.$emit("isLoading", true);
       contract
         .lock(issueId)
         .then(() => this.updateData())
@@ -440,14 +446,20 @@ export default {
     unlockIssue: function() {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
+      
+      this.$emit("isLoading", true);
       contract
         .unlock(issueId)
+        .then(() => this.updateData())
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false))
         .then(() => this.closeUnlockIssueModal())
-        .then(() => this.updateData());
     },
     finishDevelopment: function() {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
+      
+      this.$emit("isLoading", true);
       contract
         .develop(issueId)
         .then(() => this.updateData())
@@ -458,6 +470,8 @@ export default {
     finishReview: function(isAccepted) {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
+      
+      this.$emit("isLoading", true);
       contract
         .review(issueId, isAccepted)
         .then(() => this.updateData())
@@ -468,18 +482,26 @@ export default {
     resetIssue: function() {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
+      
+      this.$emit("isLoading", true);
       contract
         .reset(issueId)
-        .then(() => this.closeResetIssueModal())
-        .then(() => this.updateData());
+        .then(() => this.updateData())
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false))
+        .then(() => this.closeResetIssueModal());
     },
     deleteIssue: function() {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
+
+      this.$emit("isLoading", true);
       contract
         .delete(issueId)
-        .then(() => this.closeDeleteIssueModal())
-        .then(() => this.updateData());
+        .then(() => this.updateData())
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false))
+        .then(() => this.closeDeleteIssueModal());
     },
     setIssue: function(issue, contractIssue) {
       this.issue = issue;
