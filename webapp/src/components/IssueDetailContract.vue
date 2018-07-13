@@ -1,5 +1,4 @@
 <template>
-
     <div v-if="contractIssue">
         <div class="row">
             <div class="col">
@@ -21,24 +20,24 @@
         <hr>
         <div class="row">
             <div class="col">
-                <h4>{{contractIssue.donationSum}} Ether is the current bounty</h4>
+                <h4>{{contractIssue.donationSum | weiToEther}} Ether is the current bounty</h4>
             </div>
         </div>
-        <div v-for="donation in contractIssue.donationValues" :key="donation.donator" class="row">
+        <div v-for="donation in combinedDonations" :key="donation.donator" class="row">
             <div class="col">
-                <span>{{donation.donator}} has donated {{donation.value}} Ether </span>
+                <span>{{donation.donator}} has donated {{donation.value | weiToEther}} Ether </span>
             </div>
         </div>
         <hr>
-        <div v-if="contractIssue.reviewStatus.length > 0">
+        <div v-if="combinedReviews.length > 0">
             <div class="row">
                 <div class="col">
                     <h4>Review-Overview</h4>
                 </div>
             </div>
-            <div v-for="review in contractIssue.reviewStatus" :key="review.reviewer" class="row">
+            <div v-for="review in combinedReviews" :key="review.reviewer" class="row">
                 <div class="col">
-                    <span v-if="review.value">{{review.reviewer}} has reviewed this issue</span>
+                    <span v-if="review.status">{{review.reviewer}} has reviewed this issue</span>
                     <span v-else>{{review.reviewer}} has not yet reviewed this issue</span>
                 </div>
             </div>
@@ -55,8 +54,15 @@
 </template>
 
 <script>
+import getWeb3 from "@/api/getWeb3";
+
 export default {
   name: "IssueDetailContract",
+  filters: {
+    weiToEther(wei) {
+      return getWeb3().fromWei(wei, "ether");
+    }
+  },
   props: {
     contractIssue: {
       type: Object,
@@ -64,6 +70,22 @@ export default {
     }
   },
   computed: {
+    combinedDonations() {
+      return this.contractIssue.donators.map((donator, index) => {
+        return {
+          donator,
+          value: this.contractIssue.donationValues[index]
+        };
+      });
+    },
+    combinedReviews() {
+      return this.contractIssue.reviewers.map((reviewer, index) => {
+        return {
+          reviewer,
+          status: this.contractIssue.reviewStatus[index]
+        };
+      });
+    },
     chainBadgeState: function() {
       if (this.contractIssue != null) {
         switch (this.contractIssue.lifecycleStatus) {

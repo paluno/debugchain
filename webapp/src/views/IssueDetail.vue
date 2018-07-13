@@ -207,58 +207,24 @@ export default {
     this.updateData();
   },
   methods: {
-    setIssue: function(issue, contractIssue) {
+    setIssue: function(issue) {
       this.issue = issue;
-      if (contractIssue !== undefined) {
-        this.contractIssue = contractIssue;
-        this.combineDonations(this.contractIssue);
-        this.combineReviews(this.contractIssue);
-      }
-    },
-    combineDonations(cIssue) {
-      // TODO replace this with computed property
-      cIssue.donationSum = getWeb3().fromWei(cIssue.donationSum, "ether");
-      this.combined = [];
-      if (cIssue.donationValues.length == cIssue.donators.length) {
-        for (let i = 0; i < cIssue.donationValues.length; i++) {
-          this.combined[i] = {
-            donator: cIssue.donators[i],
-            value: getWeb3().fromWei(cIssue.donationValues[i], "ether")
-          };
-        }
-      }
-      cIssue.donationValues = this.combined;
-      cIssue.donators = undefined; // Remove donators since donators are now merged in donationValues
-    },
-    combineReviews(cIssue) {
-      // TODO replace this with computed property
-      let combined = [];
-      if (cIssue.reviewers.length == cIssue.reviewStatus.length) {
-        combined = cIssue.reviewers.map((reviewer, index) => {
-          return {
-            reviewer: reviewer,
-            value: cIssue.reviewStatus[index]
-          };
-        });
-      }
-      cIssue.reviewStatus = combined;
-      // TODO ignore for merge conflict > replace with computed property
-      // cIssue.reviewers = undefined; // Remove reviewers since reviewers are now merged in reviewStatus
     },
     setPossibleReviewers: function(possibleReviewers, projectMembers) {
       // TODO replace this with computed property
-      this.possibleReviewers = possibleReviewers.map(reviewer => {
-        for (let i = 0; i < projectMembers.length; i++) {
-          const member = projectMembers[i];
-          if (reviewer.gitlabId == member.id) {
+      this.possibleReviewers = possibleReviewers
+        .map(reviewer => {
+          const member = projectMembers.find(m => m.id == reviewer.gitlabId);
+          if (member) {
             return {
               address: reviewer.address,
               gitlabId: reviewer.gitlabId,
               username: member.username
             };
           }
-        }
-      });
+        })
+        // filter elements where member was not found > nothing returned.
+        .filter(x => x !== undefined);
     },
     setContractAddress: function(address) {
       this.contractAddress = address;
@@ -307,7 +273,7 @@ export default {
           const profile = results[5];
           const project = results[6];
 
-          this.setIssue(issue, contractIssue);
+          this.setIssue(issue);
           if (ownedProjects.find(project => project.id == this.projectId)) {
             this.setIsMaintainer(true);
           }
