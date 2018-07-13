@@ -22,31 +22,9 @@
 
           <review-action v-if="canReview" @reviewed="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></review-action>
 
-          <button v-if="canReset" class="btn btn-outline-primary btn-sm" v-on:click="showResetIssueModal">Reset Issue</button>
+          <reset-action v-if="canReset" @reset="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></reset-action>
 
-          <Modal v-model="resetIssueModal.show" title="Reset Issue">
-            <p>
-              Do you really want to reset Issue "{{issue.title}}"?
-            </p>
-
-            <template slot="footer">
-              <button type="button" class="btn btn-primary" @click="resetIssue">Yes</button>
-              <button type="button" class="btn btn-secondary" @click="closeResetIssueModal">No</button>
-            </template>
-          </Modal>
-
-          <button v-if="canDelete" class="btn btn-outline-primary btn-sm" v-on:click="showDeleteIssueModal">Delete Issue</button>
-
-          <Modal v-model="deleteIssueModal.show" title="Delete Issue">
-            <p>
-              Do you really want to delete Issue "{{issue.title}}"?
-            </p>
-
-            <template slot="footer">
-              <button type="button" class="btn btn-primary" @click="deleteIssue">Yes</button>
-              <button type="button" class="btn btn-secondary" @click="closeDeleteIssueModal">No</button>
-            </template>
-          </Modal>
+          <delete-action v-if="canDelete" @deleted="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></delete-action>
         </div>
       </div>
       <div class="row">
@@ -133,6 +111,8 @@ import LockAction from "@/components/actions/LockAction";
 import UnlockAction from "@/components/actions/UnlockAction";
 import FinishDevelopmentAction from "@/components/actions/FinishDevelopmentAction";
 import ReviewAction from "@/components/actions/ReviewAction";
+import ResetAction from "@/components/actions/ResetAction";
+import DeleteAction from "@/components/actions/DeleteAction";
 import Gitlab from "@/api/gitlab";
 import Backend from "@/api/backend";
 import Contract from "@/api/contract";
@@ -149,7 +129,9 @@ export default {
     LockAction,
     UnlockAction,
     FinishDevelopmentAction,
-    ReviewAction
+    ReviewAction,
+    ResetAction,
+    DeleteAction
   },
   props: {
     projectId: String,
@@ -304,43 +286,13 @@ export default {
       contractAddress: null,
       isMaintainer: false,
       userAddress: null,
-      possibleReviewers: null,
-      resetIssueModal: {
-        show: false
-      },
-      deleteIssueModal: {
-        show: false
-      }
+      possibleReviewers: null
     };
   },
   created: function() {
     this.updateData();
   },
   methods: {
-    resetIssue: function() {
-      const issueId = this.issueId;
-      const contract = new Contract(this.contractAddress);
-
-      this.$emit("isLoading", true);
-      contract
-        .reset(issueId)
-        .then(() => this.updateData())
-        .catch(error => ErrorContainer.add(error))
-        .then(() => this.$emit("isLoading", false))
-        .then(() => this.closeResetIssueModal());
-    },
-    deleteIssue: function() {
-      const issueId = this.issueId;
-      const contract = new Contract(this.contractAddress);
-
-      this.$emit("isLoading", true);
-      contract
-        .delete(issueId)
-        .then(() => this.updateData())
-        .catch(error => ErrorContainer.add(error))
-        .then(() => this.$emit("isLoading", false))
-        .then(() => this.closeDeleteIssueModal());
-    },
     setIssue: function(issue, contractIssue) {
       this.issue = issue;
       if (contractIssue !== undefined) {
@@ -462,18 +414,6 @@ export default {
           pendingWithdrawals: newProfile.pendingWithdrawals
         };
       }
-    },
-    showResetIssueModal: function() {
-      this.resetIssueModal.show = true;
-    },
-    closeResetIssueModal: function() {
-      this.resetIssueModal.show = false;
-    },
-    showDeleteIssueModal: function() {
-      this.deleteIssueModal.show = true;
-    },
-    closeDeleteIssueModal: function() {
-      this.deleteIssueModal.show = false;
     },
     onIsLoadingChanged: function(isLoading) {
       this.$emit("isLoading", isLoading);
