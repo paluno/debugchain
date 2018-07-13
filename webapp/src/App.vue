@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="container">
     <div class="error-toast-container">
-      <error-toast v-for="error in errors" :key="error.id" :error="error" style="position: static"></error-toast>
+      <error-toast v-for="error in errors" :key="error.id" :error="error.raw" class="error-toast"></error-toast>
     </div>
     <LoadingOverlay v-if="loading" />
     <router-view @isLoading="onIsLoadingChanged" />
@@ -46,5 +46,9 @@ export default {
   z-index: 9998;
   top: 1rem;
   right: 1rem;
+
+  .error-toast {
+    position: static;
+  }
 }
 </style>

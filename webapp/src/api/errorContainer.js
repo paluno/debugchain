@@ -6,15 +6,29 @@ class ErrorContainer {
     }
 
     add(error) {
+        error = this._ensureError(error);
+
         const element = {
             timestamp: Date.now(),
             id: this._nextId,
-            error
+            raw: error
         }
         this.errors.push(element);
+        console.error(error);
         // remove after 5 seconds
         setTimeout(() => this._remove(element), 5000);
         this._nextId += 1;
+    }
+
+    _ensureError(error) {
+        if (error instanceof Error) {
+            return error;
+        } else {
+            if (typeof error === 'string') {
+                return new Error(error);
+            }
+        }
+        return new Error("An unknown error occured.");
     }
 
     _remove(element) {

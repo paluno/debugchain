@@ -1,14 +1,26 @@
 <template>
-    <transition name="fade">
-        <div class="alert alert-danger" role="alert">
-            An unknown error occured!
-        </div>
-    </transition>
+  <transition name="fade">
+    <div class="alert alert-danger" role="alert">
+      {{errorMessage}}
+    </div>
+  </transition>
 </template>
 
 <script>
 export default {
-  name: "ErrorToast"
+  name: "ErrorToast",
+  props: {
+    error: {
+      type: Error,
+      required: true
+    }
+  },
+  computed: {
+    errorMessage() {
+      // TODO handle specific axios errors
+      return this.error.message;
+    }
+  }
 };
 </script>
 
