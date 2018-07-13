@@ -485,18 +485,16 @@ export default {
     },
     combineReviews(cIssue) {
       // TODO replace this with computed property
-      this.combined = [];
+      let combined = [];
       if (cIssue.reviewers.length == cIssue.reviewStatus.length) {
-        for (let i = 0; i < cIssue.reviewers.length; i++) {
-          if (!this.combinedReviews === undefined) {
-            this.combinedReviews[i] = {
-              reviewer: cIssue.reviewers[i],
-              value: cIssue.reviewStatus[i]
-            };
-          }
-        }
+        combined = cIssue.reviewers.map((reviewer, index)=>{
+          return {
+            reviewer: reviewer,
+            value: cIssue.reviewStatus[index]
+          };
+        })
       }
-      cIssue.reviewStatus = this.combined;
+      cIssue.reviewStatus = combined;
       // TODO ignore for merge conflict > replace with computed property
       // cIssue.reviewers = undefined; // Remove reviewers since reviewers are now merged in reviewStatus
     },

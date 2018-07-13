@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.23;
 
 contract DebugChain {
 
@@ -36,7 +36,7 @@ contract DebugChain {
      *
      * @param _pId project ID to be persisted
      */
-constructor(uint _pId) public {
+    constructor(uint _pId) public {
         maintainer = msg.sender;
         projectId = _pId;
     }
@@ -201,7 +201,7 @@ constructor(uint _pId) public {
     function setDeveloper(uint _id) public issueExists(_id) {
         issues[_id].developer = msg.sender;
         // lock the issue after a developer is assigned
-        setLocked(_id, true);
+        setLocked(_id);
     }
 
     /**
@@ -214,15 +214,21 @@ constructor(uint _pId) public {
     }
 
     /**
-     * Unlocks an issue. Resets the developer address and sets the locked status
-     * to false.
+     * Unlocks an issue. Resets the developer address and resets the lifecycle status
+     * to approved.
      *
      * @param _id issue id
      */
     function unlockIssue(uint _id) public issueExists(_id) {
         // only allow the maintainer and current developer to unlock an issue
         require(msg.sender == maintainer || msg.sender == issues[_id].developer);
-        setLocked(_id, false);
+        // TODO test
+        // reset developer address
+        issues[_id].developer = address(0);
+        // reset lifecycle to allow re-locking
+        issues[_id].lifecycleStatus = 1;
+        // fire lifecycle event
+        emit IssueUnlocked(msg.sender, _id);
     }
 
     /**
@@ -291,40 +297,28 @@ constructor(uint _pId) public {
      * Setter for an issues locked status.
      *
      * @param _id issue id
-     * @param _val locked status to set
      */
-    // TODO remove bool parameter
-    function setLocked(uint _id, bool _val) private issueExists(_id) {
+    function setLocked(uint _id) private issueExists(_id) {
+        // require approved status and no set developer
         require(issues[_id].lifecycleStatus == 1);
 
-        if (_val) {
-            issues[_id].lifecycleStatus = 2;
-            // fire lifecycle event
-            emit IssueLocked(msg.sender, _id);
-        } else {
-            // reset developer address
-            issues[_id].developer = address(0);
-            // reset lifecycle to allow re-locking
-            issues[_id].lifecycleStatus = 1;
-            // fire lifecycle event
-emit IssueUnlocked(msg.sender, _id);
-        }
+        issues[_id].lifecycleStatus = 2;
+        // fire lifecycle event
+        emit IssueLocked(msg.sender, _id);
     }
 
     /**
      * Setter for an issues developed status.
      *
      * @param _id issue id
-     * @param _val developed status to set
      */
-    // TODO remove bool parameter
-    function setDeveloped(uint _id, bool _val) public issueExists(_id) onlyDeveloper(_id) {
+    function setDeveloped(uint _id) public issueExists(_id) onlyDeveloper(_id) {
         // only accept developed flag, when issue is locked
         require(issues[_id].lifecycleStatus == 2);
 
         issues[_id].lifecycleStatus = 3;
         // fire lifecycle event
-emit IssueDeveloped(msg.sender, _id);
+        emit IssueDeveloped(msg.sender, _id);
     }
 
     /**
@@ -336,12 +330,21 @@ emit IssueDeveloped(msg.sender, _id);
     function setReviewed(uint _id, bool _val) public issueExists(_id) onlyReviewer(_id) {
         // only accept reviews, when issue is marked as developed
         require(issues[_id].lifecycleStatus == 3);
+        // TODO lock reviewer out after succesful review
 
-        issues[_id].isReviewed[msg.sender] = _val;
-        // check if all reviewers approved the developed changes
-        if (checkForCompletion(_id)) {
-            completeIssue(_id);
+        // on successful review, write new value to chain and check for completion
+        if (_val) {
+            issues[_id].isReviewed[msg.sender] = _val;
+            // check if all reviewers approved the developed changes
+            if (checkForCompletion(_id)) {
+                completeIssue(_id);
+            }
+        } else { // on a rejection-review, reset review status
+            resetReviewStatus(_id);
+            // and reset lifecycle to in development
+            issues[_id].lifecycleStatus = 2;
         }
+
         // fire lifecycle event
         emit IssueReviewed(msg.sender, _id);
     }
@@ -372,25 +375,32 @@ emit IssueDeveloped(msg.sender, _id);
         pendingWithdrawals[issues[_id].developer] = issues[_id].donationSum;
         issues[_id].lifecycleStatus = 4;
         // fire lifecycle event
-emit IssueCompleted(msg.sender, _id);
+        emit IssueCompleted(msg.sender, _id);
     }
 
     /**
-     * Resets an issues reviewers and its corresponding review status.
+     * Resets an issues. reviewers and its corresponding review status.
      *
      * @param _id issue id
      */
     function resetIssue(uint _id) public issueExists(_id) onlyMaintainer {
-        // reset the review stati
+        // reset the review status
+        resetReviewStatus(_id);
+        // reset the reviewers address array
+        issues[_id].reviewers = new address[](0);
+        // reset the developer and set lifecycle to approved
+        unlockIssue(_id);
+
+        // fire lifecycle event
+        emit IssueReset(msg.sender, _id);
+    }
+
+    function resetReviewStatus(uint _id) private {
         for (uint i = 0; i < issues[_id].reviewers.length; i++) {
             // return the boolean review status for each reqistered reviewer
-            issues[_id].isReviewed[issues[_id].reviewers[i]] = false;
             // TODO delete in place of false?
+            issues[_id].isReviewed[issues[_id].reviewers[i]] = false;
         }
-        // reset the reviewers address array
-        setReviewers(_id, new address[](0));
-        // fire lifecycle event
-emit IssueReset(msg.sender, _id);
     }
 
     /**
@@ -408,7 +418,7 @@ emit IssueReset(msg.sender, _id);
         removeFromIssueLookup(_id);
         delete issues[_id];
         // fire lifecycle event
-emit IssueDeleted(msg.sender, _id);
+        emit IssueDeleted(msg.sender, _id);
     }
 
     /**
@@ -486,44 +496,44 @@ emit IssueDeleted(msg.sender, _id);
         uint _amount
     );
 
-event IssueApproved (
+    event IssueApproved (
         address indexed _by,
         uint indexed _id
     );
 
-event IssueLocked (
+    event IssueLocked (
         address indexed _by,
         uint indexed _id
     );
 
-        event IssueUnlocked (
+    event IssueUnlocked (
         address indexed _by,
         uint indexed _id
     );
 
-event IssueDeveloped (
-address _by,
-uint _id
-);
-
-event IssueReviewed (
-address _by,
-uint _id
-);
-
-event IssueCompleted (
-address _by,
-uint _id
+    event IssueDeveloped (
+        address _by,
+        uint _id
     );
 
-event IssueReset (
-address _by,
-uint _id
-);
+    event IssueReviewed (
+        address _by,
+        uint _id
+    );
 
-event IssueDeleted (
-address _by,
-uint _id
+    event IssueCompleted (
+        address _by,
+        uint _id
+    );
+
+    event IssueReset (
+        address _by,
+        uint _id
+    );
+
+    event IssueDeleted (
+        address _by,
+        uint _id
     );
 
     /**
