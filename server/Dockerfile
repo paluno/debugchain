@@ -4,7 +4,7 @@ FROM openjdk:8-jre
 EXPOSE 8080
 
 # Add a volume pointing to /tmp
-VOLUME /tmp
+VOLUME /tmp /home
 
 # The application's jar file
 ARG JAR_FILE=target/debugchain-server.jar
