@@ -8,7 +8,9 @@
           <h1>{{issue.title}}</h1>
         </div>
         <div class="col-auto">
-          <a class="btn btn-link btn-sm" :href="issue.web_url" target="_blank">Open in Gitlab  <i class="fas fa-external-link-alt"></i></a>
+          <a class="btn btn-link btn-sm" :href="issue.web_url" target="_blank">Open in Gitlab
+            <i class="fas fa-external-link-alt"></i>
+          </a>
 
           <donate-action v-if="canDonate" @donated="updateData" :contractAddress="contractAddress" :issueId="issueId" @isLoading="onIsLoadingChanged"></donate-action>
 
@@ -27,18 +29,7 @@
           <delete-action v-if="canDelete" @deleted="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></delete-action>
         </div>
       </div>
-      <div class="row">
-        <div class="col">
-          <span :class="badgeState">{{state}}</span>
-          <label>Created</label>
-          <span>at {{prettyTime}}</span>
-          <label>by</label>
-          <img class="avatar" :src="issue.author.avatar_url" />
-          <span>
-            <b>{{issue.author.username}}</b>
-          </span>
-        </div>
-      </div>
+      <issue-detail-gitlab-header :issue="issue"></issue-detail-gitlab-header>
       <hr>
       <div class="row">
         <div class="col" v-html="markdownDescription">
@@ -55,6 +46,7 @@ import ErrorContainer from "@/api/errorContainer";
 import Navigation from "@/components/Navigation";
 import Modal from "@/components/Modal";
 import IssueDetailContract from "@/components/IssueDetailContract";
+import IssueDetailGitlabHeader from "@/components/IssueDetailGitlabHeader";
 import DonateAction from "@/components/actions/DonateAction";
 import ApproveAction from "@/components/actions/ApproveAction";
 import LockAction from "@/components/actions/LockAction";
@@ -75,6 +67,7 @@ export default {
     Modal,
     Navigation,
     IssueDetailContract,
+    IssueDetailGitlabHeader,
     DonateAction,
     ApproveAction,
     LockAction,
@@ -91,48 +84,6 @@ export default {
   computed: {
     markdownDescription: function() {
       return marked(this.issue.description);
-    },
-    prettyTime: function() {
-      if (this.issue != null) {
-        const options = {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric"
-        };
-        const date = new Date(this.issue.created_at);
-        return date.toLocaleDateString("en-EN", options);
-      }
-    },
-    state: function() {
-      if (this.issue != null) {
-        switch (this.issue.state) {
-          case "opened":
-            return "Open";
-            break;
-          case "closed":
-            return "Closed";
-            break;
-          default:
-            return "None";
-        }
-      }
-      return "None";
-    },
-    badgeState: function() {
-      if (this.issue != null) {
-        switch (this.issue.state) {
-          case "opened":
-            return "badge badge-success";
-            break;
-          case "closed":
-            return "badge badge-primary";
-            break;
-          default:
-            return "badge badge-secondary";
-        }
-      }
-      return "badge badge-secondary";
     },
     canDonate: function() {
       if (this.contractIssue != null) {
@@ -303,9 +254,4 @@ export default {
 </script>
 
 <style>
-.avatar {
-  border-radius: 50%;
-  height: 25px;
-  width: 25px;
-}
 </style>
