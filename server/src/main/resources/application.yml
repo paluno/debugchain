@@ -26,8 +26,9 @@ spring:
   jpa:
     databasePlatform: "org.hibernate.dialect.H2Dialect"
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
   datasource:
+    initialization-mode: never
     driverClassName: org.h2.Driver
     url: jdbc:h2:file:/home/debugchain-db
     username: sa
