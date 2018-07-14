@@ -24,6 +24,8 @@
     <hr>
     <h2>Router</h2>
     <router-link to="/invalid-url">Test invalid router-link url</router-link>
+    <h2>Error component</h2>
+    <button @click="addError">Add Error</button>
   </div>
 </template>
 
@@ -31,6 +33,7 @@
 import Gitlab from "@/api/gitlab";
 import Backend from "@/api/backend";
 import Contract from "@/api/contract";
+import ErrorContainer from "@/api/errorContainer";
 import Navigation from "@/components/Navigation";
 
 export default {
@@ -66,6 +69,9 @@ export default {
           alert("Could not complete demo contract creation.");
           console.log("Demo creation failed:", error);
         });
+    },
+    addError() {
+      ErrorContainer.add("Some Error");
     },
     createContract: function() {
       const contract = new Contract(null, "http://localhost:9545");

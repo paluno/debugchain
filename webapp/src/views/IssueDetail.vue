@@ -203,6 +203,7 @@
 </template>
 
 <script>
+import ErrorContainer from "@/api/errorContainer";
 import Navigation from "@/components/Navigation";
 import Modal from "@/components/Modal.vue";
 import Gitlab from "@/api/gitlab";
@@ -407,67 +408,99 @@ export default {
       const donation = this.donateEtherModal.donation;
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
+      
+      this.$emit("isLoading", true);
       contract
         .donate(issueId, donation)
-        .then(() => this.closeDonateEtherModal())
-        .then(() => this.updateData());
+        .then(() => this.updateData())
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false))
+        .then(() => this.closeDonateEtherModal());
     },
     approveIssue: function() {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
       const reviewers = this.approveIssueModal.selectedReviewers;
+      
+      this.$emit("isLoading", true);
       contract
         .approve(issueId, reviewers)
-        .then(() => this.closeApproveIssueModal())
-        .then(() => this.updateData());
+        .then(() => this.updateData())
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false))
+        .then(() => this.closeApproveIssueModal());
     },
     lockIssue: function() {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
+      
+      this.$emit("isLoading", true);
       contract
         .lock(issueId)
-        .then(() => this.closeLockIssueModal())
-        .then(() => this.updateData());
+        .then(() => this.updateData())
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false))
+        .then(() => this.closeLockIssueModal());
     },
     unlockIssue: function() {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
+      
+      this.$emit("isLoading", true);
       contract
         .unlock(issueId)
+        .then(() => this.updateData())
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false))
         .then(() => this.closeUnlockIssueModal())
-        .then(() => this.updateData());
     },
     finishDevelopment: function() {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
+      
+      this.$emit("isLoading", true);
       contract
         .develop(issueId)
-        .then(() => this.closeFinishDevelopmentModal())
-        .then(() => this.updateData());
+        .then(() => this.updateData())
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false))
+        .then(() => this.closeFinishDevelopmentModal());
     },
     finishReview: function(isAccepted) {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
+      
+      this.$emit("isLoading", true);
       contract
         .review(issueId, isAccepted)
-        .then(() => this.closeFinishReviewModal())
-        .then(() => this.updateData());
+        .then(() => this.updateData())
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false))
+        .then(() => this.closeFinishReviewModal());
     },
     resetIssue: function() {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
+      
+      this.$emit("isLoading", true);
       contract
         .reset(issueId)
-        .then(() => this.closeResetIssueModal())
-        .then(() => this.updateData());
+        .then(() => this.updateData())
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false))
+        .then(() => this.closeResetIssueModal());
     },
     deleteIssue: function() {
       const issueId = this.issueId;
       const contract = new Contract(this.contractAddress);
+
+      this.$emit("isLoading", true);
       contract
         .delete(issueId)
-        .then(() => this.closeDeleteIssueModal())
-        .then(() => this.updateData());
+        .then(() => this.updateData())
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false))
+        .then(() => this.closeDeleteIssueModal());
     },
     setIssue: function(issue, contractIssue) {
       this.issue = issue;
@@ -559,27 +592,29 @@ export default {
           }),
         backend.get("/profile/withdrawals/" + this.projectId).then(r => r.data),
         backend.get("/projects/" + this.projectId).then(r => r.data)
-      ]).then(results => {
-        const issue = results[0];
-        const ownedProjects = results[1];
-        const projectMembers = results[2];
-        const possibleReviewers = results[3];
-        const contractIssue = results[4];
-        const profile = results[5];
-        const project = results[6];
+      ])
+        .then(results => {
+          const issue = results[0];
+          const ownedProjects = results[1];
+          const projectMembers = results[2];
+          const possibleReviewers = results[3];
+          const contractIssue = results[4];
+          const profile = results[5];
+          const project = results[6];
 
-        this.setIssue(issue, contractIssue);
-        if (ownedProjects.find(project => project.id == this.projectId)) {
-          this.setIsMaintainer(true);
-        }
-        // TODO consider using web3 address instead of profile
-        this.setUserAddress(profile.address);
-        this.setPossibleReviewers(possibleReviewers, projectMembers);
-        this.setContractIssue(contractIssue);
-        this.setProfile(profile);
-        this.setContractAddress(project.address);
-        this.$emit("isLoading", false);
-      });
+          this.setIssue(issue, contractIssue);
+          if (ownedProjects.find(project => project.id == this.projectId)) {
+            this.setIsMaintainer(true);
+          }
+          // TODO consider using web3 address instead of profile
+          this.setUserAddress(profile.address);
+          this.setPossibleReviewers(possibleReviewers, projectMembers);
+          this.setContractIssue(contractIssue);
+          this.setProfile(profile);
+          this.setContractAddress(project.address);
+        })
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false));
     },
     setProfile: function(newProfile) {
       if (newProfile) {
