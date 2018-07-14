@@ -1,6 +1,15 @@
 <template>
   <div class="issueList">
     <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" :projectId="projectId" />
+    
+    <div class="row">
+      <div v-if="project" class="col">
+        <h1>{{project.name}}</h1>
+      </div>
+      <div class="col-auto">
+        <a class="btn btn-outline-primary btn-sm" :href="project.web_url">Open in Gitlab  <i class="fas fa-external-link-alt"></i></a>
+      </div>
+    </div>
     <div class="table">
       <vue-good-table :columns="columns" :rows="rows" :pagination-options="{ enabled: true, perPage: 5}" :search-options="{ enabled: true}" styleClass="vgt-table striped bordered" @on-row-click="navigate">
       </vue-good-table>
@@ -24,6 +33,7 @@ export default {
   },
   data: function() {
     return {
+      project: null,
       profile: {
         address: null,
         pendingWithdrawals: null
@@ -99,16 +109,22 @@ export default {
         backend
           .get("projects/" + this.projectId + "/issues/")
           .then(result => result.data),
-        backend.get("/profile/withdrawals/" + this.projectId).then(r => r.data)
+        backend.get("/profile/withdrawals/" + this.projectId).then(r => r.data),
+        gitlab.projects.one(this.projectId)
       ]).then(results => {
         const issues = results[0];
         const contractIssues = results[1];
         const profile = results[2];
+        const project = results[3];
 
         this.setIssues(issues, contractIssues);
         this.setProfile(profile);
+        this.setProject(project);
         this.$emit("isLoading", false);
       });
+    },
+    setProject: function(project) {
+      this.project = project;
     },
     setProfile: function(newProfile) {
       if (newProfile) {

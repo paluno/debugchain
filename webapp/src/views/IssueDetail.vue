@@ -5,9 +5,10 @@
     <div v-if="issue">
       <div class="form-group row">
         <div class="col">
-          <h1><a :href="issue.web_url">{{issue.title}}</a></h1>
+          <h1>{{issue.title}}</h1>
         </div>
         <div class="col-auto">
+          <a class="btn btn-outline-primary btn-sm" :href="issue.web_url">Open in Gitlab  <i class="fas fa-external-link-alt"></i></a>
           <button v-if="canDonate" class="btn btn-outline-secondary btn-sm" v-on:click="showDonateEtherModal">Donate Ether</button>
 
           <Modal v-model="donateEtherModal.show" title="Donate Ether">
@@ -410,12 +411,12 @@ export default {
       // TODO replace this with computed property
       let combined = [];
       if (cIssue.reviewers.length == cIssue.reviewStatus.length) {
-        combined = cIssue.reviewers.map((reviewer, index)=>{
+        combined = cIssue.reviewers.map((reviewer, index) => {
           return {
             reviewer: reviewer,
             value: cIssue.reviewStatus[index]
           };
-        })
+        });
       }
       cIssue.reviewStatus = combined;
       // TODO ignore for merge conflict > replace with computed property
