@@ -2,12 +2,12 @@
   <div class="issueList">
     <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" :projectId="projectId" />
     
-    <div class="row">
-      <div v-if="project" class="col">
+    <div v-if="project" class="row">
+      <div class="col">
         <h1>{{project.name}}</h1>
       </div>
       <div class="col-auto">
-        <a class="btn btn-outline-primary btn-sm" :href="project.web_url">Open in Gitlab  <i class="fas fa-external-link-alt"></i></a>
+        <a class="btn btn-link btn-sm" :href="project.web_url" target="_blank">Open in Gitlab  <i class="fas fa-external-link-alt"></i></a>
       </div>
     </div>
     <div class="table">
