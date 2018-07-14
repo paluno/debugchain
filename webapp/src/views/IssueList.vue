@@ -1,23 +1,35 @@
 <template>
   <div class="issueList">
     <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" :projectId="projectId" />
-    <div v-if="canWithdraw" class="form-group row">
+
+    <div v-if="project" class="row">
       <div class="col">
-        <p>You have {{this.profile.pendingWithdrawals}} Ether in your pending withdrawals for this project.</p>
+        <h1>{{project.name}}</h1>
       </div>
       <div class="col-auto">
-        <button class="btn btn-outline-primary btn-sm" v-on:click="showWithdrawModal">Withdraw</button>
-        <Modal v-model="withdrawModal.show" title="Withdraw">
-          <p>
-            Do you really want to get pending withdrawals for the project: "{{projectId}}"?
-          </p>
-
-          <template slot="footer">
-            <button type="button" class="btn btn-primary" @click="withdraw">Yes</button>
-            <button type="button" class="btn btn-secondary" @click="closeWithdrawModal">No</button>
-          </template>
-        </Modal>
+        <a class="btn btn-link btn-sm" :href="project.web_url" target="_blank">
+          Open in Gitlab
+          <i class="fas fa-external-link-alt"></i>
+        </a>
+        <button v-if="canWithdraw" class="btn btn-outline-secondary btn-sm" @click="showWithdrawModal">
+          Withdraw Ether
+        </button>
       </div>
+    </div>
+    <div v-if="canWithdraw" class="row">
+      <div class="col">
+        <p>You have {{this.profile.pendingWithdrawals}} Ether available to withdraw in this project.</p>
+      </div>
+      <Modal v-model="withdrawModal.show" title="Withdraw">
+        <p>
+          Do you really want to get pending withdrawals for the project: "{{projectId}}"?
+        </p>
+
+        <template slot="footer">
+          <button type="button" class="btn btn-primary" @click="withdraw">Yes</button>
+          <button type="button" class="btn btn-secondary" @click="closeWithdrawModal">No</button>
+        </template>
+      </Modal>
     </div>
     <div class="table">
       <vue-good-table :columns="columns" :rows="rows" :pagination-options="{ enabled: true, perPage: 5}" :search-options="{ enabled: true}" styleClass="vgt-table striped bordered" @on-row-click="navigate">
@@ -53,6 +65,7 @@ export default {
   },
   data: function() {
     return {
+      project: null,
       profile: {
         address: null,
         pendingWithdrawals: null
@@ -140,18 +153,24 @@ export default {
           .get("projects/" + this.projectId + "/issues/")
           .then(result => result.data),
         backend.get("/profile/withdrawals/" + this.projectId).then(r => r.data),
+        gitlab.projects.one(this.projectId),
         backend.get("/projects/" + this.projectId).then(r => r.data)
       ]).then(results => {
         const issues = results[0];
         const contractIssues = results[1];
         const profile = results[2];
-        const project = results[3];
+        const gitlabProject = results[3];
+        const project = results[4];
 
         this.setIssues(issues, contractIssues);
         this.setProfile(profile);
+        this.setProject(gitlabProject);
         this.setContractAddress(project.address);
         this.$emit("isLoading", false);
       });
+    },
+    setProject: function(project) {
+      this.project = project;
     },
     setProfile: function(newProfile) {
       if (newProfile) {
