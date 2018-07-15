@@ -30,14 +30,14 @@
         <div class="col">{{createProjectModal.name}}</div>
       </div>
       <div class="row">
-        <label class="col-sm-3">URL:</label>
+        <label class="col-sm-3">Gitlab-Link:</label>
         <div class="col">
           <a :href="createProjectModal.url">{{createProjectModal.url}}</a>
         </div>
       </div>
 
       <template slot="footer">
-        <button type="button" class="btn btn-primary" @click="createProject">Save</button>
+        <button type="button" class="btn btn-primary" @click="createProject">Create</button>
         <button type="button" class="btn btn-secondary" @click="closeCreateProjectModal">Close</button>
       </template>
     </Modal>
@@ -73,7 +73,7 @@ export default {
       },
       columns: [
         {
-          label: "ID",
+          label: "Id",
           field: "id",
           type: "number"
         },
@@ -82,11 +82,11 @@ export default {
           field: "owner"
         },
         {
-          label: "URL",
+          label: "Gitlab-Link",
           field: "url"
         },
         {
-          label: "Project existent",
+          label: "tracked in chain",
           field: "created"
         }
       ],
