@@ -16,7 +16,7 @@
       </div>
       <template slot="footer">
         <!-- TODO validate selection: At least one reviewer; disable button; show error -->
-        <button type="button" class="btn btn-primary" @click="approveIssue">Approve</button>
+        <button type="button" class="btn btn-primary" @click="approveIssue" v-bind:disabled="selectedReviewers.length == 0">Approve</button>
         <button type="button" class="btn btn-secondary" @click="closeApproveIssueModal">Close</button>
       </template>
     </Modal>
