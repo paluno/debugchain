@@ -29,7 +29,29 @@ export class Backend {
         this._client.interceptors.response.use(
             // return data directly: we usually dont need detailed response information on success
             response => response.data,
-            error => Promise.reject(error));
+            error => Promise.reject(this._setLocalizedErrorMessage(error)));
+    }
+
+    _setLocalizedErrorMessage(error) {
+        let msg;
+        if (error.response) {
+            // The request was made and the server responded with an error status code
+            switch (error.response.status) {
+                case 404:
+                    msg = `The requested resource does not exist. Try going back to the last page.`;
+                    break;
+                case 500:
+                    msg = `An internal error occured. We're sorry, please try again later.`;
+                    break;
+                default:
+                    msg = `The server returned an error: ${error.response.status} ${error.response.statusText}`;
+            }
+        } else if (error.request) {
+            // The request was made but no response was received
+            msg = `The server did not respond. Try checking your internet connection.`;
+        }
+        error.userMessage = msg;
+        return error;
     }
 
     getProjects() {
@@ -86,7 +108,7 @@ export class Backend {
         return this._client
             .get("/profile/assignedIssues");
     }
-    
+
     setProfileMemberships(memberships) {
         return this._client
             .post("/profile/memberships", memberships);

@@ -17,8 +17,11 @@ export default {
   },
   computed: {
     errorMessage() {
-      // TODO handle specific axios errors
-      return this.error.message;
+      if (this.error.userMessage){
+        return this.error.userMessage;
+      } else {
+        return "An unknown error occured! We're sorry, please try again later.";
+      }
     }
   }
 };

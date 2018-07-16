@@ -14,7 +14,7 @@ class ErrorContainer {
             raw: error
         }
         this.errors.push(element);
-        console.error(error);
+        console.error("User message: " + error.userMessage, error);
         // remove after 5 seconds
         setTimeout(() => this._remove(element), 5000);
         this._nextId += 1;
