@@ -5,11 +5,11 @@
       <router-link class="nav-item nav-link" :to="{ name: 'projects' }">
         Projects
       </router-link>
-      <router-link v-if="projectId" class="nav-item nav-link" :to="{ name: 'issueList', params: { projectId: projectId }}">
-        Project #{{projectId}}
+      <router-link v-if="project" class="nav-item nav-link" :to="{ name: 'issueList', params: { projectId: project.id }}">
+        {{project.name}}
       </router-link>
-      <router-link v-if="projectId && issueId" class="nav-item nav-link" :to="{ name: 'issue', params: { projectId: projectId, issueId: issueId }}">
-        Issue #{{issueId}}
+      <router-link v-if="project && issue" class="nav-item nav-link" :to="{ name: 'issue', params: { projectId: project.id, issueId: issue.id }}">
+        {{issue.title}}
       </router-link>
     </div>
     <div class="navbar-nav">
@@ -42,8 +42,18 @@ export default {
     }
   },
   props: {
-    projectId: String,
-    issueId: String,
+    project: {
+      type: Object,
+      default: function() {
+        return null;
+      }
+    },
+    issue: {
+      type: Object,
+      default: function() {
+        return null;
+      }
+    },
     pendingWithdrawals: Number,
     address: String
   },

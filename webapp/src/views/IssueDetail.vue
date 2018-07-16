@@ -1,6 +1,6 @@
 <template>
   <div class="issue_detail">
-    <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" v-bind:projectId="projectId" v-bind:issueId="issueId" />
+    <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" v-bind:project="project" v-bind:issue="issue" />
 
     <div v-if="issue">
       <div class="form-group row">
@@ -146,6 +146,7 @@ export default {
         address: null,
         pendingWithdrawals: null
       },
+      project: null,
       issue: null,
       contractIssue: null,
       contractAddress: null,
@@ -189,6 +190,9 @@ export default {
     setUserAddress: function(address) {
       this.userAddress = address;
     },
+    setProject: function(project) {
+      this.project = project;
+    },
     updateData: function() {
       const gitlab = Gitlab.getClient();
       const backend = Backend.getClient();
@@ -213,7 +217,8 @@ export default {
             if (error.response.status != 404) throw error;
           }),
         backend.get("/profile/withdrawals/" + this.projectId).then(r => r.data),
-        backend.get("/projects/" + this.projectId).then(r => r.data)
+        backend.get("/projects/" + this.projectId).then(r => r.data),
+        gitlab.projects.one(this.projectId)
       ])
         .then(results => {
           const issue = results[0];
@@ -222,7 +227,8 @@ export default {
           const possibleReviewers = results[3];
           const contractIssue = results[4];
           const profile = results[5];
-          const project = results[6];
+          const backendProject = results[6];
+          const gitlabProject = results[7];
 
           this.setIssue(issue);
           if (ownedProjects.find(project => project.id == this.projectId)) {
@@ -233,7 +239,8 @@ export default {
           this.setPossibleReviewers(possibleReviewers, projectMembers);
           this.setContractIssue(contractIssue);
           this.setProfile(profile);
-          this.setContractAddress(project.address);
+          this.setContractAddress(backendProject.address);
+          this.setProject(gitlabProject);
         })
         .catch(error => ErrorContainer.add(error))
         .then(() => this.$emit("isLoading", false));

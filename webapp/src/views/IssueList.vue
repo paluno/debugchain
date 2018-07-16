@@ -1,6 +1,6 @@
 <template>
   <div class="issueList">
-    <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" :projectId="projectId" />
+    <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" :project="project" />
 
     <div v-if="project" class="row">
       <div class="col">
