@@ -41,7 +41,7 @@
 <script>
 import ErrorContainer from "@/api/errorContainer";
 import Gitlab from "@/api/gitlab";
-import Backend from "@/api/backend";
+import { Backend } from "@/api/backend";
 import Modal from "@/components/Modal.vue";
 import Navigation from "@/components/Navigation";
 import Contract from "@/api/contract";
@@ -145,17 +145,15 @@ export default {
     },
     updateData: function() {
       const gitlab = Gitlab.getClient();
-      const backend = Backend.getClient();
+      const backend = new Backend();
 
       this.$emit("isLoading", true);
       Promise.all([
         gitlab.projects.issues.list(this.projectId),
-        backend
-          .get("projects/" + this.projectId + "/issues/")
-          .then(result => result.data),
-        backend.get("/profile/withdrawals/" + this.projectId).then(r => r.data),
+        backend.getProjectIssues(this.projectId),
+        backend.getProfile(this.projectId),
         gitlab.projects.one(this.projectId),
-        backend.get("/projects/" + this.projectId).then(r => r.data)
+        backend.getProject(this.projectId)
       ])
         .then(results => {
           const issues = results[0];

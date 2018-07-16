@@ -51,7 +51,7 @@ import ErrorContainer from "@/api/errorContainer";
 import Gitlab from "@/api/gitlab";
 import Modal from "@/components/Modal.vue";
 import Navigation from "@/components/Navigation";
-import Backend from "@/api/backend";
+import { Backend } from "@/api/backend";
 import Contract from "@/api/contract";
 
 export default {
@@ -98,19 +98,14 @@ export default {
   },
   methods: {
     createProject: function() {
-      const client = Backend.getClient();
+      const backend = new Backend();
       const contract = new Contract();
       const projectId = this.createProjectModal.id;
 
       this.$emit("isLoading", true);
       contract
         .deploy(projectId)
-        .then(address => {
-          return client.post("/projects/", {
-            address: address,
-            gitlabId: projectId
-          });
-        })
+        .then(address => backend.createProject(projectId, address))
         .then(() => {
           this.$router.push({
             name: "issueList",
@@ -143,13 +138,13 @@ export default {
     },
     updateData: function() {
       const gitlab = Gitlab.getClient();
-      const backend = Backend.getClient();
+      const backend = new Backend();
 
       this.$emit("isLoading", true);
       Promise.all([
         gitlab.projects.list(),
-        backend.get("/profile/").then(result => result.data),
-        backend.get("/projects").then(result => result.data)
+        backend.getProfile(),
+        backend.getProjects()
       ])
         .then(results => {
           this.setProjects(results[0], results[2]);
@@ -171,15 +166,14 @@ export default {
       this.createProjectModal.url = "";
     },
     openProject: function(id, name, url) {
-      const client = Backend.getClient();
+      const backend = new Backend();
 
       this.$emit("isLoading", true);
-      client
-        .get("/projects")
-        .then(response => {
-          this.projects = response.data;
-          const project = this.projects.find(e => e.gitlabId === id);
-
+      backend
+        // TODO replace with getProject(id) and catch/ignore 404
+        .getProjects()
+        .then(projects => projects.find(e => e.gitlabId === id))
+        .then(project => {
           if (project !== undefined) {
             this.$router.push({
               name: "issueList",
