@@ -54,6 +54,11 @@ import getWeb3 from "@/api/getWeb3";
 
 export default {
   name: "profile",
+  components: {
+    Modal,
+    SetAddressModal,
+    Navigation
+  },
   data: function() {
     return {
       profile: null,
@@ -85,14 +90,6 @@ export default {
       ]
     };
   },
-  components: {
-    Modal,
-    SetAddressModal,
-    Navigation
-  },
-  created: function() {
-    this.updateData();
-  },
   computed: {
     assignedIssuesRows() {
       if (!this.profile.address) {
@@ -109,6 +106,9 @@ export default {
       });
     }
   },
+  created: function() {
+    this.updateData();
+  },
   methods: {
     addressModalSaveEvent: function(newAddress) {
       const backend = Backend.getClient();
@@ -118,10 +118,25 @@ export default {
         .post("/profile", {
           address: newAddress
         })
-        .then(response => {
-          this.updateData();
-          this.showAddressModal = false;
-        })
+        .then(response => this.updateData())
+        .catch(error => ErrorContainer.add(error))
+        .then(() => this.$emit("isLoading", false))
+        .then(() => (this.showAddressModal = false));
+    },
+    saveMembership: function() {
+      let preparedMemberships = this.projectMemberships.map(membership => {
+        return {
+          projectGitlabId: membership.projectGitlabId,
+          userGitlabId: membership.userGitlabId,
+          reviewer: membership.isReviewer
+        };
+      });
+
+      const backend = Backend.getClient();
+      this.$emit("isLoading", true);
+      backend
+        .post("/profile/memberships", preparedMemberships)
+        .then(result => this.updateData())
         .catch(error => ErrorContainer.add(error))
         .then(() => this.$emit("isLoading", false));
     },
@@ -134,9 +149,6 @@ export default {
         )
       );
       this.showSaveButton = modified;
-    },
-    setProfile: function(profile) {
-      this.profile = profile;
     },
     setProjectMemberships: function(projects, memberships) {
       //TODO: get project names from gitlab call to display behind checkboxes instead of just ID
@@ -174,22 +186,8 @@ export default {
         JSON.stringify(this.projectMemberships)
       );
     },
-    saveMembership: function() {
-      let preparedMemberships = this.projectMemberships.map(membership => {
-        return {
-          projectGitlabId: membership.projectGitlabId,
-          userGitlabId: membership.userGitlabId,
-          reviewer: membership.isReviewer
-        };
-      });
-
-      const backend = Backend.getClient();
-      this.$emit("isLoading", true);
-      backend
-        .post("/profile/memberships", preparedMemberships)
-        .then(result => this.updateData())
-        .catch(error => ErrorContainer.add(error))
-        .then(() => this.$emit("isLoading", false));
+    setProfile: function(profile) {
+      this.profile = profile;
     },
     setAssignedIssues(issues) {
       this.assignedIssues = issues;
