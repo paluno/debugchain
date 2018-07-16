@@ -24,7 +24,7 @@
       <div class="col-md-3">Reviewer-State:</div>
       <div class="col-md-9">
         <div class="form-check" v-for="membership in projectMemberships" :key="membership.projectGitlabId">
-          <input class="form-check-input" v-model="membership.isReviewer" v-bind:id="membership.projectGitlabId" @change="checkReviewerChange" type="checkbox" />
+          <input class="form-check-input" v-model="membership.isReviewer" v-bind:id="membership.projectGitlabId" @change="checkReviewerChanged" type="checkbox" />
           <label class="form-check-label" v-bind:for="membership.projectGitlabId">I want to be a reviewer for Project: {{membership.projectGitlabId}}</label>
         </div>
         <button v-if="showSaveButton" class="btn btn-outline-secondary btn-sm" @click="saveMembership">Save Reviewer-State</button>
@@ -38,9 +38,7 @@
     </div>
     <hr class="my-4">
     <h2>Assigned issues:</h2>
-    <vue-good-table :columns="columns"
-                    :rows="filterAssignedIssues"
-                    styleClass="vgt-table striped bordered">
+    <vue-good-table :columns="columns" :rows="assignedIssuesRows" styleClass="vgt-table striped bordered">
     </vue-good-table>
   </div>
 </template>
@@ -62,7 +60,7 @@ export default {
       gitlabUsername: null,
       projectMemberships: [],
       showAddressModal: false,
-      allIssues: [],
+      assignedIssues: [],
       unmodifiedMemberships: [],
       showSaveButton: false,
       columns: [
@@ -84,8 +82,7 @@ export default {
           label: "Assigned as",
           field: "assignedAs"
         }
-      ],
-      rows: []
+      ]
     };
   },
   components: {
@@ -97,44 +94,27 @@ export default {
     this.updateData();
   },
   computed: {
-    filterAssignedIssues: function() {
-      if (this.profile.address === null) return [];
-      const profileAddress = this.profile.address.toLowerCase();
-      const rows = [];
-
-      this.allIssues.forEach(issue => {
-        if (
-          issue.developer !== null &&
-          issue.developer.toLowerCase() === profileAddress
-        ) {
-          rows.push({
-            id: issue.id,
-            status: issue.lifecycleStatus,
-            eth: getWeb3().fromWei(issue.donationSum, "ether"),
-            assignedAs: "Developer"
-          });
-        } else {
-          issue.reviewers.forEach(r => {
-            if (r !== null && r.toLowerCase() === profileAddress) {
-              rows.push({
-                id: issue.id,
-                status: issue.lifecycleStatus,
-                eth: getWeb3().fromWei(issue.donationSum, "ether"),
-                assignedAs: "Reviewer"
-              });
-            }
-          });
-        }
+    assignedIssuesRows() {
+      if (!this.profile.address) {
+        return [];
+      }
+      return this.assignedIssues.map(issue => {
+        const asDeveloper = issue.developer === this.profile.address;
+        return {
+          id: issue.id,
+          status: issue.lifecycleStatus,
+          eth: getWeb3().fromWei(issue.donationSum, "ether"),
+          assignedAs: asDeveloper ? "Developer" : "Reviewer"
+        };
       });
-      return rows;
     }
   },
   methods: {
     addressModalSaveEvent: function(newAddress) {
-      const client = Backend.getClient();
+      const backend = Backend.getClient();
 
       this.$emit("isLoading", true);
-      client
+      backend
         .post("/profile", {
           address: newAddress
         })
@@ -145,7 +125,7 @@ export default {
         .catch(error => ErrorContainer.add(error))
         .then(() => this.$emit("isLoading", false));
     },
-    checkReviewerChange: function() {
+    checkReviewerChanged: function() {
       const modified = this.unmodifiedMemberships.some(unmodified =>
         this.projectMemberships.some(
           membership =>
@@ -211,54 +191,40 @@ export default {
         .catch(error => ErrorContainer.add(error))
         .then(() => this.$emit("isLoading", false));
     },
-    getGitlabUsername: function(id) {
-      const gitlab = Gitlab.getClient();
-      return gitlab.get("/users/" + id).then(r => r.username);
+    setAssignedIssues(issues) {
+      this.assignedIssues = issues;
     },
-
-    // TODO implement as endpoint in backend!
-    getAllIssues: function(projects) {
-      const backend = Backend.getClient();
-      projects.map(p => {
-        backend.get("/projects/" + p.gitlabId + "/issues/").then(issues => {
-          issues.data.forEach(element => {
-            this.allIssues.push(element);
-          });
-        });
-      });
-    },
-
     updateData: function() {
       const backend = Backend.getClient();
+      const gitlab = Gitlab.getClient();
 
       this.$emit("isLoading", true);
       // TODO handle / display errors in component
       Promise.all([
         backend.get("/projects").then(r => r.data),
         backend.get("/profile").then(r => r.data),
-        backend.get("/profile/memberships").then(r => r.data)
+        backend.get("/profile/memberships").then(r => r.data),
+        backend.get("/profile/assignedIssues").then(r => r.data)
       ])
         .then(results => {
           const projects = results[0];
           const profile = results[1];
           const memberships = results[2];
+          const assignedIssues = results[3];
 
           this.setProfile(profile);
           this.setProjectMemberships(projects, memberships);
+          this.setAssignedIssues(assignedIssues);
 
-          // TODO this is not awaited! > include in Promise.all
-          const gitlabUsername = this.getGitlabUsername(profile.gitlabId)
-            .then(username => (this.gitlabUsername = username))
-            .catch(error => ErrorContainer.add(error));
-
-          // TODO this is not awaited! > include in Promise.all
-          if (this.profile.address !== null) {
-            //can only filter for assigned issues if address is set
-            //get all issues of all projects, to then filter for assigned issues afterwards
-            this.getAllIssues(projects);
-          } else {
-            //TODO handle?
-          }
+          const userId = profile.gitlabId;
+          // can only be called after getting gitlab id
+          // return promise for error handling
+          return gitlab.users
+            .one(userId)
+            .then(r => r.username)
+            .then(username => {
+              this.gitlabUsername = username;
+            });
         })
         .catch(error => ErrorContainer.add(error))
         .then(() => this.$emit("isLoading", false));
