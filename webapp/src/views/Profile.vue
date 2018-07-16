@@ -23,11 +23,11 @@
     <div v-if="profile.address" class="form-group row">
       <div class="col-md-3">Reviewer-State:</div>
       <div class="col-md-9">
-        <div class="form-check" v-for="membership in projectMemberships" :key="membership.projectGitlabId">
-          <input class="form-check-input" v-model="membership.isReviewer" v-bind:id="membership.projectGitlabId" @change="checkReviewerChanged" type="checkbox" />
+        <div class="form-check" v-for="membership in changedMemberships" :key="membership.projectGitlabId">
+          <input class="form-check-input" v-model="membership.isReviewer" v-bind:id="membership.projectGitlabId" type="checkbox" />
           <label class="form-check-label" v-bind:for="membership.projectGitlabId">I want to be a reviewer for Project: {{membership.projectGitlabId}}</label>
         </div>
-        <button v-if="showSaveButton" class="btn btn-outline-secondary btn-sm" @click="saveMembership">Save Reviewer-State</button>
+        <button v-if="isMembershipsChanged" class="btn btn-outline-secondary btn-sm" @click="saveMembership">Save Reviewer-State</button>
       </div>
     </div>
     <div v-else class="form-group row">
@@ -53,7 +53,7 @@ import Navigation from "@/components/Navigation";
 import getWeb3 from "@/api/getWeb3";
 
 export default {
-  name: "profile",
+  name: "Profile",
   components: {
     Modal,
     SetAddressModal,
@@ -66,8 +66,9 @@ export default {
       projectMemberships: [],
       showAddressModal: false,
       assignedIssues: [],
-      unmodifiedMemberships: [],
-      showSaveButton: false,
+      changedMemberships: [],
+      projects: [],
+      memberships: [],
       columns: [
         {
           label: "ID",
@@ -104,6 +105,37 @@ export default {
           assignedAs: asDeveloper ? "Developer" : "Reviewer"
         };
       });
+    },
+    isMembershipsChanged() {
+      return this.combinedMemberships.some(original =>
+        this.changedMemberships.some(
+          changed =>
+            original.projectGitlabId === changed.projectGitlabId &&
+            original.isReviewer !== changed.isReviewer
+        )
+      );
+    },
+    combinedMemberships() {
+      return this.projects.map(project => {
+        const member = this.memberships.find(
+          m => m.projectGitlabId == project.gitlabId
+        );
+
+        return {
+          projectGitlabId: project.gitlabId,
+          userGitlabId: this.profile.gitlabId,
+          projectaddress: project.address,
+          isReviewer: member ? member.reviewer : false
+        };
+      });
+    }
+  },
+  watch: {
+    combinedMemberships() {
+      // if memberships is reloaded: update modifiable data
+      this.changedMemberships = JSON.parse(
+        JSON.stringify(this.combinedMemberships)
+      );
     }
   },
   created: function() {
@@ -124,7 +156,7 @@ export default {
         .then(() => (this.showAddressModal = false));
     },
     saveMembership: function() {
-      let preparedMemberships = this.projectMemberships.map(membership => {
+      let preparedMemberships = this.changedMemberships.map(membership => {
         return {
           projectGitlabId: membership.projectGitlabId,
           userGitlabId: membership.userGitlabId,
@@ -140,51 +172,9 @@ export default {
         .catch(error => ErrorContainer.add(error))
         .then(() => this.$emit("isLoading", false));
     },
-    checkReviewerChanged: function() {
-      const modified = this.unmodifiedMemberships.some(unmodified =>
-        this.projectMemberships.some(
-          membership =>
-            unmodified.projectGitlabId === membership.projectGitlabId &&
-            unmodified.isReviewer !== membership.isReviewer
-        )
-      );
-      this.showSaveButton = modified;
-    },
     setProjectMemberships: function(projects, memberships) {
-      //TODO: get project names from gitlab call to display behind checkboxes instead of just ID
-      if (memberships.length > 0) {
-        this.projectMemberships = projects.map(project => {
-          for (let i = 0; i < memberships.length; i++) {
-            const membership = memberships[i];
-            if (membership.projectGitlabId == project.gitlabId) {
-              return {
-                projectGitlabId: project.gitlabId,
-                userGitlabId: membership.userGitlabId,
-                projectaddress: project.address,
-                isReviewer: membership.reviewer
-              };
-            }
-          }
-          return {
-            projectGitlabId: project.gitlabId,
-            userGitlabId: this.profile.gitlabId,
-            projectaddress: project.address,
-            isReviewer: false
-          };
-        });
-      } else {
-        this.projectMemberships = projects.map(project => {
-          return {
-            projectGitlabId: project.gitlabId,
-            userGitlabId: this.profile.gitlabId,
-            projectaddress: project.address,
-            isReviewer: false
-          };
-        });
-      }
-      this.unmodifiedMemberships = JSON.parse(
-        JSON.stringify(this.projectMemberships)
-      );
+      this.projects = projects;
+      this.memberships = memberships;
     },
     setProfile: function(profile) {
       this.profile = profile;
