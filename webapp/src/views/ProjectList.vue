@@ -48,7 +48,7 @@
 
 <script>
 import ErrorContainer from "@/api/errorContainer";
-import Gitlab from "@/api/gitlab";
+import { Gitlab } from "@/api/gitlab";
 import Modal from "@/components/Modal.vue";
 import Navigation from "@/components/Navigation";
 import { Backend } from "@/api/backend";
@@ -137,12 +137,12 @@ export default {
       };
     },
     updateData: function() {
-      const gitlab = Gitlab.getClient();
+      const gitlab = new Gitlab();
       const backend = new Backend();
 
       this.$emit("isLoading", true);
       Promise.all([
-        gitlab.projects.list(),
+        gitlab.getProjects(),
         backend.getProfile(),
         backend.getProjects()
       ])

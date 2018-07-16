@@ -48,7 +48,7 @@ import ErrorContainer from "@/api/errorContainer";
 import Modal from "@/components/Modal";
 import SetAddressModal from "@/components/modals/SetAddressModal";
 import { Backend } from "@/api/backend";
-import Gitlab from "@/api/gitlab";
+import { Gitlab } from "@/api/gitlab";
 import Navigation from "@/components/Navigation";
 import getWeb3 from "@/api/getWeb3";
 
@@ -184,7 +184,7 @@ export default {
     },
     updateData: function() {
       const backend = new Backend();
-      const gitlab = Gitlab.getClient();
+      const gitlab = new Gitlab();
 
       this.$emit("isLoading", true);
       // TODO handle / display errors in component
@@ -192,27 +192,21 @@ export default {
         backend.getProjects(),
         backend.getProfile(),
         backend.getProfileMemberships(),
-        backend.getProfileAssignedIssues()
+        backend.getProfileAssignedIssues(),
+        gitlab.getCurrentUser()
       ])
         .then(results => {
           const projects = results[0];
           const profile = results[1];
           const memberships = results[2];
           const assignedIssues = results[3];
+          const user = results[4];
 
           this.setProfile(profile);
           this.setProjectMemberships(projects, memberships);
           this.setAssignedIssues(assignedIssues);
 
-          const userId = profile.gitlabId;
-          // can only be called after getting gitlab id
-          // return promise for error handling
-          return gitlab.users
-            .one(userId)
-            .then(r => r.username)
-            .then(username => {
-              this.gitlabUsername = username;
-            });
+          this.gitlabUsername = user.username;
         })
         .catch(error => ErrorContainer.add(error))
         .then(() => this.$emit("isLoading", false));

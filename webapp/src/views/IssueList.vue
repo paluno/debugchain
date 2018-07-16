@@ -40,7 +40,7 @@
 
 <script>
 import ErrorContainer from "@/api/errorContainer";
-import Gitlab from "@/api/gitlab";
+import { Gitlab } from "@/api/gitlab";
 import { Backend } from "@/api/backend";
 import Modal from "@/components/Modal.vue";
 import Navigation from "@/components/Navigation";
@@ -144,15 +144,15 @@ export default {
         .then(() => this.updateData());
     },
     updateData: function() {
-      const gitlab = Gitlab.getClient();
+      const gitlab = new Gitlab();
       const backend = new Backend();
 
       this.$emit("isLoading", true);
       Promise.all([
-        gitlab.projects.issues.list(this.projectId),
+        gitlab.getProjectIssues(this.projectId),
         backend.getProjectIssues(this.projectId),
         backend.getProfile(this.projectId),
-        gitlab.projects.one(this.projectId),
+        gitlab.getProject(this.projectId),
         backend.getProject(this.projectId)
       ])
         .then(results => {

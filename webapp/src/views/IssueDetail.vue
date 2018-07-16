@@ -55,7 +55,7 @@ import FinishDevelopmentAction from "@/components/actions/FinishDevelopmentActio
 import ReviewAction from "@/components/actions/ReviewAction";
 import ResetAction from "@/components/actions/ResetAction";
 import DeleteAction from "@/components/actions/DeleteAction";
-import Gitlab from "@/api/gitlab";
+import { Gitlab } from "@/api/gitlab";
 import { Backend } from "@/api/backend";
 import marked from "marked";
 
@@ -192,15 +192,15 @@ export default {
       this.project = project;
     },
     updateData: function() {
-      const gitlab = Gitlab.getClient();
+      const gitlab = new Gitlab();
       const backend = new Backend();
 
       this.$emit("isLoading", true);
 
       Promise.all([
-        gitlab.projects.issues.one(this.projectId, this.issueId),
-        gitlab.projects.owned(),
-        gitlab.projects.members.list(this.projectId),
+        gitlab.getProjectIssue(this.projectId, this.issueId),
+        gitlab.getProjectsOwned(),
+        gitlab.getProjectMembers(this.projectId),
         backend.getProjectReviewers(this.projectId),
         backend.getProjectIssue(this.projectId, this.issueId).catch(error => {
           console.log(
@@ -211,7 +211,7 @@ export default {
         }),
         backend.getProfile(this.projectId),
         backend.getProject(this.projectId),
-        gitlab.projects.one(this.projectId)
+        gitlab.getProject(this.projectId)
       ])
         .then(results => {
           const issue = results[0];
