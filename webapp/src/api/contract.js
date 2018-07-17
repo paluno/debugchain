@@ -8,14 +8,14 @@ const DEFAULT_GAS = 5000000;
 // callback provider for ugly web3.js method signature
 const handleCallback = (resolve, reject) => (error, result) => {
     if (error) {
-        reject(addUserMessage(error));
+        reject(error);
     }
     resolve(result);
 };
 
-const addUserMessage = function(error) {
+const addUserMessageAndRethrow = (error) => {
     error.userMessage = Localization.getForContract(error);
-    return error;
+    throw error;
 }
 
 export default class Contract {
@@ -40,7 +40,7 @@ export default class Contract {
                 { data: byteCode, from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 (err, contract) => {
                     if (err) {
-                        reject(addUserMessage(err));
+                        reject(err);
                     }
                     // callback is called twice, address is only present the second time
                     if (firstCall) {
@@ -51,7 +51,7 @@ export default class Contract {
                     }
                 }
             );
-        })
+        }).catch(error => addUserMessageAndRethrow(error));
     }
 
     donate(issueId, donationValue) {
@@ -61,7 +61,7 @@ export default class Contract {
                 { from: this.web3.eth.accounts[0], value: this.web3.toWei(donationValue, "ether"), gas: DEFAULT_GAS },
                 handleCallback(resolve, reject)
             );
-        });
+        }).catch(error => addUserMessageAndRethrow(error));
     }
 
     approve(issueId, reviewers) {
@@ -73,7 +73,7 @@ export default class Contract {
                 { from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 handleCallback(resolve, reject)
             );
-        });
+        }).catch(error => addUserMessageAndRethrow(error));
     }
 
     lock(issueId) {
@@ -83,7 +83,7 @@ export default class Contract {
                 { from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 handleCallback(resolve, reject)
             );
-        });
+        }).catch(error => addUserMessageAndRethrow(error));
     }
 
     unlock(issueId) {
@@ -93,7 +93,7 @@ export default class Contract {
                 { from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 handleCallback(resolve, reject)
             );
-        });
+        }).catch(error => addUserMessageAndRethrow(error));
     }
 
     develop(issueId) {
@@ -103,7 +103,7 @@ export default class Contract {
                 { from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 handleCallback(resolve, reject)
             );
-        });
+        }).catch(error => addUserMessageAndRethrow(error));
     }
 
     review(issueId, accepted) {
@@ -117,7 +117,7 @@ export default class Contract {
                 { from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 handleCallback(resolve, reject)
             );
-        });
+        }).catch(error => addUserMessageAndRethrow(error));
     }
 
     withdraw() {
@@ -126,7 +126,7 @@ export default class Contract {
                 { from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 handleCallback(resolve, reject)
             );
-        });
+        }).catch(error => addUserMessageAndRethrow(error));
     }
 
     reset(issueId) {
@@ -136,7 +136,7 @@ export default class Contract {
                 { from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 handleCallback(resolve, reject)
             );
-        });
+        }).catch(error => addUserMessageAndRethrow(error));
     }
 
     delete(issueId) {
@@ -146,7 +146,6 @@ export default class Contract {
                 { from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 handleCallback(resolve, reject)
             );
-        });
+        }).catch(error => addUserMessageAndRethrow(error));
     }
-
 }
