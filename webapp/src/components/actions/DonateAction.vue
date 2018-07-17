@@ -13,7 +13,7 @@
         <!--TODO check the validity of the input-->
       </div>
       <template slot="footer">
-        <button type="button" class="btn btn-primary" @click="donateEther">Save</button>
+        <button type="button" class="btn btn-primary" @click="donateEther">Donate</button>
         <button type="button" class="btn btn-secondary" @click="closeDonateEtherModal">Close</button>
       </template>
     </Modal>

@@ -33,7 +33,7 @@
     <div v-else class="form-group row">
       <div class="col-md-3">Reviewer-State:</div>
       <div class="col-md-9">
-        <p>You need to add a ethereum-address in order to manage your reviewer-settings!</p>
+        <p>You need to add an ethereum-address in order to manage your reviewer-settings!</p>
       </div>
     </div>
     <hr class="my-4">
@@ -67,7 +67,7 @@ export default {
       showSaveButton: false,
       columns: [
         {
-          label: "ID",
+          label: "Id",
           field: "id",
           type: "number"
         },
@@ -76,7 +76,7 @@ export default {
           field: "status"
         },
         {
-          label: "ETH",
+          label: "Donation (ETH)",
           field: "eth",
           type: "number"
         },

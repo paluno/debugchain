@@ -47,7 +47,7 @@
         <div class="row">
             <div class="col">
                 <h2>This issue is not yet tracked in the DebugChain</h2>
-                <p>It will automatically be part of the DebugChain after someone has donated some ether so it. You can do this by clicking the "Donate"-button above!</p>
+                <p>It will automatically be part of the DebugChain after someone has donated some ether to it. You can do this by clicking the "Donate"-button above!</p>
             </div>
         </div>
     </div>

@@ -73,7 +73,7 @@ export default {
       },
       columns: [
         {
-          label: "ID",
+          label: "Id",
           field: "id",
           type: "number",
           filterOptions: {
@@ -88,7 +88,7 @@ export default {
           }
         },
         {
-          label: "ETH",
+          label: "Donation (ETH)",
           field: "eth",
           type: "number"
         },
