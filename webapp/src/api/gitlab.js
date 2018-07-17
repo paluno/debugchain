@@ -2,6 +2,7 @@ import SETTINGS from "@/settings"
 import UserSession from "@/auth.js";
 import GitlabApis from "gitlab-api-wrapper";
 import Axios from "axios";
+import Localization from "@/api/errorLocalization";
 
 export default {
     getClient() {
@@ -18,7 +19,7 @@ export class Gitlab {
 
     constructor() {
         this._client = Axios.create({
-            baseURL: SETTINGS.gitlabConnection.url +'/api/v3/',
+            baseURL: SETTINGS.gitlabConnection.url + '/api/v3/',
             timeout: 3000,
             headers: {
                 Authorization: "Bearer " + UserSession.state.accessToken
@@ -29,29 +30,10 @@ export class Gitlab {
         this._client.interceptors.response.use(
             // return data directly: we usually dont need detailed response information on success
             response => response.data,
-            error => Promise.reject(this._setLocalizedErrorMessage(error)));
-    }
-
-    _setLocalizedErrorMessage(error) {
-        let msg;
-        if (error.response) {
-            // The request was made and the server responded with an error status code
-            switch (error.response.status) {
-                case 404:
-                    msg = `The requested resource does not exist. Try going back to the last page.`;
-                    break;
-                case 500:
-                    msg = `An internal error occured. We're sorry, please try again later.`;
-                    break;
-                default:
-                    msg = `The server returned an error: ${error.response.status} ${error.response.statusText}`;
-            }
-        } else if (error.request) {
-            // The request was made but no response was received
-            msg = `The server did not respond. Try checking your internet connection.`;
-        }
-        error.userMessage = msg;
-        return error;
+            error => {
+                error.userMessage = Localization.getForAxios(error);
+                return Promise.reject(error);
+            });
     }
 
     getProjects() {

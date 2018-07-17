@@ -31,7 +31,7 @@
 
 <script>
 import Gitlab from "@/api/gitlab";
-import Backend from "@/api/backend";
+import { Backend } from "@/api/backend";
 import Contract from "@/api/contract";
 import ErrorContainer from "@/api/errorContainer";
 import Navigation from "@/components/Navigation";
@@ -62,7 +62,7 @@ export default {
         .then(() => this.donate())
         .then(() => this.approve())
         .then(() => this.lock())
-        .then(() => this.contract.issueId = 2)
+        .then(() => (this.contract.issueId = 2))
         .then(() => this.donate())
         .then(() => this.donate())
         .catch(error => {
@@ -75,18 +75,15 @@ export default {
     },
     createContract: function() {
       const contract = new Contract(null, "http://localhost:9545");
-      const backend = Backend.getClient();
+      const backend = new Backend();
 
       return contract
         .deploy(this.contract.projectId)
         .then(address => (this.contract.address = address))
         .then(() => console.log("Deployed contract for project"))
-        .then(() => {
-          return backend.post("/projects/", {
-            address: this.contract.address,
-            gitlabId: this.contract.projectId
-          });
-        })
+        .then(() =>
+          backend.createProject(this.contract.projectId, this.contract.address)
+        )
         .then(() => console.log("Created project in backend"));
     },
     getContract: function() {
@@ -202,7 +199,6 @@ export default {
         console.log("Issue deleted");
       });
     }
-
   }
 };
 </script>
