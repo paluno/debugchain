@@ -16,6 +16,8 @@ spring:
       console:
         enabled: true
         path: /h2-console
+        settings:
+          web-allow-others: true
 oauth2.gitlab.userEndpoint: "http://localhost/api/v4/user"
 
 ---
