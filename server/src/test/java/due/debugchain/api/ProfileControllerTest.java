@@ -2,9 +2,6 @@ package due.debugchain.api;
 
 import due.debugchain.IntegrationTest;
 import due.debugchain.contracts.DebugChain;
-import due.debugchain.persistence.ProjectService;
-import due.debugchain.persistence.UserService;
-import due.debugchain.persistence.entities.ProjectEntity;
 import due.debugchain.persistence.entities.UserEntity;
 import due.debugchain.persistence.repositories.UserRepository;
 import org.json.JSONArray;
@@ -15,11 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.transaction.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import static java.math.BigInteger.valueOf;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.iterableWithSize;
@@ -36,19 +30,10 @@ public class ProfileControllerTest extends IntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private ProjectService projectService;
-
     @Before
     public void setup() throws Exception {
-        contract = deployContract();
+        contract = loadContract(999L);
         contract.donate(valueOf(1L), valueOf(1L)).send();
-
-        String adress = contract.getContractAddress();
-        ProjectEntity project = new ProjectEntity();
-        project.setGitlabId(999L);
-        project.setAddress(adress);
-        projectService.addProject(project);
     }
 
     @Test
@@ -168,5 +153,21 @@ public class ProfileControllerTest extends IntegrationTest {
             assertThat(m.getIdentity().getProjectGitlabId()).isEqualTo(998L);
             assertThat(m.getIdentity().getUserGitlabId()).isEqualTo(USER_ID);
         });
+    }
+
+    @Test
+    public void getAssignedIssues() throws Exception {
+        contract.setApproved(valueOf(1L), true, singletonList("0x99861c8068bfe2e0a5137e16d23a648962c79b5c")).send();
+        mockMvc.perform(get("/api/profile/assignedIssues")
+            .with(userToken()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", iterableWithSize(1)))
+            .andExpect(jsonPath("$[?(@.id == 1 && @.reviewers[?(@ == '0x99861c8068bfe2e0a5137e16d23a648962c79b5c')])]").exists());
+        contract.setDeveloper(valueOf(1L)).send();
+        mockMvc.perform(get("/api/profile/assignedIssues")
+            .with(userToken(678L)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", iterableWithSize(1)))
+            .andExpect(jsonPath("$[?(@.id == 1 && @.developer == '0x627306090abab3a6e1400e9345bc60c78a8bef57')]").exists());
     }
 }
