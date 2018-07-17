@@ -1,8 +1,9 @@
 <template>
-  <div v-if="profile" id="profile">
+<div id="profile">
+  <Navigation :address="profile.address" />
+  <div class="content" v-if="profile">
     <set-address-modal v-model="showAddressModal" v-on:save="addressModalSaveEvent" />
 
-    <Navigation :address="profile.address" />
     <h1>Profile</h1>
     <div class="form-group row">
       <label class="col-md-3" for="username">Username:</label>
@@ -42,6 +43,7 @@
                     :rows="filterAssignedIssues"
                     styleClass="vgt-table striped bordered">
     </vue-good-table>
+  </div>
   </div>
 </template>
 

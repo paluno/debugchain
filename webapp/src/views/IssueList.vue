@@ -1,39 +1,42 @@
 <template>
-  <div class="issueList">
+  <div>
     <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" :project="project" />
+    <div class="content">
+      <div class="container-fluid">
+      <div v-if="project" class="row">
+        <div class="col">
+          <h1>{{project.name}}</h1>
+        </div>
+        <div class="col-auto">
+          <a class="btn btn-link btn-sm" :href="project.web_url" target="_blank">
+            Open in Gitlab
+            <i class="fas fa-external-link-alt"></i>
+          </a>
+          <button v-if="canWithdraw" class="btn btn-outline-secondary btn-sm" @click="showWithdrawModal">
+            Withdraw Ether
+          </button>
+        </div>
+      </div>
+      </div>
+      <div v-if="canWithdraw" class="row">
+        <div class="col">
+          <p>You have {{this.profile.pendingWithdrawals}} Ether available to withdraw in this project.</p>
+        </div>
+        <Modal v-model="withdrawModal.show" title="Withdraw">
+          <p>
+            Do you really want to get pending withdrawals for the project: "{{projectId}}"?
+          </p>
 
-    <div v-if="project" class="row">
-      <div class="col">
-        <h1>{{project.name}}</h1>
+          <template slot="footer">
+            <button type="button" class="btn btn-primary" @click="withdraw">Yes</button>
+            <button type="button" class="btn btn-secondary" @click="closeWithdrawModal">No</button>
+          </template>
+        </Modal>
       </div>
-      <div class="col-auto">
-        <a class="btn btn-link btn-sm" :href="project.web_url" target="_blank">
-          Open in Gitlab
-          <i class="fas fa-external-link-alt"></i>
-        </a>
-        <button v-if="canWithdraw" class="btn btn-outline-secondary btn-sm" @click="showWithdrawModal">
-          Withdraw Ether
-        </button>
+      <div class="table">
+        <vue-good-table :columns="columns" :rows="rows" :pagination-options="{ enabled: true, perPage: 5}" :search-options="{ enabled: true}" styleClass="vgt-table striped bordered" @on-row-click="navigate">
+        </vue-good-table>
       </div>
-    </div>
-    <div v-if="canWithdraw" class="row">
-      <div class="col">
-        <p>You have {{this.profile.pendingWithdrawals}} Ether available to withdraw in this project.</p>
-      </div>
-      <Modal v-model="withdrawModal.show" title="Withdraw">
-        <p>
-          Do you really want to get pending withdrawals for the project: "{{projectId}}"?
-        </p>
-
-        <template slot="footer">
-          <button type="button" class="btn btn-primary" @click="withdraw">Yes</button>
-          <button type="button" class="btn btn-secondary" @click="closeWithdrawModal">No</button>
-        </template>
-      </Modal>
-    </div>
-    <div class="table">
-      <vue-good-table :columns="columns" :rows="rows" :pagination-options="{ enabled: true, perPage: 5}" :search-options="{ enabled: true}" styleClass="vgt-table striped bordered" @on-row-click="navigate">
-      </vue-good-table>
     </div>
   </div>
 </template>

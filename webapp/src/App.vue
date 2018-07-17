@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="container">
+  <div id="app">
     <div class="error-toast-container">
       <error-toast v-for="error in errors" :key="error.id" :error="error.raw" class="error-toast"></error-toast>
     </div>
@@ -7,6 +7,12 @@
     <router-view @isLoading="onIsLoadingChanged" />
   </div>
 </template>
+<style>
+.content {
+  padding: 0;
+  margin: 25px 25px 25px 25px;
+}
+</style>
 
 <script>
 import "bootstrap/dist/css/bootstrap.css";
