@@ -50,7 +50,7 @@ import getWeb3 from "@/api/getWeb3";
 export default {
   name: "IssueList",
   props: {
-    projectId: String
+    projectId: [String, Number]
   },
   components: {
     Navigation,

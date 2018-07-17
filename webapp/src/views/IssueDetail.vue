@@ -76,8 +76,8 @@ export default {
     DeleteAction
   },
   props: {
-    projectId: String,
-    issueId: String
+    projectId: [String, Number],
+    issueId: [String, Number]
   },
   computed: {
     markdownDescription: function() {
