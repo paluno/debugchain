@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -33,7 +34,7 @@ public class ProjectService {
 
     public void addProject(ProjectEntity projectEntity){ projectRepository.save(projectEntity); }
 
-    public Iterable<ProjectEntity> getAll() {
+    public List<ProjectEntity> getAll() {
         return projectRepository.findAll();
     }
 

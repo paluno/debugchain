@@ -24,7 +24,7 @@ public class IssuesControllerTest extends IntegrationTest {
 
     @Before
     public void setup() throws Exception {
-        contract = deployContract();
+        contract = loadContract(999L);
         contract.donate(valueOf(1L), valueOf(1L)).send();
         contract.donate(valueOf(2L), valueOf(1L)).send();
 

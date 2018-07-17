@@ -27,7 +27,7 @@ public class ContractIntegrationTest extends IntegrationTest {
 
     @Test
     public void evictCacheOnIssueUpdate() throws Exception {
-        DebugChain contract = deployContract();
+        DebugChain contract = loadContract(999L);
         Long issueId = 1L;
         BigInteger bigIssueId = valueOf(issueId);
         contract.donate(bigIssueId, toWei("1", ETHER).toBigInteger()).send();

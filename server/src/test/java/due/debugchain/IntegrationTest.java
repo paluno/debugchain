@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import due.debugchain.auth.GitLabUser;
 import due.debugchain.contracts.DebugChain;
+import due.debugchain.persistence.entities.ProjectEntity;
+import due.debugchain.persistence.repositories.ProjectRepository;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +53,9 @@ public abstract class IntegrationTest {
     private RestTemplate restTemplate;
 
     @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
     protected Web3j web3j;
 
     @Autowired
@@ -64,13 +69,14 @@ public abstract class IntegrationTest {
     private MockRestServiceServer server;
 
     @Before
-    public void mvcSetup() {
+    public void integrationSetup() throws Exception {
         mockMvc = MockMvcBuilders
             .webAppContextSetup(context)
             .alwaysDo(result -> server.reset()) // reset mocking of user-requests to GitLab
             .apply(springSecurity())
             .build();
         server = MockRestServiceServer.createServer(restTemplate);
+        deployContracts();
     }
 
     protected RequestPostProcessor userToken() {
@@ -89,6 +95,12 @@ public abstract class IntegrationTest {
         };
     }
 
+    protected DebugChain loadContract(long projectId) {
+        return projectRepository.findById(projectId)
+            .map(p -> DebugChain.load(p.getAddress(), web3j, credentials, GAS_PRICE, GAS_LIMIT))
+            .orElseThrow(IllegalArgumentException::new);
+    }
+
     private String userResponse(Long userId) {
         GitLabUser user = new GitLabUser();
         user.setAdmin(false);
@@ -104,16 +116,15 @@ public abstract class IntegrationTest {
         }
     }
 
-    protected DebugChain deployContract() throws Exception {
-        return deployContract(999L);
-    }
-
-    // helper method for setting up contract for integration testing
-    protected DebugChain deployContract(long projectId) throws Exception {
-        // deploy contract
-        return DebugChain
-            .deploy(web3j, credentials, GAS_PRICE, GAS_LIMIT, BigInteger.valueOf(projectId))
-            .send();
+    private void deployContracts() throws Exception {
+        for (ProjectEntity p : projectRepository.findAll()) {
+            // deploy contract
+            DebugChain contract = DebugChain
+                .deploy(web3j, credentials, GAS_PRICE, GAS_LIMIT, BigInteger.valueOf(p.getGitlabId()))
+                .send();
+            p.setAddress(contract.getContractAddress());
+            projectRepository.save(p);
+        }
     }
 
 
