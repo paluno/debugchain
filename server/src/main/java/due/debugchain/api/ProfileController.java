@@ -21,13 +21,10 @@ import org.springframework.web.bind.annotation.*;
 import org.web3j.abi.datatypes.Address;
 
 import javax.validation.Valid;
-import java.math.BigInteger;
 import java.util.Collection;
-import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 
 @RestController
@@ -98,13 +95,13 @@ public class ProfileController {
 
     private Stream<IssueStruct> getAllIssues() {
         // get all projects
-        return StreamSupport.stream(projectService.getAll().spliterator(), false)
+        return projectService.getAll().stream()
             // issue ids per project
             .map(projectEntity -> contractService.getIssueIdList(projectEntity.getAddress())
                 .stream()
                 // issue per issueId
                 .map(issueId -> contractService.getIssue(projectEntity.getAddress(), issueId.longValue())))
             // flatten stream
-            .flatMap(Function.identity());
+            .flatMap(identity());
     }
 }
