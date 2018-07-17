@@ -12,7 +12,7 @@
             <i class="fas fa-external-link-alt"></i>
           </a>
 
-          <donate-action v-if="canDonate" @donated="updateData" :contractAddress="contractAddress" :issueId="issueId" @isLoading="onIsLoadingChanged"></donate-action>
+          <donate-action v-if="canDonate" @donated="updateData" :contractAddress="contractAddress" :issueId="issueId"></donate-action>
 
           <approve-action v-if="canApprove" @approved="updateData" :contractAddress="contractAddress" :issueId="issueId" :possibleReviewers="possibleReviewers" @isLoading="onIsLoadingChanged"></approve-action>
 
