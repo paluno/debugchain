@@ -8,6 +8,7 @@ import Profile from './views/Profile.vue'
 import IssueDetail from './views/IssueDetail'
 import ProjectList from './views/ProjectList'
 import NotFound from './views/NotFound'
+import FAQ from './views/FAQ'
 
 import UserSession from './auth'
 
@@ -54,6 +55,12 @@ const router = new Router({
       path: '/profile',
       name: 'profile',
       component: Profile,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/faq',
+      name: 'faq',
+      component: FAQ,
       meta: { requiresAuth: true }
     },
     {
