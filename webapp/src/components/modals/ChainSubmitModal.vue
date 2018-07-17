@@ -1,13 +1,13 @@
 <template>
   <div class="d-inline">
-      <Modal v-model="show" title="Transaction Infos">
-        <p >
-          Please confirm the action in your Ethereum client / Metamask.<br />
-        </p>    
-        <template slot="footer">
-          <button type="button" class="btn btn-secondary" @click="closeModal">Close</button>
-        </template>
-      </Modal>
+    <Modal v-model="value" title="Transaction Infos">
+      <p>
+        Please confirm the action in your Ethereum client / Metamask.<br />
+      </p>
+      <template slot="footer">
+        <button type="button" class="btn btn-secondary" @click="closeModal">Close</button>
+      </template>
+    </Modal>
   </div>
 </template>
 
@@ -19,18 +19,12 @@ export default {
   components: {
     Modal
   },
-  props: {},
-  data() {
-    return {
-      show: false
-    };
+  props: {
+    value: Boolean
   },
   methods: {
-    showModal() {
-      this.show = true;
-    },
     closeModal() {
-      this.show = false;
+      this.$emit("input", false);
     }
   }
 };
