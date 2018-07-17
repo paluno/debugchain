@@ -17,6 +17,11 @@ class ErrorLocalization {
         }
         return null;
     }
+
+    getForContract(error) {
+        // TODO filter for specific errors
+        return "An error occured with your Ethereum provider. Please check your transaction log or try again.";
+    }
 }
 
 export default new ErrorLocalization();

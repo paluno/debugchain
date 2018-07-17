@@ -1,16 +1,22 @@
 import getWeb3 from "./getWeb3"
 import abi from '../../contracts/___contracts_contracts_DebugChain_sol_DebugChain.abi';
 import byteCode from '../../contracts/___contracts_contracts_DebugChain_sol_DebugChain.bin';
+import Localization from "@/api/errorLocalization";
 
 const DEFAULT_GAS = 5000000;
 
 // callback provider for ugly web3.js method signature
-const handleCallback = (resolve, reject) => (err, result) => {
-    if (err) {
-        reject(err);
+const handleCallback = (resolve, reject) => (error, result) => {
+    if (error) {
+        reject(addUserMessage(error));
     }
     resolve(result);
 };
+
+const addUserMessage = function(error) {
+    error.userMessage = Localization.getForContract(error);
+    return error;
+}
 
 export default class Contract {
 
@@ -34,7 +40,7 @@ export default class Contract {
                 { data: byteCode, from: this.web3.eth.accounts[0], gas: DEFAULT_GAS },
                 (err, contract) => {
                     if (err) {
-                        reject(err);
+                        reject(addUserMessage(err));
                     }
                     // callback is called twice, address is only present the second time
                     if (firstCall) {
