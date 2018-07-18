@@ -47,8 +47,8 @@
 import ErrorContainer from "@/api/errorContainer";
 import Modal from "@/components/Modal";
 import SetAddressModal from "@/components/modals/SetAddressModal";
-import Backend from "@/api/backend";
-import Gitlab from "@/api/gitlab";
+import { Backend } from "@/api/backend";
+import { Gitlab } from "@/api/gitlab";
 import Navigation from "@/components/Navigation";
 import getWeb3 from "@/api/getWeb3";
 
@@ -143,19 +143,20 @@ export default {
   },
   methods: {
     addressModalSaveEvent: function(newAddress) {
-      const backend = Backend.getClient();
+      const backend = new Backend();
 
       this.$emit("isLoading", true);
       backend
-        .post("/profile", {
+        .setProfile({
           address: newAddress
         })
-        .then(response => this.updateData())
+        .then(() => this.updateData())
         .catch(error => ErrorContainer.add(error))
         .then(() => this.$emit("isLoading", false))
         .then(() => (this.showAddressModal = false));
     },
     saveMembership: function() {
+      const backend = new Backend();
       let preparedMemberships = this.changedMemberships.map(membership => {
         return {
           projectGitlabId: membership.projectGitlabId,
@@ -164,11 +165,10 @@ export default {
         };
       });
 
-      const backend = Backend.getClient();
       this.$emit("isLoading", true);
       backend
-        .post("/profile/memberships", preparedMemberships)
-        .then(result => this.updateData())
+        .setProfileMemberships(preparedMemberships)
+        .then(() => this.updateData())
         .catch(error => ErrorContainer.add(error))
         .then(() => this.$emit("isLoading", false));
     },
@@ -183,36 +183,30 @@ export default {
       this.assignedIssues = issues;
     },
     updateData: function() {
-      const backend = Backend.getClient();
-      const gitlab = Gitlab.getClient();
+      const backend = new Backend();
+      const gitlab = new Gitlab();
 
       this.$emit("isLoading", true);
       // TODO handle / display errors in component
       Promise.all([
-        backend.get("/projects").then(r => r.data),
-        backend.get("/profile").then(r => r.data),
-        backend.get("/profile/memberships").then(r => r.data),
-        backend.get("/profile/assignedIssues").then(r => r.data)
+        backend.getProjects(),
+        backend.getProfile(),
+        backend.getProfileMemberships(),
+        backend.getProfileAssignedIssues(),
+        gitlab.getCurrentUser()
       ])
         .then(results => {
           const projects = results[0];
           const profile = results[1];
           const memberships = results[2];
           const assignedIssues = results[3];
+          const user = results[4];
 
           this.setProfile(profile);
           this.setProjectMemberships(projects, memberships);
           this.setAssignedIssues(assignedIssues);
 
-          const userId = profile.gitlabId;
-          // can only be called after getting gitlab id
-          // return promise for error handling
-          return gitlab.users
-            .one(userId)
-            .then(r => r.username)
-            .then(username => {
-              this.gitlabUsername = username;
-            });
+          this.gitlabUsername = user.username;
         })
         .catch(error => ErrorContainer.add(error))
         .then(() => this.$emit("isLoading", false));

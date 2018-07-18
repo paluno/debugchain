@@ -55,10 +55,8 @@ import FinishDevelopmentAction from "@/components/actions/FinishDevelopmentActio
 import ReviewAction from "@/components/actions/ReviewAction";
 import ResetAction from "@/components/actions/ResetAction";
 import DeleteAction from "@/components/actions/DeleteAction";
-import Gitlab from "@/api/gitlab";
-import Backend from "@/api/backend";
-import Contract from "@/api/contract";
-import getWeb3 from "@/api/getWeb3";
+import { Gitlab } from "@/api/gitlab";
+import { Backend } from "@/api/backend";
 import marked from "marked";
 
 export default {
@@ -78,8 +76,8 @@ export default {
     DeleteAction
   },
   props: {
-    projectId: String,
-    issueId: String
+    projectId: [String, Number],
+    issueId: [String, Number]
   },
   computed: {
     markdownDescription: function() {
@@ -194,31 +192,26 @@ export default {
       this.project = project;
     },
     updateData: function() {
-      const gitlab = Gitlab.getClient();
-      const backend = Backend.getClient();
+      const gitlab = new Gitlab();
+      const backend = new Backend();
 
       this.$emit("isLoading", true);
 
       Promise.all([
-        gitlab.projects.issues.one(this.projectId, this.issueId),
-        gitlab.projects.owned(),
-        gitlab.projects.members.list(this.projectId),
-        backend
-          .get("/projects/" + this.projectId + "/reviewers")
-          .then(r => r.data),
-        backend
-          .get("/projects/" + this.projectId + "/issues/" + this.issueId)
-          .then(r => r.data)
-          .catch(error => {
-            console.log(
-              "Could not get issue-details from backend/chain. Maybe this issue is not yet tracked"
-            );
-            // ignore 404 (issue not in contract)
-            if (error.response.status != 404) throw error;
-          }),
-        backend.get("/profile/withdrawals/" + this.projectId).then(r => r.data),
-        backend.get("/projects/" + this.projectId).then(r => r.data),
-        gitlab.projects.one(this.projectId)
+        gitlab.getProjectIssue(this.projectId, this.issueId),
+        gitlab.getProjectsOwned(),
+        gitlab.getProjectMembers(this.projectId),
+        backend.getProjectReviewers(this.projectId),
+        backend.getProjectIssue(this.projectId, this.issueId).catch(error => {
+          console.log(
+            "Could not get issue-details from backend/chain. Maybe this issue is not yet tracked"
+          );
+          // ignore 404 (issue not in contract)
+          if (error.response.status != 404) throw error;
+        }),
+        backend.getProfile(this.projectId),
+        backend.getProject(this.projectId),
+        gitlab.getProject(this.projectId)
       ])
         .then(results => {
           const issue = results[0];
