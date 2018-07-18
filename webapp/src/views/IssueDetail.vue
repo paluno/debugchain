@@ -26,7 +26,7 @@
 
           <reset-action v-if="canReset" @reset="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></reset-action>
 
-          <delete-action v-if="canDelete" @deleted="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></delete-action>
+          <delete-action v-if="canDelete" @deleted="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></delete-action>
         </div>
       </div>
       <issue-detail-gitlab-header :issue="issue"></issue-detail-gitlab-header>
