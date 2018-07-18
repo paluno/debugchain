@@ -18,7 +18,7 @@
       </template>
     </Modal>
 
-     <chain-submit-modal v-model="showChainSubmit"></chain-submit-modal>
+    <chain-submit-modal v-model="showChainSubmit"></chain-submit-modal>
   </div>
 </template>
 

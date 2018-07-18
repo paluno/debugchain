@@ -14,7 +14,7 @@
 
           <donate-action v-if="canDonate" @donated="updateData" :contractAddress="contractAddress" :issueId="issueId"></donate-action>
 
-          <approve-action v-if="canApprove" @approved="updateData" :contractAddress="contractAddress" :issueId="issueId" :possibleReviewers="possibleReviewers" @isLoading="onIsLoadingChanged"></approve-action>
+          <approve-action v-if="canApprove" @approved="updateData" :contractAddress="contractAddress" :issueId="issueId" :possibleReviewers="possibleReviewers"></approve-action>
 
           <lock-action v-if="canLock" @locked="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></lock-action>
 
