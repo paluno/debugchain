@@ -20,7 +20,7 @@
 
           <unlock-action v-if="canUnlock" @unlocked="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></unlock-action>
 
-          <finish-development-action v-if="canFinishDevelopment" @finishedDevelopment="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></finish-development-action>
+          <finish-development-action v-if="canFinishDevelopment" @finishedDevelopment="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></finish-development-action>
 
           <review-action v-if="canReview" @reviewed="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></review-action>
 
