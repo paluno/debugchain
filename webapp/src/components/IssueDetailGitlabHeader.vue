@@ -1,16 +1,16 @@
 <template>
-    <div class="row">
-        <div class="col">
-            <span :class="badgeState">{{state}}</span>
-            <label>Created</label>
-            <span>at {{prettyTime}}</span>
-            <label>by</label>
-            <img class="avatar" :src="issue.author.avatar_url" />
-            <span>
-                <b>{{issue.author.username}}</b>
-            </span>
-        </div>
+  <div class="row">
+    <div class="col">
+      <span :class="badgeState">{{state}}</span>
+      <label>Created</label>
+      <span>at {{prettyTime}}</span>
+      <label>by</label>
+      <img class="avatar" :src="issue.author.avatar_url" />
+      <span>
+        <b>{{issue.author.username}}</b>
+      </span>
     </div>
+  </div>
 </template>
 
 <script>

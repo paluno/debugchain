@@ -3,24 +3,24 @@
     <Navigation :profile="profile" :project="project" />
     <div class="content">
       <div class="container-fluid">
-      <div v-if="project" class="row">
-        <div class="col">
-          <h1>{{project.name}}</h1>
+        <div v-if="project" class="row">
+          <div class="col">
+            <h1>{{project.name}}</h1>
+          </div>
+          <div class="col-auto">
+            <a class="btn btn-link btn-sm" :href="project.web_url" target="_blank">
+              Open in Gitlab
+              <i class="fas fa-external-link-alt"></i>
+            </a>
+            <button v-if="canWithdraw" class="btn btn-outline-secondary btn-sm" @click="showWithdrawModal">
+              Withdraw Ether
+            </button>
+          </div>
         </div>
-        <div class="col-auto">
-          <a class="btn btn-link btn-sm" :href="project.web_url" target="_blank">
-            Open in Gitlab
-            <i class="fas fa-external-link-alt"></i>
-          </a>
-          <button v-if="canWithdraw" class="btn btn-outline-secondary btn-sm" @click="showWithdrawModal">
-            Withdraw Ether
-          </button>
-        </div>
-      </div>
       </div>
       <div v-if="canWithdraw" class="row">
         <div class="col">
-          <p>You have {{this.profile.pendingWithdrawals  | weiToEther}} Ether available to withdraw in this project.</p>
+          <p>You have {{this.profile.pendingWithdrawals | weiToEther}} Ether available to withdraw in this project.</p>
         </div>
         <Modal v-model="withdrawModal.show" title="Withdraw">
           <p>

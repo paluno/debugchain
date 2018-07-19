@@ -38,7 +38,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .modal-mask {
   position: fixed;
   z-index: 1000;
@@ -57,7 +56,7 @@ export default {
 }
 
 .modal-body {
-    max-height: calc(100vh - 200px);
-    overflow-y: auto;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
 }
 </style>

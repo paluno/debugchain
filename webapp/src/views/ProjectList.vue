@@ -2,15 +2,10 @@
   <div id="projectlist">
     <Navigation :profile="profile" />
     <div class="content">
-    <vue-good-table :columns="columns"
-      :rows="gitlabProjects"
-      :pagination-options="{ enabled: true, perPage: 10}"
-      :search-options="{ enabled: true}"
-      styleClass="vgt-table striped bordered"
-      @on-row-click="onRowClick">
+      <vue-good-table :columns="columns" :rows="gitlabProjects" :pagination-options="{ enabled: true, perPage: 10}" :search-options="{ enabled: true}" styleClass="vgt-table striped bordered" @on-row-click="onRowClick">
         <template slot="table-row" slot-scope="props">
           <span v-if="props.column.field == 'created' && props.formattedRow[props.column.field] == 'Yes'">
-            <span style="font-weight: bold; color: green;">{{props.row.created}}</span> 
+            <span style="font-weight: bold; color: green;">{{props.row.created}}</span>
           </span>
           <span v-else-if="props.column.field == 'created' && props.formattedRow[props.column.field] == 'No'">
             <span style="font-weight: bold; color: red;">{{props.row.created}}</span>
@@ -19,30 +14,30 @@
             {{props.formattedRow[props.column.field]}}
           </span>
         </template>
-    </vue-good-table>
+      </vue-good-table>
 
-    <Modal v-model="createProjectModal.show" title="Create Project">
-      <p>
-        Do you want to create a DebugChain project for this GitLab project?
-      </p>
-      <div class="row">
-        <label class="col-sm-3">Name:</label>
-        <div class="col">{{createProjectModal.name}}</div>
-      </div>
-      <div class="row">
-        <label class="col-sm-3">Gitlab-Link:</label>
-        <div class="col">
-          <a :href="createProjectModal.url">{{createProjectModal.url}}</a>
+      <Modal v-model="createProjectModal.show" title="Create Project">
+        <p>
+          Do you want to create a DebugChain project for this GitLab project?
+        </p>
+        <div class="row">
+          <label class="col-sm-3">Name:</label>
+          <div class="col">{{createProjectModal.name}}</div>
         </div>
-      </div>
+        <div class="row">
+          <label class="col-sm-3">Gitlab-Link:</label>
+          <div class="col">
+            <a :href="createProjectModal.url">{{createProjectModal.url}}</a>
+          </div>
+        </div>
 
-      <template slot="footer">
-        <button type="button" class="btn btn-primary" @click="createProject">Create</button>
-        <button type="button" class="btn btn-secondary" @click="closeCreateProjectModal">Close</button>
-      </template>
-    </Modal>
+        <template slot="footer">
+          <button type="button" class="btn btn-primary" @click="createProject">Create</button>
+          <button type="button" class="btn btn-secondary" @click="closeCreateProjectModal">Close</button>
+        </template>
+      </Modal>
 
-    <chain-submit-modal v-model="showChainSubmit"></chain-submit-modal>
+      <chain-submit-modal v-model="showChainSubmit"></chain-submit-modal>
     </div>
   </div>
 
@@ -119,7 +114,7 @@ export default {
           });
         })
         .catch(error => ErrorContainer.add(error))
-        .then(() => (this.showChainSubmit = false))
+        .then(() => (this.showChainSubmit = false));
     },
     setProjects: function(gitlabProjects, debugChainProjects) {
       this.gitlabProjects = gitlabProjects.map(gProject => {
