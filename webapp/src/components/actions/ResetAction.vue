@@ -26,7 +26,8 @@ import ChainSubmitModal from "@/components/modals/ChainSubmitModal";
 export default {
   name: "ResetAction",
   components: {
-    Modal
+    Modal,
+    ChainSubmitModal
   },
   props: {
     contractAddress: {
