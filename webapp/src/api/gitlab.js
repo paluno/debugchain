@@ -31,7 +31,7 @@ export class Gitlab {
             // return data directly: we usually dont need detailed response information on success
             response => response.data,
             error => {
-                error.userMessage = Localization.getForAxios(error);
+                error.userMessage = Localization.getForAxios(error, "Gitlab");
                 return Promise.reject(error);
             });
     }
