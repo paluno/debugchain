@@ -37,7 +37,8 @@
         </p>
 
         <p><strong>What does the lifecycle of an issue look like?</strong> <br>
-        <img src="<%= BASE_URL %>issue_lifecycle.png" alt="issue lifecycle"/>
+        The following diagram depicts an issue's lifecycle: <br>
+        <img src="../../public/issue_lifecycle.png" alt="issue lifecycle"/> </p>
     </div>
 </template>
 
