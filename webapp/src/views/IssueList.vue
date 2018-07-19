@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" :project="project" />
+    <Navigation :profile="profile" :project="project" />
     <div class="content">
       <div class="container-fluid">
       <div v-if="project" class="row">
@@ -67,6 +67,7 @@ export default {
   computed: {
     canWithdraw: function() {
       return (
+        this.profile &&
         typeof this.profile.pendingWithdrawals === "number" &&
         this.profile.pendingWithdrawals > 0
       );
@@ -75,10 +76,7 @@ export default {
   data: function() {
     return {
       project: null,
-      profile: {
-        address: null,
-        pendingWithdrawals: null
-      },
+      profile: null,
       columns: [
         {
           label: "Id",
@@ -182,12 +180,7 @@ export default {
       this.project = project;
     },
     setProfile: function(newProfile) {
-      if (newProfile) {
-        this.profile = {
-          address: newProfile.address,
-          pendingWithdrawals: newProfile.pendingWithdrawals
-        };
-      }
+      this.profile = newProfile;
     },
     setContractAddress: function(address) {
       this.contractAddress = address;

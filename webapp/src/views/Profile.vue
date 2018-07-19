@@ -1,6 +1,6 @@
 <template>
 <div id="profile">
-  <Navigation :address="profile.address" />
+  <Navigation :profile="profile" />
   <div class="content" v-if="profile">
     <set-address-modal v-model="showAddressModal" v-on:save="addressModalSaveEvent" />
 

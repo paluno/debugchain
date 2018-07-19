@@ -1,6 +1,6 @@
 <template>
   <div id="projectlist">
-    <Navigation :address="profile.address" />
+    <Navigation :profile="profile" />
     <div class="content">
     <vue-good-table :columns="columns"
       :rows="gitlabProjects"
@@ -67,9 +67,7 @@ export default {
   },
   data: function() {
     return {
-      profile: {
-        address: null
-      },
+      profile: null,
       createProjectModal: {
         show: false,
         id: 0,
@@ -139,9 +137,7 @@ export default {
       });
     },
     setProfile: function(newProfile) {
-      this.profile = {
-        address: newProfile.address
-      };
+      this.profile = newProfile;
     },
     updateData: function() {
       const gitlab = new Gitlab();
