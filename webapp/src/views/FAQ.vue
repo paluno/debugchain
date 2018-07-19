@@ -35,6 +35,9 @@
         <p><strong>Why can't I finish the development of my issue?</strong> <br>
         Check your Metamask address/account. The one you finish the development with needs to be the same you initially locked the issue with!
         </p>
+
+        <p><strong>What does the lifecycle of an issue look like?</strong> <br>
+        <img src="<%= BASE_URL %>issue_lifecycle.png" alt="issue lifecycle"/>
     </div>
 </template>
 
