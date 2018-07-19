@@ -1,47 +1,50 @@
 <template>
-  <div class="issueList">
+  <div>
     <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" :project="project" />
+    <div class="content">
+      <div class="container-fluid">
+      <div v-if="project" class="row">
+        <div class="col">
+          <h1>{{project.name}}</h1>
+        </div>
+        <div class="col-auto">
+          <a class="btn btn-link btn-sm" :href="project.web_url" target="_blank">
+            Open in Gitlab
+            <i class="fas fa-external-link-alt"></i>
+          </a>
+          <button v-if="canWithdraw" class="btn btn-outline-secondary btn-sm" @click="showWithdrawModal">
+            Withdraw Ether
+          </button>
+        </div>
+      </div>
+      </div>
+      <div v-if="canWithdraw" class="row">
+        <div class="col">
+          <p>You have {{this.profile.pendingWithdrawals}} Ether available to withdraw in this project.</p>
+        </div>
+        <Modal v-model="withdrawModal.show" title="Withdraw">
+          <p>
+            Do you really want to get pending withdrawals for the project: "{{projectId}}"?
+          </p>
 
-    <div v-if="project" class="row">
-      <div class="col">
-        <h1>{{project.name}}</h1>
+          <template slot="footer">
+            <button type="button" class="btn btn-primary" @click="withdraw">Yes</button>
+            <button type="button" class="btn btn-secondary" @click="closeWithdrawModal">No</button>
+          </template>
+        </Modal>
       </div>
-      <div class="col-auto">
-        <a class="btn btn-link btn-sm" :href="project.web_url" target="_blank">
-          Open in Gitlab
-          <i class="fas fa-external-link-alt"></i>
-        </a>
-        <button v-if="canWithdraw" class="btn btn-outline-secondary btn-sm" @click="showWithdrawModal">
-          Withdraw Ether
-        </button>
+      <div class="table">
+        <vue-good-table :columns="columns" :rows="rows" :pagination-options="{ enabled: true, perPage: 5}" :search-options="{ enabled: true}" styleClass="vgt-table striped bordered" @on-row-click="navigate">
+        </vue-good-table>
       </div>
-    </div>
-    <div v-if="canWithdraw" class="row">
-      <div class="col">
-        <p>You have {{this.profile.pendingWithdrawals}} Ether available to withdraw in this project.</p>
-      </div>
-      <Modal v-model="withdrawModal.show" title="Withdraw">
-        <p>
-          Do you really want to get pending withdrawals for the project: "{{projectId}}"?
-        </p>
-
-        <template slot="footer">
-          <button type="button" class="btn btn-primary" @click="withdraw">Yes</button>
-          <button type="button" class="btn btn-secondary" @click="closeWithdrawModal">No</button>
-        </template>
-      </Modal>
-    </div>
-    <div class="table">
-      <vue-good-table :columns="columns" :rows="rows" :pagination-options="{ enabled: true, perPage: 5}" :search-options="{ enabled: true}" styleClass="vgt-table striped bordered" @on-row-click="navigate">
-      </vue-good-table>
     </div>
   </div>
 </template>
 
 <script>
 import ErrorContainer from "@/api/errorContainer";
-import Gitlab from "@/api/gitlab";
-import Backend from "@/api/backend";
+import { Gitlab } from "@/api/gitlab";
+import { Backend } from "@/api/backend";
 import Modal from "@/components/Modal.vue";
 import Navigation from "@/components/Navigation";
 import Contract from "@/api/contract";
@@ -50,7 +53,7 @@ import getWeb3 from "@/api/getWeb3";
 export default {
   name: "IssueList",
   props: {
-    projectId: String
+    projectId: [String, Number]
   },
   components: {
     Navigation,
@@ -144,18 +147,16 @@ export default {
         .then(() => this.updateData());
     },
     updateData: function() {
-      const gitlab = Gitlab.getClient();
-      const backend = Backend.getClient();
+      const gitlab = new Gitlab();
+      const backend = new Backend();
 
       this.$emit("isLoading", true);
       Promise.all([
-        gitlab.projects.issues.list(this.projectId),
-        backend
-          .get("projects/" + this.projectId + "/issues/")
-          .then(result => result.data),
-        backend.get("/profile/withdrawals/" + this.projectId).then(r => r.data),
-        gitlab.projects.one(this.projectId),
-        backend.get("/projects/" + this.projectId).then(r => r.data)
+        gitlab.getProjectIssues(this.projectId),
+        backend.getProjectIssues(this.projectId),
+        backend.getProfile(this.projectId),
+        gitlab.getProject(this.projectId),
+        backend.getProject(this.projectId)
       ])
         .then(results => {
           const issues = results[0];

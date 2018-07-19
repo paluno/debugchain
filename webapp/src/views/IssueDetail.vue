@@ -2,42 +2,44 @@
   <div class="issue_detail">
     <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" v-bind:project="project" v-bind:issue="issue" />
 
-    <div v-if="issue">
-      <div class="form-group row">
-        <div class="col">
-          <h1>{{issue.title}}</h1>
+    <div class="container-fluid">
+      <div v-if="issue">
+        <div class="form-group row">
+          <div class="col">
+            <h1>{{issue.title}}</h1>
+          </div>
+          <div class="col-auto">
+            <a class="btn btn-link btn-sm" :href="issue.web_url" target="_blank">Open in Gitlab
+              <i class="fas fa-external-link-alt"></i>
+            </a>
+
+            <donate-action v-if="canDonate" @donated="updateData" :contractAddress="contractAddress" :issueId="issueId"></donate-action>
+
+            <approve-action v-if="canApprove" @approved="updateData" :contractAddress="contractAddress" :issueId="issueId" :possibleReviewers="possibleReviewers"></approve-action>
+
+            <lock-action v-if="canLock" @locked="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></lock-action>
+
+            <unlock-action v-if="canUnlock" @unlocked="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></unlock-action>
+
+            <finish-development-action v-if="canFinishDevelopment" @finishedDevelopment="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></finish-development-action>
+
+            <review-action v-if="canReview" @reviewed="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></review-action>
+
+            <reset-action v-if="canReset" @reset="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></reset-action>
+
+            <delete-action v-if="canDelete" @deleted="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></delete-action>
+          </div>
         </div>
-        <div class="col-auto">
-          <a class="btn btn-link btn-sm" :href="issue.web_url" target="_blank">Open in Gitlab
-            <i class="fas fa-external-link-alt"></i>
-          </a>
-
-          <donate-action v-if="canDonate" @donated="updateData" :contractAddress="contractAddress" :issueId="issueId"></donate-action>
-
-          <approve-action v-if="canApprove" @approved="updateData" :contractAddress="contractAddress" :issueId="issueId" :possibleReviewers="possibleReviewers"></approve-action>
-
-          <lock-action v-if="canLock" @locked="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></lock-action>
-
-          <unlock-action v-if="canUnlock" @unlocked="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></unlock-action>
-
-          <finish-development-action v-if="canFinishDevelopment" @finishedDevelopment="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></finish-development-action>
-
-          <review-action v-if="canReview" @reviewed="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></review-action>
-
-          <reset-action v-if="canReset" @reset="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></reset-action>
-
-          <delete-action v-if="canDelete" @deleted="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></delete-action>
+        <issue-detail-gitlab-header :issue="issue"></issue-detail-gitlab-header>
+        <hr>
+        <div class="row">
+          <div class="col" v-html="markdownDescription">
+          </div>
         </div>
       </div>
-      <issue-detail-gitlab-header :issue="issue"></issue-detail-gitlab-header>
       <hr>
-      <div class="row">
-        <div class="col" v-html="markdownDescription">
-        </div>
-      </div>
+      <issue-detail-contract :contractIssue="contractIssue"></issue-detail-contract>
     </div>
-    <hr>
-    <issue-detail-contract :contractIssue="contractIssue"></issue-detail-contract>
   </div>
 </template>
 
@@ -55,10 +57,8 @@ import FinishDevelopmentAction from "@/components/actions/FinishDevelopmentActio
 import ReviewAction from "@/components/actions/ReviewAction";
 import ResetAction from "@/components/actions/ResetAction";
 import DeleteAction from "@/components/actions/DeleteAction";
-import Gitlab from "@/api/gitlab";
-import Backend from "@/api/backend";
-import Contract from "@/api/contract";
-import getWeb3 from "@/api/getWeb3";
+import { Gitlab } from "@/api/gitlab";
+import { Backend } from "@/api/backend";
 import marked from "marked";
 
 export default {
@@ -78,8 +78,8 @@ export default {
     DeleteAction
   },
   props: {
-    projectId: String,
-    issueId: String
+    projectId: [String, Number],
+    issueId: [String, Number]
   },
   computed: {
     markdownDescription: function() {
@@ -194,31 +194,26 @@ export default {
       this.project = project;
     },
     updateData: function() {
-      const gitlab = Gitlab.getClient();
-      const backend = Backend.getClient();
+      const gitlab = new Gitlab();
+      const backend = new Backend();
 
       this.$emit("isLoading", true);
 
       Promise.all([
-        gitlab.projects.issues.one(this.projectId, this.issueId),
-        gitlab.projects.owned(),
-        gitlab.projects.members.list(this.projectId),
-        backend
-          .get("/projects/" + this.projectId + "/reviewers")
-          .then(r => r.data),
-        backend
-          .get("/projects/" + this.projectId + "/issues/" + this.issueId)
-          .then(r => r.data)
-          .catch(error => {
-            console.log(
-              "Could not get issue-details from backend/chain. Maybe this issue is not yet tracked"
-            );
-            // ignore 404 (issue not in contract)
-            if (error.response.status != 404) throw error;
-          }),
-        backend.get("/profile/withdrawals/" + this.projectId).then(r => r.data),
-        backend.get("/projects/" + this.projectId).then(r => r.data),
-        gitlab.projects.one(this.projectId)
+        gitlab.getProjectIssue(this.projectId, this.issueId),
+        gitlab.getProjectsOwned(),
+        gitlab.getProjectMembers(this.projectId),
+        backend.getProjectReviewers(this.projectId),
+        backend.getProjectIssue(this.projectId, this.issueId).catch(error => {
+          console.log(
+            "Could not get issue-details from backend/chain. Maybe this issue is not yet tracked"
+          );
+          // ignore 404 (issue not in contract)
+          if (error.response.status != 404) throw error;
+        }),
+        backend.getProfile(this.projectId),
+        backend.getProject(this.projectId),
+        gitlab.getProject(this.projectId)
       ])
         .then(results => {
           const issue = results[0];

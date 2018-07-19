@@ -12,6 +12,12 @@ spring:
     cache:
       jcache:
         config: classpath:ehcache.xml
+    h2:
+      console:
+        enabled: true
+        path: /h2-console
+        settings:
+          web-allow-others: true
 oauth2.gitlab.userEndpoint: "http://localhost/api/v4/user"
 
 ---
@@ -33,5 +39,5 @@ spring:
     url: jdbc:h2:file:/home/debugchain-db
     username: sa
     password:
-web3j.client-address: "http://debugchain.k202.de:8545"
+web3j.client-address: "http://debugchain.k202.de:9654"
 oauth2.gitlab.userEndpoint: "http://debugchain.k202.de/api/v4/user"

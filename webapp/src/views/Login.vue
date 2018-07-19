@@ -1,7 +1,7 @@
 <template>
   <div v-if="!session.loggedIn">
-    <div class="row">
-      <div class="col text-center">
+    <div class="content">
+      <div class="text-center">
         <h1>Login</h1>
         <p>
           You are not authenticated. Please login using your Gitlab-Account.
