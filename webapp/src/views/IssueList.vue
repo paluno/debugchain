@@ -20,7 +20,7 @@
       </div>
       <div v-if="canWithdraw" class="row">
         <div class="col">
-          <p>You have {{this.profile.pendingWithdrawals}} Ether available to withdraw in this project.</p>
+          <p>You have {{this.profile.pendingWithdrawals  | weiToEther}} Ether available to withdraw in this project.</p>
         </div>
         <Modal v-model="withdrawModal.show" title="Withdraw">
           <p>
@@ -52,6 +52,11 @@ import getWeb3 from "@/api/getWeb3";
 
 export default {
   name: "IssueList",
+  filters: {
+    weiToEther: function(value) {
+      return getWeb3().fromWei(value, "ether");
+    }
+  },
   props: {
     projectId: [String, Number]
   },
