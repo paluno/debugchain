@@ -24,9 +24,6 @@
         FAQ
       </router-link>
       <a v-if="session.loggedIn" v-on:click="logout" href="/" class="nav-item nav-link">Logout</a>
-      <router-link class="nav-item nav-link" :to="{name: 'debug'}">
-        Debug
-      </router-link>
     </div>
   </nav>
 </template>

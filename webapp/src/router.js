@@ -2,7 +2,6 @@ import Vue from 'vue'
 import Router from 'vue-router'
 
 import IssueList from './views/IssueList.vue'
-import Debug from './views/Debug'
 import Login from './views/Login.vue'
 import Profile from './views/Profile.vue'
 import IssueDetail from './views/IssueDetail'
@@ -62,11 +61,6 @@ const router = new Router({
       name: 'faq',
       component: FAQ,
       meta: { requiresAuth: true }
-    },
-    {
-      path: '/debug',
-      name: 'debug',
-      component: Debug
     },
     {
       path: '/login',
