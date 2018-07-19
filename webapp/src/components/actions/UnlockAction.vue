@@ -66,7 +66,9 @@ export default {
 
       contract
         .unlock(issueId)
-        .catch(error => ErrorContainer.add(error))
+        .catch(error => {
+          if (!error.canceled) ErrorContainer.add(error);
+        })
         .then(() => (this.showChainSubmit = false))
         .then(() => this.$emit("unlocked"));
     }

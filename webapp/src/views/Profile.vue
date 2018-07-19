@@ -189,7 +189,6 @@ export default {
       const gitlab = new Gitlab();
 
       this.$emit("isLoading", true);
-      // TODO handle / display errors in component
       Promise.all([
         backend.getProjects(),
         backend.getProfile(),

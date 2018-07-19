@@ -71,12 +71,13 @@ export default {
       const contract = new Contract(this.contractAddress);
       const reviewers = this.selectedReviewers;
 
-      // TODO extract to global module
       this.closeApproveIssueModal();
       this.showChainSubmit = true;
       contract
         .approve(issueId, reviewers)
-        .catch(error => ErrorContainer.add(error))
+        .catch(error => {
+          if (!error.canceled) ErrorContainer.add(error);
+        })
         .then(() => (this.showChainSubmit = false))
         .then(() => this.$emit("approved"));
     }
