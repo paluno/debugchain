@@ -18,7 +18,7 @@ import { GitlabOAuth, UserSession } from "@/auth";
 import Storage from "@/webStorage";
 
 export default {
-  name: "login",
+  name: "Login",
   data: function() {
     return {
       session: UserSession.state

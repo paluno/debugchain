@@ -1,13 +1,15 @@
 <template>
-    <div class="overlay">
-        <div class="center-screen">
-            <div class="loader"></div>
-        </div>
+  <div class="overlay">
+    <div class="center-screen">
+      <div class="loader"></div>
     </div>
+  </div>
 </template>
 
 <script>
-export default {};
+export default {
+  name: "LoadingOverlay"
+};
 </script>
 
 <style>

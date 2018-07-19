@@ -17,7 +17,7 @@ export default {
   },
   computed: {
     errorMessage() {
-      if (this.error.userMessage){
+      if (this.error.userMessage) {
         return this.error.userMessage;
       } else {
         return "An unknown error occured! We're sorry, please try again later.";

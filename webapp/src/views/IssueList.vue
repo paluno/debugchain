@@ -1,26 +1,26 @@
 <template>
   <div>
-    <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" :project="project" />
+    <Navigation :profile="profile" :project="project" />
     <div class="content">
       <div class="container-fluid">
-      <div v-if="project" class="row">
-        <div class="col">
-          <h1>{{project.name}}</h1>
+        <div v-if="project" class="row">
+          <div class="col">
+            <h1>{{project.name}}</h1>
+          </div>
+          <div class="col-auto">
+            <a class="btn btn-link btn-sm" :href="project.web_url" target="_blank">
+              Open in Gitlab
+              <i class="fas fa-external-link-alt"></i>
+            </a>
+            <button v-if="canWithdraw" class="btn btn-outline-secondary btn-sm" @click="showWithdrawModal">
+              Withdraw Ether
+            </button>
+          </div>
         </div>
-        <div class="col-auto">
-          <a class="btn btn-link btn-sm" :href="project.web_url" target="_blank">
-            Open in Gitlab
-            <i class="fas fa-external-link-alt"></i>
-          </a>
-          <button v-if="canWithdraw" class="btn btn-outline-secondary btn-sm" @click="showWithdrawModal">
-            Withdraw Ether
-          </button>
-        </div>
-      </div>
       </div>
       <div v-if="canWithdraw" class="row">
         <div class="col">
-          <p>You have {{this.profile.pendingWithdrawals  | weiToEther}} Ether available to withdraw in this project.</p>
+          <p>You have {{this.profile.pendingWithdrawals | weiToEther}} Ether available to withdraw in this project.</p>
         </div>
         <Modal v-model="withdrawModal.show" title="Withdraw">
           <p>
@@ -52,6 +52,10 @@ import getWeb3 from "@/api/getWeb3";
 
 export default {
   name: "IssueList",
+  components: {
+    Navigation,
+    Modal
+  },
   filters: {
     weiToEther: function(value) {
       return getWeb3().fromWei(value, "ether");
@@ -60,13 +64,10 @@ export default {
   props: {
     projectId: [String, Number]
   },
-  components: {
-    Navigation,
-    Modal
-  },
   computed: {
     canWithdraw: function() {
       return (
+        this.profile &&
         typeof this.profile.pendingWithdrawals === "number" &&
         this.profile.pendingWithdrawals > 0
       );
@@ -75,10 +76,7 @@ export default {
   data: function() {
     return {
       project: null,
-      profile: {
-        address: null,
-        pendingWithdrawals: null
-      },
+      profile: null,
       columns: [
         {
           label: "Id",
@@ -182,12 +180,7 @@ export default {
       this.project = project;
     },
     setProfile: function(newProfile) {
-      if (newProfile) {
-        this.profile = {
-          address: newProfile.address,
-          pendingWithdrawals: newProfile.pendingWithdrawals
-        };
-      }
+      this.profile = newProfile;
     },
     setContractAddress: function(address) {
       this.contractAddress = address;

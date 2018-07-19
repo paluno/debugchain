@@ -1,6 +1,6 @@
 <template>
   <div class="issue_detail">
-    <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" v-bind:project="project" v-bind:issue="issue" />
+    <Navigation :profile="profile" :project="project" :issue="issue" />
 
     <div class="container-fluid">
       <div v-if="issue">
@@ -81,7 +81,22 @@ export default {
     projectId: [String, Number],
     issueId: [String, Number]
   },
+  data: function() {
+    return {
+      profile: null,
+      project: null,
+      issue: null,
+      contractIssue: null,
+      contractAddress: null,
+      isMaintainer: false,
+      possibleReviewers: null
+    };
+  },
   computed: {
+    userAddress: function() {
+      // TODO consider using web3 address instead of profile
+      return this.profile ? this.profile.address : null;
+    },
     markdownDescription: function() {
       return marked(this.issue.description);
     },
@@ -140,21 +155,6 @@ export default {
       );
     }
   },
-  data: function() {
-    return {
-      profile: {
-        address: null,
-        pendingWithdrawals: null
-      },
-      project: null,
-      issue: null,
-      contractIssue: null,
-      contractAddress: null,
-      isMaintainer: false,
-      userAddress: null,
-      possibleReviewers: null
-    };
-  },
   created: function() {
     this.updateData();
   },
@@ -186,9 +186,6 @@ export default {
     },
     setIsMaintainer: function(val) {
       this.isMaintainer = val;
-    },
-    setUserAddress: function(address) {
-      this.userAddress = address;
     },
     setProject: function(project) {
       this.project = project;
@@ -229,8 +226,6 @@ export default {
           if (ownedProjects.find(project => project.id == this.projectId)) {
             this.setIsMaintainer(true);
           }
-          // TODO consider using web3 address instead of profile
-          this.setUserAddress(profile.address);
           this.setPossibleReviewers(possibleReviewers, projectMembers);
           this.setContractIssue(contractIssue);
           this.setProfile(profile);
@@ -241,12 +236,7 @@ export default {
         .then(() => this.$emit("isLoading", false));
     },
     setProfile: function(newProfile) {
-      if (newProfile) {
-        this.profile = {
-          address: newProfile.address,
-          pendingWithdrawals: newProfile.pendingWithdrawals
-        };
-      }
+      this.profile = newProfile;
     },
     onIsLoadingChanged: function(isLoading) {
       this.$emit("isLoading", isLoading);

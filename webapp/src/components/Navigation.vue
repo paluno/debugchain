@@ -14,8 +14,8 @@
     </div>
     <div class="navbar-nav">
       <span v-if="session.loggedIn" class="navbar-text">
-        <small v-if="typeof pendingWithdrawals === 'number' && pendingWithdrawals > 0">You have {{pendingWithdrawals | weiToEther}} ETH available</small>
-        <small v-if="address == null">Set your wallet address to access more actions</small>
+        <small v-if="showAvailableEther">You have {{profile.pendingWithdrawals | weiToEther}} ETH available.</small>
+        <small v-if="showSetAddressHint">Set your wallet address to access more actions.</small>
       </span>
       <router-link v-if="session.loggedIn" class="nav-item nav-link" :to="{ name: 'profile'}">
         Profile
@@ -24,9 +24,6 @@
         FAQ
       </router-link>
       <a v-if="session.loggedIn" v-on:click="logout" href="/" class="nav-item nav-link">Logout</a>
-      <router-link class="nav-item nav-link" :to="{name: 'debug'}">
-        Debug
-      </router-link>
     </div>
   </nav>
 </template>
@@ -46,24 +43,33 @@ export default {
   },
   props: {
     project: {
-      type: Object,
-      default: function() {
-        return null;
-      }
+      type: Object
     },
     issue: {
-      type: Object,
-      default: function() {
-        return null;
-      }
+      type: Object
     },
-    pendingWithdrawals: Number,
-    address: String
+    profile: {
+      type: Object
+    }
   },
   data: function() {
     return {
       session: UserSession.state
     };
+  },
+  computed: {
+    showSetAddressHint() {
+      // profile is loaded but has no address set
+      return this.profile && this.profile.address === null;
+    },
+    showAvailableEther() {
+      // profile is loaded and has ether available to withdraw
+      return (
+        this.profile &&
+        typeof this.profile.pendingWithdrawals === "number" &&
+        this.profile.pendingWithdrawals > 0
+      );
+    }
   },
   methods: {
     logout: function() {
