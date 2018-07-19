@@ -2,42 +2,44 @@
   <div class="issue_detail">
     <Navigation :address="profile.address" :pendingWithdrawals="profile.pendingWithdrawals" v-bind:project="project" v-bind:issue="issue" />
 
-    <div v-if="issue">
-      <div class="form-group row">
-        <div class="col">
-          <h1>{{issue.title}}</h1>
+    <div class="container-fluid">
+      <div v-if="issue">
+        <div class="form-group row">
+          <div class="col">
+            <h1>{{issue.title}}</h1>
+          </div>
+          <div class="col-auto">
+            <a class="btn btn-link btn-sm" :href="issue.web_url" target="_blank">Open in Gitlab
+              <i class="fas fa-external-link-alt"></i>
+            </a>
+
+            <donate-action v-if="canDonate" @donated="updateData" :contractAddress="contractAddress" :issueId="issueId" @isLoading="onIsLoadingChanged"></donate-action>
+
+            <approve-action v-if="canApprove" @approved="updateData" :contractAddress="contractAddress" :issueId="issueId" :possibleReviewers="possibleReviewers" @isLoading="onIsLoadingChanged"></approve-action>
+
+            <lock-action v-if="canLock" @locked="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></lock-action>
+
+            <unlock-action v-if="canUnlock" @unlocked="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></unlock-action>
+
+            <finish-development-action v-if="canFinishDevelopment" @finishedDevelopment="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></finish-development-action>
+
+            <review-action v-if="canReview" @reviewed="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></review-action>
+
+            <reset-action v-if="canReset" @reset="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></reset-action>
+
+            <delete-action v-if="canDelete" @deleted="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></delete-action>
+          </div>
         </div>
-        <div class="col-auto">
-          <a class="btn btn-link btn-sm" :href="issue.web_url" target="_blank">Open in Gitlab
-            <i class="fas fa-external-link-alt"></i>
-          </a>
-
-          <donate-action v-if="canDonate" @donated="updateData" :contractAddress="contractAddress" :issueId="issueId" @isLoading="onIsLoadingChanged"></donate-action>
-
-          <approve-action v-if="canApprove" @approved="updateData" :contractAddress="contractAddress" :issueId="issueId" :possibleReviewers="possibleReviewers" @isLoading="onIsLoadingChanged"></approve-action>
-
-          <lock-action v-if="canLock" @locked="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></lock-action>
-
-          <unlock-action v-if="canUnlock" @unlocked="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></unlock-action>
-
-          <finish-development-action v-if="canFinishDevelopment" @finishedDevelopment="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></finish-development-action>
-
-          <review-action v-if="canReview" @reviewed="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></review-action>
-
-          <reset-action v-if="canReset" @reset="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></reset-action>
-
-          <delete-action v-if="canDelete" @deleted="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></delete-action>
+        <issue-detail-gitlab-header :issue="issue"></issue-detail-gitlab-header>
+        <hr>
+        <div class="row">
+          <div class="col" v-html="markdownDescription">
+          </div>
         </div>
       </div>
-      <issue-detail-gitlab-header :issue="issue"></issue-detail-gitlab-header>
       <hr>
-      <div class="row">
-        <div class="col" v-html="markdownDescription">
-        </div>
-      </div>
+      <issue-detail-contract :contractIssue="contractIssue"></issue-detail-contract>
     </div>
-    <hr>
-    <issue-detail-contract :contractIssue="contractIssue"></issue-detail-contract>
   </div>
 </template>
 

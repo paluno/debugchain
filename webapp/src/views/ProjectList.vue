@@ -1,7 +1,7 @@
 <template>
-  <div class="projectsetup">
+  <div id="projectlist">
     <Navigation :address="profile.address" />
-
+    <div class="content">
     <vue-good-table :columns="columns"
       :rows="gitlabProjects"
       :pagination-options="{ enabled: true, perPage: 10}"
@@ -41,6 +41,7 @@
         <button type="button" class="btn btn-secondary" @click="closeCreateProjectModal">Close</button>
       </template>
     </Modal>
+    </div>
   </div>
 
 </template>

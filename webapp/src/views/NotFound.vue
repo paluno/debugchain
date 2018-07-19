@@ -1,18 +1,18 @@
 <template>
-    <div class="row">
-        <div class="col-auto mt-5">
-            <h1>404 - Page not found</h1>
-            <p>The page you requested could not be found.</p>
-            <ul class="list-unstyled">
-                <li v-if="from">
-                    <router-link :to="from">Go back to the previous page.</router-link>
-                </li>
-                <li>
-                    <router-link to="/">Go back to the home page.</router-link>
-                </li>
-            </ul>
-        </div>
+  <div class="content">
+    <div class="text-center">
+      <h1>404 - Page not found</h1>
+      <p>The page you requested could not be found.</p>
+      <ul class="list-unstyled">
+          <li v-if="from">
+              <router-link :to="from">Go back to the previous page.</router-link>
+          </li>
+          <li>
+              <router-link to="/">Go back to the home page.</router-link>
+          </li>
+      </ul>
     </div>
+  </div>
 </template>
 
 <script>
