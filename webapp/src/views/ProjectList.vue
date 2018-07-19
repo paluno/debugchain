@@ -113,7 +113,9 @@ export default {
             params: { projectId: projectId.toString() }
           });
         })
-        .catch(error => ErrorContainer.add(error))
+        .catch(error => {
+          if (!error.canceled) ErrorContainer.add(error);
+        })
         .then(() => (this.showChainSubmit = false));
     },
     setProjects: function(gitlabProjects, debugChainProjects) {

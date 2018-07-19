@@ -67,7 +67,9 @@ export default {
 
       contract
         .review(issueId, isAccepted)
-        .catch(error => ErrorContainer.add(error))
+        .catch(error => {
+          if (!error.canceled) ErrorContainer.add(error);
+        })
         .then(() => (this.showChainSubmit = false))
         .then(() => this.$emit("reviewed"));
     }

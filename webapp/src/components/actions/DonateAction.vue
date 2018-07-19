@@ -70,7 +70,9 @@ export default {
 
       contract
         .donate(issueId, donation)
-        .catch(error => ErrorContainer.add(error))
+        .catch(error => {
+          if (!error.canceled) ErrorContainer.add(error);
+        })
         .then(() => (this.showChainSubmit = false))
         .then(() => this.$emit("donated"));
     }

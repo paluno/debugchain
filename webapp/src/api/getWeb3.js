@@ -1,5 +1,7 @@
 import Web3 from 'web3'
 import Settings from '@/settings';
+import ErrorContainer from "@/api/errorContainer";
+import Localization from "@/api/errorLocalization";
 
 let instance;
 
@@ -15,7 +17,9 @@ const getWeb3 = () => {
         instance = new Web3(global.web3.currentProvider);
         return instance;
     }
-    throw new Error('Could not retrieve meta-mask provider');
+    const e = new Error("Could not retrieve meta-mask provider");
+    e.userMessage = Localization.getForContract(e);
+    ErrorContainer.add(e);
 };
 
 export default getWeb3
