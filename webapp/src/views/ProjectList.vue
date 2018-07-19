@@ -54,7 +54,7 @@ import { Backend } from "@/api/backend";
 import Contract from "@/api/contract";
 
 export default {
-  name: "projectList",
+  name: "ProjectList",
   components: {
     Modal,
     ChainSubmitModal,

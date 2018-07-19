@@ -52,6 +52,10 @@ import getWeb3 from "@/api/getWeb3";
 
 export default {
   name: "IssueList",
+  components: {
+    Navigation,
+    Modal
+  },
   filters: {
     weiToEther: function(value) {
       return getWeb3().fromWei(value, "ether");
@@ -59,10 +63,6 @@ export default {
   },
   props: {
     projectId: [String, Number]
-  },
-  components: {
-    Navigation,
-    Modal
   },
   computed: {
     canWithdraw: function() {

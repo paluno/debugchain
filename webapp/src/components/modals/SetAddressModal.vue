@@ -20,11 +20,12 @@ import Modal from "@/components/Modal";
 import getWeb3 from "@/api/getWeb3";
 
 export default {
-  props: {
-    value: Boolean
-  },
+  name: "SetAddressModal",
   components: {
     Modal
+  },
+  props: {
+    value: Boolean
   },
   data: function() {
     return {

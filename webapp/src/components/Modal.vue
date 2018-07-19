@@ -25,6 +25,7 @@
 
 <script>
 export default {
+  name: "Modal",
   props: {
     title: String,
     value: Boolean

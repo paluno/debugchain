@@ -49,7 +49,7 @@
 import Navigation from "@/components/Navigation";
 
 export default {
-  name: "faq",
+  name: "Faq",
   components: {
     Navigation
   }

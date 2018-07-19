@@ -81,6 +81,17 @@ export default {
     projectId: [String, Number],
     issueId: [String, Number]
   },
+  data: function() {
+    return {
+      profile: null,
+      project: null,
+      issue: null,
+      contractIssue: null,
+      contractAddress: null,
+      isMaintainer: false,
+      possibleReviewers: null
+    };
+  },
   computed: {
     userAddress: function() {
       // TODO consider using web3 address instead of profile
@@ -143,17 +154,6 @@ export default {
         this.contractIssue.lifecycleStatus != "COMPLETED"
       );
     }
-  },
-  data: function() {
-    return {
-      profile: null,
-      project: null,
-      issue: null,
-      contractIssue: null,
-      contractAddress: null,
-      isMaintainer: false,
-      possibleReviewers: null
-    };
   },
   created: function() {
     this.updateData();

@@ -17,7 +17,7 @@
 
 <script>
 export default {
-  name: "not-found",
+  name: "NotFound",
   data() {
     return {
       from: null
