@@ -37,7 +37,8 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+
 .modal-mask {
   position: fixed;
   z-index: 1000;
@@ -53,5 +54,10 @@ export default {
 .modal-wrapper {
   display: table-cell;
   vertical-align: middle;
+}
+
+.modal-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
 }
 </style>
