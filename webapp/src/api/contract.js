@@ -30,9 +30,8 @@ export default class Contract {
 
     deploy(projectId) {
         return new Promise((resolve, reject) => {
-            const address = this.instance.address;
-            if (address) {
-                reject(new Error('Contract already deployed at ' + address));
+            if (!web3.eth.accounts[0]) {
+                reject(new Error("No web3 account available"));
             }
             let firstCall = true;
             this.instance.new(

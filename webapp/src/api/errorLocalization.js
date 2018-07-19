@@ -19,7 +19,12 @@ class ErrorLocalization {
     }
 
     getForContract(error) {
-        // TODO filter for specific errors
+        switch (error.message) {
+            case "Could not retrieve meta-mask provider":
+                return "Unable to retrieve Ethereum provider. Make sure that you have an ethereum client (e.g. MetaMask) installed and unlocked.";
+            case "No web3 account available":
+                return "Could not access your account. Did you unlock your wallet?";
+        }
         return "An error occured with your Ethereum provider. Please check your transaction log or try again.";
     }
 }
