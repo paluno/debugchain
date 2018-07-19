@@ -13,21 +13,21 @@
               <i class="fas fa-external-link-alt"></i>
             </a>
 
-            <donate-action v-if="canDonate" @donated="updateData" :contractAddress="contractAddress" :issueId="issueId" @isLoading="onIsLoadingChanged"></donate-action>
+            <donate-action v-if="canDonate" @donated="updateData" :contractAddress="contractAddress" :issueId="issueId"></donate-action>
 
-            <approve-action v-if="canApprove" @approved="updateData" :contractAddress="contractAddress" :issueId="issueId" :possibleReviewers="possibleReviewers" @isLoading="onIsLoadingChanged"></approve-action>
+            <approve-action v-if="canApprove" @approved="updateData" :contractAddress="contractAddress" :issueId="issueId" :possibleReviewers="possibleReviewers"></approve-action>
 
-            <lock-action v-if="canLock" @locked="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></lock-action>
+            <lock-action v-if="canLock" @locked="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></lock-action>
 
-            <unlock-action v-if="canUnlock" @unlocked="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></unlock-action>
+            <unlock-action v-if="canUnlock" @unlocked="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></unlock-action>
 
-            <finish-development-action v-if="canFinishDevelopment" @finishedDevelopment="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></finish-development-action>
+            <finish-development-action v-if="canFinishDevelopment" @finishedDevelopment="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></finish-development-action>
 
-            <review-action v-if="canReview" @reviewed="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></review-action>
+            <review-action v-if="canReview" @reviewed="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></review-action>
 
-            <reset-action v-if="canReset" @reset="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></reset-action>
+            <reset-action v-if="canReset" @reset="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></reset-action>
 
-            <delete-action v-if="canDelete" @deleted="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue" @isLoading="onIsLoadingChanged"></delete-action>
+            <delete-action v-if="canDelete" @deleted="updateData" :contractAddress="contractAddress" :issueId="issueId" :issue="issue"></delete-action>
           </div>
         </div>
         <issue-detail-gitlab-header :issue="issue"></issue-detail-gitlab-header>

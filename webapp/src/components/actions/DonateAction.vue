@@ -17,18 +17,22 @@
         <button type="button" class="btn btn-secondary" @click="closeDonateEtherModal">Close</button>
       </template>
     </Modal>
+
+    <chain-submit-modal v-model="showChainSubmit"></chain-submit-modal>
   </div>
 </template>
 
 <script>
 import ErrorContainer from "@/api/errorContainer";
-import Modal from "@/components/Modal.vue";
+import Modal from "@/components/Modal";
 import Contract from "@/api/contract";
+import ChainSubmitModal from "@/components/modals/ChainSubmitModal";
 
 export default {
   name: "DonateAction",
   components: {
-    Modal
+    Modal,
+    ChainSubmitModal
   },
   props: {
     contractAddress: {
@@ -43,7 +47,8 @@ export default {
   data() {
     return {
       show: false,
-      donation: 0
+      donation: 0,
+      showChainSubmit: false
     };
   },
   methods: {
@@ -60,12 +65,13 @@ export default {
       const contract = new Contract(this.contractAddress);
 
       // TODO extract to global module
-      this.$emit("isLoading", true);
+      this.closeDonateEtherModal();
+      this.showChainSubmit = true;
+
       contract
         .donate(issueId, donation)
         .catch(error => ErrorContainer.add(error))
-        .then(() => this.$emit("isLoading", false))
-        .then(() => this.closeDonateEtherModal())
+        .then(() => (this.showChainSubmit = false))
         .then(() => this.$emit("donated"));
     }
   }

@@ -20,6 +20,8 @@
         <button type="button" class="btn btn-secondary" @click="closeApproveIssueModal">Close</button>
       </template>
     </Modal>
+
+    <chain-submit-modal v-model="showChainSubmit"></chain-submit-modal>
   </div>
 </template>
 
@@ -27,11 +29,13 @@
 import ErrorContainer from "@/api/errorContainer";
 import Modal from "@/components/Modal.vue";
 import Contract from "@/api/contract";
+import ChainSubmitModal from "@/components/modals/ChainSubmitModal";
 
 export default {
   name: "ApproveAction",
   components: {
-    Modal
+    Modal,
+    ChainSubmitModal
   },
   props: {
     contractAddress: {
@@ -50,7 +54,8 @@ export default {
   data: function() {
     return {
       show: false,
-      selectedReviewers: []
+      selectedReviewers: [],
+      showChainSubmit: false
     };
   },
   methods: {
@@ -67,12 +72,12 @@ export default {
       const reviewers = this.selectedReviewers;
 
       // TODO extract to global module
-      this.$emit("isLoading", true);
+      this.closeApproveIssueModal();
+      this.showChainSubmit = true;
       contract
         .approve(issueId, reviewers)
         .catch(error => ErrorContainer.add(error))
-        .then(() => this.$emit("isLoading", false))
-        .then(() => this.closeApproveIssueModal())
+        .then(() => (this.showChainSubmit = false))
         .then(() => this.$emit("approved"));
     }
   }

@@ -41,6 +41,8 @@
         <button type="button" class="btn btn-secondary" @click="closeCreateProjectModal">Close</button>
       </template>
     </Modal>
+
+    <chain-submit-modal v-model="showChainSubmit"></chain-submit-modal>
     </div>
   </div>
 
@@ -51,6 +53,7 @@
 import ErrorContainer from "@/api/errorContainer";
 import { Gitlab } from "@/api/gitlab";
 import Modal from "@/components/Modal.vue";
+import ChainSubmitModal from "@/components/modals/ChainSubmitModal";
 import Navigation from "@/components/Navigation";
 import { Backend } from "@/api/backend";
 import Contract from "@/api/contract";
@@ -59,6 +62,7 @@ export default {
   name: "projectList",
   components: {
     Modal,
+    ChainSubmitModal,
     Navigation
   },
   data: function() {
@@ -91,7 +95,8 @@ export default {
           field: "created"
         }
       ],
-      gitlabProjects: []
+      gitlabProjects: [],
+      showChainSubmit: false
     };
   },
   created: function() {
@@ -103,7 +108,9 @@ export default {
       const contract = new Contract();
       const projectId = this.createProjectModal.id;
 
-      this.$emit("isLoading", true);
+      this.closeCreateProjectModal();
+      this.showChainSubmit = true;
+
       contract
         .deploy(projectId)
         .then(address => backend.createProject(projectId, address))
@@ -114,8 +121,7 @@ export default {
           });
         })
         .catch(error => ErrorContainer.add(error))
-        .then(() => this.$emit("isLoading", false))
-        .then(() => this.closeCreateProjectModal());
+        .then(() => (this.showChainSubmit = false))
     },
     setProjects: function(gitlabProjects, debugChainProjects) {
       this.gitlabProjects = gitlabProjects.map(gProject => {

@@ -12,6 +12,8 @@
         <button type="button" class="btn btn-secondary" @click="closeModal">No</button>
       </template>
     </Modal>
+
+    <chain-submit-modal v-model="showChainSubmit"></chain-submit-modal>
   </div>
 </template>
 
@@ -19,11 +21,13 @@
 import ErrorContainer from "@/api/errorContainer";
 import Modal from "@/components/Modal.vue";
 import Contract from "@/api/contract";
+import ChainSubmitModal from "@/components/modals/ChainSubmitModal";
 
 export default {
   name: "UnlockAction",
   components: {
-    Modal
+    Modal,
+    ChainSubmitModal
   },
   props: {
     contractAddress: {
@@ -41,7 +45,8 @@ export default {
   },
   data: function() {
     return {
-      show: false
+      show: false,
+      showChainSubmit: false
     };
   },
   methods: {
@@ -56,12 +61,13 @@ export default {
       const contract = new Contract(this.contractAddress);
 
       // TODO extract to global module
-      this.$emit("isLoading", true);
+      this.closeModal();
+      this.showChainSubmit = true;
+
       contract
         .unlock(issueId)
         .catch(error => ErrorContainer.add(error))
-        .then(() => this.$emit("isLoading", false))
-        .then(() => this.closeModal())
+        .then(() => (this.showChainSubmit = false))
         .then(() => this.$emit("unlocked"));
     }
   }
