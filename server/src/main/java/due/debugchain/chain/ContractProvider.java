@@ -56,13 +56,15 @@ public class ContractProvider {
     public DebugChain readOnlyContract(String contractAddress) {
         DebugChain contract = DebugChain.load(contractAddress, web3j, transactionManager, GAS_PRICE, GAS_LIMIT);
         Consumer<BigInteger> emitter = id -> emitIssueUpdate(contractAddress, id.longValue());
-        // TODO try to generify (rx.merge won't work with different types)
+        // TODO merge into one filter?
         contract.issueDeletedEventObservable(filter(ISSUEDELETED_EVENT, contractAddress)).subscribe(event -> emitter.accept(event._id));
         contract.issueApprovedEventObservable(filter(ISSUEAPPROVED_EVENT, contractAddress)).subscribe(event -> emitter.accept(event._id));
         contract.issueCompletedEventObservable(filter(ISSUECOMPLETED_EVENT, contractAddress)).subscribe(event -> emitter.accept(event._id));
         contract.issueLockedEventObservable(filter(ISSUELOCKED_EVENT, contractAddress)).subscribe(event -> emitter.accept(event._id));
         contract.issueUnlockedEventObservable(filter(ISSUEUNLOCKED_EVENT, contractAddress)).subscribe(event -> emitter.accept(event._id));
         contract.issueResetEventObservable(filter(ISSUERESET_EVENT, contractAddress)).subscribe(event -> emitter.accept(event._id));
+        contract.issueReviewedEventObservable(filter(ISSUEREVIEWED_EVENT, contractAddress)).subscribe(event -> emitter.accept(event._id));
+        contract.issueDevelopedEventObservable(filter(ISSUEDEVELOPED_EVENT, contractAddress)).subscribe(event -> emitter.accept(event._id));
         contract.donationReceivedEventObservable(filter(DONATIONRECEIVED_EVENT, contractAddress)).subscribe(event -> emitter.accept(event._id));
         return contract;
     }
